@@ -290,25 +290,32 @@ export default function Home() {
   }, [activePage, nowPlaying]);
 
 
-  // Audio Player Logic
+  const currentTrack = nowPlaying ? tracks[nowPlaying.mood as keyof typeof tracks][nowPlaying.index] : null;
+
+  // Audio Player Logic - Load and play new track
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !currentTrack) return;
 
+    if (audio.src !== currentTrack.src) {
+      audio.src = currentTrack.src;
+      audio.load();
+    }
+    
     if (isPlaying) {
-      audio.play().catch(error => {
-        // Autoplay was prevented.
-        if (error.name === 'NotAllowedError') {
-          console.warn('Playback prevented by browser policy. User interaction is required to start audio.');
-          setIsPlaying(false); // Reset state if play fails
-        }
-      });
+      audio.play().catch(error => console.error("Audio play failed:", error));
     } else {
       audio.pause();
     }
-  }, [isPlaying, nowPlaying?.src]);
+  }, [isPlaying, currentTrack]);
 
-  const handlePlayPause = () => setIsPlaying(!isPlaying);
+  const handlePlayPause = () => {
+    if (!nowPlaying && activePage !== 'home') {
+      openPlayer(activePage, 0);
+    } else {
+      setIsPlaying(!isPlaying);
+    }
+  };
   
   const handleSongEnd = () => {
     handleNext();
@@ -428,22 +435,21 @@ export default function Home() {
       openPage(moodId);
       setCustomMoodFormData({ name: '', emoji: '', description: '' });
 
-      const imagePromises = result.playlist.map(async (song, index) => {
-        try {
-          const imageResult = await generateImage({ prompt: `${song.title} by ${song.artist}, ${input.description}` });
-          return { 
-            index, 
-            cover: imageResult.imageUrl || `https://picsum.photos/seed/${moodId}${index}/600/600` 
-          };
-        } catch (error) {
-          console.error(`Failed to generate image for song ${index}:`, error);
-          return {
+      const imagePromises = result.playlist.map((song, index) => 
+        generateImage({ prompt: `${song.title} by ${song.artist}, ${input.description}` })
+          .then(imageResult => ({
             index,
-            cover: `https://picsum.photos/seed/${moodId}${index}/600/600`
-          };
-        }
-      });
-
+            cover: imageResult.imageUrl || `https://picsum.photos/seed/${moodId}${index}/600/600`
+          }))
+          .catch(error => {
+            console.error(`Failed to generate image for song ${index}:`, error);
+            return {
+              index,
+              cover: `https://picsum.photos/seed/${moodId}${index}/600/600`
+            };
+          })
+      );
+      
       const settledImages = await Promise.all(imagePromises);
 
       setTracks(prev => {
@@ -464,7 +470,7 @@ export default function Home() {
     }
   };
 
-  const currentTrack = nowPlaying ? tracks[nowPlaying.mood as keyof typeof tracks][nowPlaying.index] : null;
+  
   const allMoods = { ...MOOD_DEFS, ...customMoods };
   const isFormValid = customMoodFormData.name && customMoodFormData.emoji && customMoodFormData.description;
 
@@ -643,7 +649,7 @@ export default function Home() {
                           <div className="player-controls">
                               <button onClick={handlePrev}><SkipBack /></button>
                               <button onClick={handlePlayPause} className="play-main-btn">
-                                  {(isPlaying && trackPlaying) ? <Pause size={32} /> : <Play size={32} />}
+                                  {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={32} /> : <Play size={32} />}
                               </button>
                               <button onClick={handleNext}><SkipForward /></button>
                           </div>
@@ -718,7 +724,7 @@ export default function Home() {
                 </div>
             </div>
           )}
-          <audio ref={audioRef} src={currentTrack?.src} onEnded={handleSongEnd} />
+          <audio ref={audioRef} src={currentTrack?.src || ''} onEnded={handleSongEnd} />
 
           <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
             <DialogContent className="sheet-content glass">
@@ -775,5 +781,3 @@ export default function Home() {
     </>
   );
 }
-
-    
