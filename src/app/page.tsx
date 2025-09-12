@@ -294,18 +294,19 @@ export default function Home() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    
+
     if (isPlaying) {
       audio.play().catch(error => {
+        // Autoplay was prevented.
         if (error.name === 'NotAllowedError') {
           console.warn('Playback prevented by browser policy. User interaction is required to start audio.');
-          setIsPlaying(false);
+          setIsPlaying(false); // Reset state if play fails
         }
       });
     } else {
       audio.pause();
     }
-  }, [isPlaying, nowPlaying]);
+  }, [isPlaying, nowPlaying?.src]);
 
   const handlePlayPause = () => setIsPlaying(!isPlaying);
   
@@ -332,8 +333,7 @@ export default function Home() {
   };
   
   const openPlayer = (mood: string, index: number) => {
-    const playlist = tracks[mood as keyof typeof tracks];
-    setNowPlaying({ mood, index: index % playlist.length });
+    setNowPlaying({ mood, index });
     setIsPlaying(true);
   };
 
@@ -775,3 +775,5 @@ export default function Home() {
     </>
   );
 }
+
+    
