@@ -286,47 +286,57 @@ export default function Home() {
   useEffect(() => {
     if (nowPlaying && activePage !== nowPlaying.mood) {
       setIsPlaying(false);
+      audioRef.current?.pause();
     }
   }, [activePage, nowPlaying]);
 
 
   const currentTrack = nowPlaying ? tracks[nowPlaying.mood as keyof typeof tracks][nowPlaying.index] : null;
 
-  // Audio Player Logic - Load and play new track
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !currentTrack) return;
-  
-    if (audio.src !== currentTrack.src) {
-      audio.src = currentTrack.src;
-      audio.load();
-    }
-  
-    if (isPlaying) {
-      audio.play().catch(error => console.error("Audio play failed:", error));
-    } else {
-      audio.pause();
-    }
-  }, [isPlaying, currentTrack]);
-  
+  // Effect to handle PLAY/PAUSE state
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-  
-    if (currentTrack && audio.src !== currentTrack.src) {
-      audio.src = currentTrack.src;
-      audio.load();
-      if (isPlaying) {
-        audio.play().catch(e => console.log(e));
-      }
+    if (isPlaying) {
+      audio.play().catch(e => console.error("Playback error:", e));
+    } else {
+      audio.pause();
     }
-  }, [currentTrack, isPlaying]);
+  }, [isPlaying]);
+  
+  // Effect to load new track when nowPlaying changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !nowPlaying) return;
+  
+    const track = tracks[nowPlaying.mood][nowPlaying.index];
+    if (track && audio.src !== window.location.origin + track.src) {
+        audio.src = track.src;
+        audio.load();
+        if (isPlaying) {
+            audio.play().catch(e => console.error("Playback error on track change:", e));
+        }
+    }
+  }, [nowPlaying, isPlaying, tracks]);
 
   const handlePlayPause = () => {
-    if (!nowPlaying && activePage !== 'home') {
-      openPlayer(activePage, 0);
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (!nowPlaying) { // First play on a page
+      const firstTrack = tracks[activePage]?.[0];
+      if (!firstTrack) return;
+      
+      setNowPlaying({ mood: activePage, index: 0 });
       setIsPlaying(true);
-    } else {
+      
+      if (audio.src !== window.location.origin + firstTrack.src) {
+          audio.src = firstTrack.src;
+          audio.load();
+      }
+      audio.play().catch(e => console.error("Playback error on first play:", e));
+
+    } else { // Subsequent play/pause toggles
       setIsPlaying(!isPlaying);
     }
   };
@@ -341,7 +351,6 @@ export default function Home() {
     const playlist = tracks[mood as keyof typeof tracks];
     const nextIndex = (index + 1) % playlist.length;
     setNowPlaying({ mood, index: nextIndex });
-    setIsPlaying(true);
   };
 
   const handlePrev = () => {
@@ -350,7 +359,6 @@ export default function Home() {
     const playlist = tracks[mood as keyof typeof tracks];
     const prevIndex = (index - 1 + playlist.length) % playlist.length;
     setNowPlaying({ mood, index: prevIndex });
-    setIsPlaying(true);
   };
   
   const openPlayer = (mood: string, index: number) => {
@@ -385,6 +393,11 @@ export default function Home() {
  const openPage = (id: string) => {
     setActivePage(id);
     setIsMenuSheetOpen(false);
+    // Reset player state when changing pages
+    if(nowPlaying && nowPlaying.mood !== id) {
+      setIsPlaying(false);
+      setNowPlaying(null);
+    }
   };
 
   const enterApp = () => {
@@ -457,14 +470,19 @@ export default function Home() {
           }))
       );
       
-      const settledImages = await Promise.all(imagePromises);
+      const settledImages = await Promise.allSettled(imagePromises);
 
       setTracks(prev => {
         const newTracks = [...(prev[moodId] || [])];
-        settledImages.forEach(({ index, cover }) => {
-          if (newTracks[index]) {
-            newTracks[index] = { ...newTracks[index], cover };
-          }
+        settledImages.forEach((settledResult, index) => {
+            if (settledResult.status === 'fulfilled' && newTracks[index]) {
+                newTracks[index] = { ...newTracks[index], cover: settledResult.value.cover };
+            } else if (settledResult.status === 'rejected') {
+                console.error(`Image generation failed for track ${index}:`, settledResult.reason);
+                if (newTracks[index]) {
+                    newTracks[index] = { ...newTracks[index], cover: `https://picsum.photos/seed/${moodId}${index}/600/600` };
+                }
+            }
         });
         return { ...prev, [moodId]: newTracks };
       });
@@ -731,7 +749,7 @@ export default function Home() {
                 </div>
             </div>
           )}
-          <audio ref={audioRef} src={currentTrack?.src || undefined} onEnded={handleSongEnd} />
+          <audio ref={audioRef} onEnded={handleSongEnd} />
 
           <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
             <DialogContent className="sheet-content glass">
@@ -788,3 +806,5 @@ export default function Home() {
     </>
   );
 }
+
+    
