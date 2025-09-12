@@ -282,38 +282,38 @@ export default function Home() {
     };
   }, [isMounted]);
 
-  // Stop music when navigating away from a mood page
-  useEffect(() => {
-    if (nowPlaying && activePage !== nowPlaying.mood) {
-      setIsPlaying(false);
-      audioRef.current?.pause();
-    }
-  }, [activePage, nowPlaying]);
-
-
   const currentTrack = nowPlaying ? tracks[nowPlaying.mood as keyof typeof tracks][nowPlaying.index] : null;
 
-  // Consolidated Audio Player Logic
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
   
-    if (isPlaying) {
-      if (currentTrack && audio.src !== window.location.origin + currentTrack.src) {
+    if (currentTrack && audio.src !== window.location.origin + currentTrack.src) {
         audio.src = currentTrack.src;
         audio.load();
-      }
-      audio.play().catch(e => console.error("Playback error:", e));
+    }
+  
+    if (isPlaying) {
+      audio.play().catch(e => console.error("Audio play error:", e));
     } else {
       audio.pause();
     }
   }, [isPlaying, currentTrack]);
-
-
+  
   const handlePlayPause = () => {
-    if (!nowPlaying) { // First play on a page
-      setNowPlaying({ mood: activePage, index: 0 });
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (!nowPlaying) {
+      const currentMood = activePage;
+      const firstTrack = tracks[currentMood as keyof typeof tracks]?.[0];
+      if (firstTrack) {
+        setNowPlaying({ mood: currentMood, index: 0 });
+        setIsPlaying(true);
+      }
+      return;
     }
+
     setIsPlaying(!isPlaying);
   };
   
@@ -346,7 +346,6 @@ export default function Home() {
 
   const closePlayer = () => {
     setIsPlaying(false);
-    setNowPlaying(null);
   };
 
   const isLiked = (track: Track) => {
@@ -368,13 +367,11 @@ export default function Home() {
     });
   }
 
- const openPage = (id: string) => {
+  const openPage = (id: string) => {
     setActivePage(id);
     setIsMenuSheetOpen(false);
-    // Reset player state when changing pages
     if(nowPlaying && nowPlaying.mood !== id) {
       setIsPlaying(false);
-      setNowPlaying(null);
     }
   };
 
@@ -467,7 +464,6 @@ export default function Home() {
 
     } catch (error) {
       console.error("Failed to generate mood:", error);
-      // Optionally, show a toast or notification to the user
     } finally {
       setIsGenerating(false);
     }
@@ -783,7 +779,3 @@ export default function Home() {
     </>
   );
 }
-
-    
-
-    
