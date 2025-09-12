@@ -293,52 +293,28 @@ export default function Home() {
 
   const currentTrack = nowPlaying ? tracks[nowPlaying.mood as keyof typeof tracks][nowPlaying.index] : null;
 
-  // Effect to handle PLAY/PAUSE state
+  // Consolidated Audio Player Logic
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+  
     if (isPlaying) {
+      if (currentTrack && audio.src !== window.location.origin + currentTrack.src) {
+        audio.src = currentTrack.src;
+        audio.load();
+      }
       audio.play().catch(e => console.error("Playback error:", e));
     } else {
       audio.pause();
     }
-  }, [isPlaying]);
-  
-  // Effect to load new track when nowPlaying changes
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !nowPlaying) return;
-  
-    const track = tracks[nowPlaying.mood][nowPlaying.index];
-    if (track && audio.src !== window.location.origin + track.src) {
-        audio.src = track.src;
-        audio.load();
-        if (isPlaying) {
-            audio.play().catch(e => console.error("Playback error on track change:", e));
-        }
-    }
-  }, [nowPlaying, isPlaying, tracks]);
+  }, [isPlaying, currentTrack]);
+
 
   const handlePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
     if (!nowPlaying) { // First play on a page
-      const firstTrack = tracks[activePage]?.[0];
-      if (!firstTrack) return;
-      
       setNowPlaying({ mood: activePage, index: 0 });
-      setIsPlaying(true);
-      
-      if (audio.src !== window.location.origin + firstTrack.src) {
-          audio.src = firstTrack.src;
-          audio.load();
-      }
-      audio.play().catch(e => console.error("Playback error on first play:", e));
-
-    } else { // Subsequent play/pause toggles
-      setIsPlaying(!isPlaying);
     }
+    setIsPlaying(!isPlaying);
   };
   
   const handleSongEnd = () => {
@@ -351,6 +327,7 @@ export default function Home() {
     const playlist = tracks[mood as keyof typeof tracks];
     const nextIndex = (index + 1) % playlist.length;
     setNowPlaying({ mood, index: nextIndex });
+    setIsPlaying(true);
   };
 
   const handlePrev = () => {
@@ -359,6 +336,7 @@ export default function Home() {
     const playlist = tracks[mood as keyof typeof tracks];
     const prevIndex = (index - 1 + playlist.length) % playlist.length;
     setNowPlaying({ mood, index: prevIndex });
+    setIsPlaying(true);
   };
   
   const openPlayer = (mood: string, index: number) => {
@@ -475,8 +453,8 @@ export default function Home() {
       setTracks(prev => {
         const newTracks = [...(prev[moodId] || [])];
         settledImages.forEach((settledResult, index) => {
-            if (settledResult.status === 'fulfilled' && newTracks[index]) {
-                newTracks[index] = { ...newTracks[index], cover: settledResult.value.cover };
+            if (settledResult.status === 'fulfilled' && newTracks[settledResult.value.index]) {
+                newTracks[settledResult.value.index] = { ...newTracks[settledResult.value.index], cover: settledResult.value.cover };
             } else if (settledResult.status === 'rejected') {
                 console.error(`Image generation failed for track ${index}:`, settledResult.reason);
                 if (newTracks[index]) {
@@ -494,7 +472,6 @@ export default function Home() {
       setIsGenerating(false);
     }
   };
-
   
   const allMoods = { ...MOOD_DEFS, ...customMoods };
   const isFormValid = customMoodFormData.name && customMoodFormData.emoji && customMoodFormData.description;
@@ -806,5 +783,7 @@ export default function Home() {
     </>
   );
 }
+
+    
 
     
