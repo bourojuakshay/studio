@@ -296,22 +296,36 @@ export default function Home() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentTrack) return;
-
+  
     if (audio.src !== currentTrack.src) {
       audio.src = currentTrack.src;
       audio.load();
     }
-    
+  
     if (isPlaying) {
       audio.play().catch(error => console.error("Audio play failed:", error));
     } else {
       audio.pause();
     }
   }, [isPlaying, currentTrack]);
+  
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+  
+    if (currentTrack && audio.src !== currentTrack.src) {
+      audio.src = currentTrack.src;
+      audio.load();
+      if (isPlaying) {
+        audio.play().catch(e => console.log(e));
+      }
+    }
+  }, [currentTrack, isPlaying]);
 
   const handlePlayPause = () => {
     if (!nowPlaying && activePage !== 'home') {
       openPlayer(activePage, 0);
+      setIsPlaying(true);
     } else {
       setIsPlaying(!isPlaying);
     }
@@ -441,13 +455,6 @@ export default function Home() {
             index,
             cover: imageResult.imageUrl || `https://picsum.photos/seed/${moodId}${index}/600/600`
           }))
-          .catch(error => {
-            console.error(`Failed to generate image for song ${index}:`, error);
-            return {
-              index,
-              cover: `https://picsum.photos/seed/${moodId}${index}/600/600`
-            };
-          })
       );
       
       const settledImages = await Promise.all(imagePromises);
@@ -724,7 +731,7 @@ export default function Home() {
                 </div>
             </div>
           )}
-          <audio ref={audioRef} src={currentTrack?.src || ''} onEnded={handleSongEnd} />
+          <audio ref={audioRef} src={currentTrack?.src || undefined} onEnded={handleSongEnd} />
 
           <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
             <DialogContent className="sheet-content glass">
