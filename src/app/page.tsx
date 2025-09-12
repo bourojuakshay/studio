@@ -86,8 +86,16 @@ const SAMPLE_TRACKS = (baseIdx = 1): Track[] => Array.from({ length: 10 }, (_, i
   cover: `https://picsum.photos/seed/h${baseIdx + i}/600/600`
 }));
 
+const happyTracks = SAMPLE_TRACKS(0);
+happyTracks[0] = {
+  title: 'Suvvi Suvvi',
+  artist: 'Local Artist',
+  src: '/audio/suvvi-suvvi.mp3',
+  cover: `https://picsum.photos/seed/h-local/600/600`
+};
+
 const STATIC_TRACKS = {
-  happy: SAMPLE_TRACKS(0),
+  happy: happyTracks,
   joyful: SAMPLE_TRACKS(4),
   sad: SAMPLE_TRACKS(8),
   depression: SAMPLE_TRACKS(12)
@@ -421,11 +429,19 @@ export default function Home() {
       setCustomMoodFormData({ name: '', emoji: '', description: '' });
 
       const imagePromises = result.playlist.map(async (song, index) => {
-        const imageResult = await generateImage({ prompt: `${song.title} by ${song.artist}, ${input.description}` });
-        return { 
-          index, 
-          cover: imageResult.imageUrl || `https://picsum.photos/seed/${moodId}${index}/600/600` 
-        };
+        try {
+          const imageResult = await generateImage({ prompt: `${song.title} by ${song.artist}, ${input.description}` });
+          return { 
+            index, 
+            cover: imageResult.imageUrl || `https://picsum.photos/seed/${moodId}${index}/600/600` 
+          };
+        } catch (error) {
+          console.error(`Failed to generate image for song ${index}:`, error);
+          return {
+            index,
+            cover: `https://picsum.photos/seed/${moodId}${index}/600/600`
+          };
+        }
       });
 
       const settledImages = await Promise.all(imagePromises);
@@ -759,5 +775,3 @@ export default function Home() {
     </>
   );
 }
-
-    
