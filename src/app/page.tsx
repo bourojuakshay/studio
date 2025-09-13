@@ -288,33 +288,36 @@ export default function Home() {
     const audio = audioRef.current;
     if (!audio) return;
   
-    if (currentTrack && audio.src !== window.location.origin + currentTrack.src) {
+    if (currentTrack) {
+      if (audio.src !== window.location.origin + currentTrack.src) {
         audio.src = currentTrack.src;
         audio.load();
-    }
-  
-    if (isPlaying) {
-      audio.play().catch(e => console.error("Audio play error:", e));
+      }
+      if (isPlaying) {
+        audio.play().catch(e => console.error("Audio play error:", e));
+      } else {
+        audio.pause();
+      }
     } else {
       audio.pause();
+      audio.src = '';
     }
   }, [isPlaying, currentTrack]);
   
   const handlePlayPause = () => {
     const audio = audioRef.current;
     if (!audio) return;
-
-    if (!nowPlaying) {
+  
+    if (nowPlaying) {
+      setIsPlaying(!isPlaying);
+    } else {
       const currentMood = activePage;
       const firstTrack = tracks[currentMood as keyof typeof tracks]?.[0];
       if (firstTrack) {
         setNowPlaying({ mood: currentMood, index: 0 });
         setIsPlaying(true);
       }
-      return;
     }
-
-    setIsPlaying(!isPlaying);
   };
   
   const handleSongEnd = () => {
