@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -21,7 +20,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { generateMood, GenerateMoodInput, GenerateMoodOutput } from '@/ai/flows/mood-generator';
 import { generateImage } from '@/ai/flows/image-generator';
 import { ThemeProvider } from '@/components/theme-provider';
-import ElasticSlider from '@/components/ElasticSlider';
 
 export const dynamic = 'force-dynamic';
 
@@ -667,10 +665,7 @@ export default function Home() {
                               <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
                                   <Heart size={24} />
                               </button>
-                               <ElasticSlider 
-                                  defaultValue={volume * 100}
-                                  onVolumeChange={(v) => setVolume(v)}
-                                />
+                              <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
                           </div>
                         </div>
                       ) : (
@@ -734,10 +729,7 @@ export default function Home() {
                         <button onClick={(e) => handleLike(e, { ...currentTrack, mood: nowPlaying.mood, index: nowPlaying.index })} className={cn('like-btn', { 'liked': isLiked(currentTrack) })}>
                             <Heart size={24} />
                         </button>
-                         <ElasticSlider 
-                            defaultValue={volume * 100}
-                            onVolumeChange={(v) => setVolume(v)}
-                          />
+                         <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
                     </div>
                 </div>
             </div>
