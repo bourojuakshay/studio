@@ -101,17 +101,18 @@ const STATIC_TRACKS = {
   depression: SAMPLE_TRACKS(12)
 };
 
-const AnimatedText = ({ text, className, as: Component = 'div' }: { text: string, className?: string, as?: React.ElementType }) => {
+const SplitText = ({ text, ...props }: { text: string } & React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <Component className={cn(className)}>
-      {text.split("").map((char, index) => (
+    <div {...props}>
+      {text.split('').map((char, index) => (
         <span key={index} className="char" style={{ '--char-index': index } as React.CSSProperties}>
           {char === ' ' ? '\u00A0' : char}
         </span>
       ))}
-    </Component>
+    </div>
   );
 };
+
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
@@ -131,12 +132,10 @@ export default function Home() {
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const introHeroRef = useRef<HTMLDivElement>(null);
-  const introHeroContentRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const homePageRef = useRef<HTMLElement>(null);
   const mainAppRef = useRef<HTMLDivElement>(null);
-  const interactiveTitleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -145,118 +144,42 @@ export default function Home() {
 
   // Hero Animations
   useEffect(() => {
-    if (!isMounted) return;
-    const heroSection = introHeroRef.current;
-    if (!heroSection || appVisible) return;
+    if (!isMounted || appVisible) return;
 
-    const heroContent = heroSection.querySelector('.hero-content');
-    if (!heroContent) return;
-    
-    const words = heroContent.querySelectorAll('.word');
+    const introHero = introHeroRef.current;
+    if (!introHero) return;
 
-    gsap.set(words, { y: 100, opacity: 0 });
-    gsap.to(words, {
-        y: 0,
-        opacity: 1,
-        duration: 1,
-        stagger: 0.15,
-        ease: 'power3.out',
-        delay: 0.2
+    const chars = introHero.querySelectorAll('.char');
+    const subtitle = introHero.querySelector('.hero-subtitle-intro');
+
+    const tl = gsap.timeline();
+    tl.set(chars, {
+      y: 100,
+      x: () => gsap.utils.random(-200, 200, 20),
+      rotation: () => gsap.utils.random(-90, 90),
+      opacity: 0,
     });
-
-
-    const onMouseMove = (e: MouseEvent) => {
-      const { clientX, clientY } = e;
-      const x = (clientX / window.innerWidth - 0.5) * 2;
-      const y = (clientY / window.innerHeight - 0.5) * 2;
-
-      gsap.to(heroContent, {
-        rotateY: x * 15,
-        rotateX: y * -15,
-        ease: 'power1.out',
-      });
-    };
     
-    heroSection.addEventListener('mousemove', onMouseMove);
-    
-    return () => {
-      heroSection.removeEventListener('mousemove', onMouseMove)
-    };
+    tl.to(chars, {
+      y: 0,
+      x: 0,
+      rotation: 0,
+      opacity: 1,
+      duration: 1.2,
+      stagger: {
+        each: 0.05,
+        from: 'random',
+      },
+      ease: 'power3.out',
+    }).to(subtitle, {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: 'power2.out',
+    }, '-=0.5');
+
   }, [appVisible, isMounted]);
 
-  // Home Page Scroll Animations
-  useEffect(() => {
-    if (!isMounted || activePage !== 'home' || !homePageRef.current) return;
-        
-    const sections = homePageRef.current.querySelectorAll('.home-section-animate');
-    sections.forEach((section) => {
-      gsap.fromTo(section, 
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 80%',
-            toggleActions: 'play none none none',
-          }
-        }
-      );
-    });
-    
-    // Scramble Animation for interactive title
-    const titleEl = interactiveTitleRef.current;
-    if (titleEl) {
-        const chars = titleEl.querySelectorAll('.char');
-        gsap.set(chars, {
-          x: () => gsap.utils.random(-250, 250),
-          y: () => gsap.utils.random(-250, 250),
-          rotation: () => gsap.utils.random(-360, 360),
-          opacity: 0,
-        });
-
-        gsap.to(chars, {
-          x: 0,
-          y: 0,
-          rotation: 0,
-          opacity: 1,
-          duration: 1,
-          ease: 'power3.out',
-          stagger: 0.03,
-          scrollTrigger: {
-            trigger: titleEl,
-            start: 'top 90%',
-            end: 'bottom 50%',
-            scrub: 1.5,
-          }
-        });
-    }
-
-  }, [activePage, appVisible, isMounted]);
-
-  // Mood Page Animation
-  useEffect(() => {
-    if (!isMounted) return;
-    let animation: gsap.core.Tween;
-    if (activePage && activePage !== 'home') {
-      const page = document.getElementById(activePage);
-      if (page) {
-        animation = gsap.fromTo(page.querySelector('.glass'),
-          { opacity: 0, y: 30 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: 'power3.out',
-            delay: 0.2
-          }
-        );
-      }
-    }
-    return () => animation?.kill();
-  }, [activePage, isMounted]);
 
   // Custom Cursor Animation
   useEffect(() => {
@@ -390,21 +313,16 @@ export default function Home() {
             setAppVisible(true);
         }
       });
-
-      tl.to(introHeroContentRef.current, {
+      
+      tl.to(introHeroRef.current, {
         duration: 0.8,
         opacity: 0,
-        scale: 0.8,
-        ease: 'power3.in',
-      })
-      .to(introHeroRef.current, {
-        duration: 0.6,
-        opacity: 0,
+        scale: 0.9,
         ease: 'power3.in',
         onComplete: () => {
           gsap.set(introHeroRef.current, { display: 'none' });
         }
-      }, "-=0.6");
+      });
   };
 
   const handleGenerateMood = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -505,18 +423,6 @@ export default function Home() {
     </Accordion>
   );
 
-  const InteractiveTitle = ({ text, className, as: Component = 'h2' }: { text: string, className?: string, as?: React.ElementType }) => {
-    return (
-      <Component className={cn(className)} ref={interactiveTitleRef}>
-        {text.split("").map((char, index) => (
-          <span key={index} className="char" style={{ '--char-index': index } as React.CSSProperties}>
-            {char === ' ' ? '\u00A0' : char}
-          </span>
-        ))}
-      </Component>
-    );
-  };
-
 
   if (!isMounted) {
     return null;
@@ -536,9 +442,10 @@ export default function Home() {
       
       {!appVisible && (
         <div className="creative-hero" ref={introHeroRef} onClick={enterApp}>
-            <div className="hero-content" ref={introHeroContentRef}>
-              <AnimatedText text="Moody" as="div" className="word" />
-              <AnimatedText text="O" as="div" className="word" />
+            <div className="hero-content">
+              <SplitText text="Moody" className="split-text-line" />
+              <SplitText text="O" className="split-text-line" />
+              <h2 className="hero-subtitle-intro">AI-Generated Soundscapes</h2>
             </div>
         </div>
       )}
