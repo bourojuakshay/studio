@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SkipBack, SkipForward, Play, Pause, X, Heart, Menu, Wand2, Loader, Smile, Music, Volume2 } from 'lucide-react';
+import { SkipBack, SkipForward, Play, Pause, X, Heart, Menu, Wand2, Loader, Smile, Music, Volume1, Volume2, Home as HomeIcon, Github } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -550,10 +550,18 @@ export default function Home() {
         <div className="app" ref={mainAppRef}>
           <header>
             <div className="header-inner">
-                <div className="logo">
+                <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">
                   MoodyO
-                </div>
-                <nav>
+                </a>
+                <nav className="hidden md:flex">
+                  <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="nav-btn">
+                    <HomeIcon size={20} />
+                  </a>
+                  <a href="https://github.com/bourojuakshay/studio" target="_blank" rel="noopener noreferrer" className="nav-btn">
+                    <Github size={20} />
+                  </a>
+                </nav>
+                <div className="md:hidden">
                   <Sheet open={isMenuSheetOpen} onOpenChange={setIsMenuSheetOpen}>
                     <SheetTrigger asChild>
                        <button className="nav-btn">
@@ -578,7 +586,7 @@ export default function Home() {
                        </div>
                     </SheetContent>
                   </Sheet>
-                </nav>
+                </div>
             </div>
           </header>
 
@@ -667,12 +675,14 @@ export default function Home() {
                               <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
                                   <Heart size={24} />
                               </button>
-                               <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
-                                <Volume2 size={24} />
-                               </button>
-                              {isVolumeOpen && (
-                                <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
-                              )}
+                               <div className="volume-control">
+                                 <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
+                                  {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24}/>}
+                                 </button>
+                                {isVolumeOpen && (
+                                  <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
+                                )}
+                               </div>
                           </div>
                         </div>
                       ) : (
@@ -736,12 +746,14 @@ export default function Home() {
                         <button onClick={(e) => handleLike(e, { ...currentTrack, mood: nowPlaying.mood, index: nowPlaying.index })} className={cn('like-btn', { 'liked': isLiked(currentTrack) })}>
                             <Heart size={24} />
                         </button>
-                         <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
-                           <Volume2 size={24} />
-                         </button>
-                        {isVolumeOpen && (
-                          <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
-                        )}
+                         <div className="volume-control">
+                           <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
+                             {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24} />}
+                           </button>
+                           {isVolumeOpen && (
+                             <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider"/>
+                           )}
+                         </div>
                     </div>
                 </div>
             </div>
@@ -803,5 +815,3 @@ export default function Home() {
     </>
   );
 }
-
-    
