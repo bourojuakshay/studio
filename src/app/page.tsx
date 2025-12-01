@@ -145,12 +145,25 @@ export default function Home() {
 
   // Hero Animations
   useEffect(() => {
-    if (!isMounted || !appVisible) return;
-    const heroSection = homePageRef.current?.querySelector('.creative-hero');
-    if (!heroSection) return;
+    if (!isMounted) return;
+    const heroSection = introHeroRef.current;
+    if (!heroSection || appVisible) return;
 
     const heroContent = heroSection.querySelector('.hero-content');
     if (!heroContent) return;
+    
+    const words = heroContent.querySelectorAll('.word');
+
+    gsap.set(words, { y: 100, opacity: 0 });
+    gsap.to(words, {
+        y: 0,
+        opacity: 1,
+        duration: 1,
+        stagger: 0.15,
+        ease: 'power3.out',
+        delay: 0.2
+    });
+
 
     const onMouseMove = (e: MouseEvent) => {
       const { clientX, clientY } = e;
@@ -394,13 +407,6 @@ export default function Home() {
       }, "-=0.6");
   };
 
-  useEffect(() => {
-    // Automatically "enter" the app if the intro is not there.
-    // This is for a simplified homepage experience.
-    setAppVisible(true);
-  }, []);
-
-
   const handleGenerateMood = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!customMoodFormData.name || !customMoodFormData.emoji || !customMoodFormData.description) return;
@@ -528,6 +534,15 @@ export default function Home() {
       <div id="cursor-dot" ref={cursorDotRef} />
       <div id="cursor-ring" ref={cursorRingRef} />
       
+      {!appVisible && (
+        <div className="creative-hero" ref={introHeroRef} onClick={enterApp}>
+            <div className="hero-content" ref={introHeroContentRef}>
+              <AnimatedText text="Moody" as="div" className="word" />
+              <AnimatedText text="O" as="div" className="word" />
+            </div>
+        </div>
+      )}
+
       {appVisible && (
         <div className="app" ref={mainAppRef}>
           <header>
@@ -670,8 +685,8 @@ export default function Home() {
             )})}
           </main>
           
-          <footer>
-             <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
+          <footer style={{marginTop: "auto", paddingTop: "28px", textAlign: "center", opacity: 0.8}}>
+             <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in" style={{textDecoration: "underline"}}>23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
           </footer>
 
           {nowPlaying && currentTrack && (
@@ -763,3 +778,5 @@ export default function Home() {
     </>
   );
 }
+
+    
