@@ -101,22 +101,9 @@ const STATIC_TRACKS = {
   depression: SAMPLE_TRACKS(12)
 };
 
-const SplitText = ({ text, ...props }: { text: string } & React.HTMLAttributes<HTMLDivElement>) => {
-  return (
-    <div {...props}>
-      {text.split('').map((char, index) => (
-        <span key={index} className="char" style={{ '--char-index': index } as React.CSSProperties}>
-          {char === ' ' ? '\u00A0' : char}
-        </span>
-      ))}
-    </div>
-  );
-};
-
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
-  const [appVisible, setAppVisible] = useState(false);
   const [activePage, setActivePage] = useState('home');
   const [nowPlaying, setNowPlaying] = useState<{ mood: string; index: number } | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -131,7 +118,6 @@ export default function Home() {
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
-  const introHeroRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const homePageRef = useRef<HTMLElement>(null);
@@ -141,45 +127,6 @@ export default function Home() {
     setIsMounted(true);
     gsap.registerPlugin(ScrollTrigger);
   }, []);
-
-  // Hero Animations
-  useEffect(() => {
-    if (!isMounted || appVisible) return;
-
-    const introHero = introHeroRef.current;
-    if (!introHero) return;
-
-    const chars = introHero.querySelectorAll('.char');
-    const subtitle = introHero.querySelector('.hero-subtitle-intro');
-
-    const tl = gsap.timeline();
-    tl.set(chars, {
-      y: 100,
-      x: () => gsap.utils.random(-200, 200, 20),
-      rotation: () => gsap.utils.random(-90, 90),
-      opacity: 0,
-    });
-    
-    tl.to(chars, {
-      y: 0,
-      x: 0,
-      rotation: 0,
-      opacity: 1,
-      duration: 1.2,
-      stagger: {
-        each: 0.05,
-        from: 'random',
-      },
-      ease: 'power3.out',
-    }).to(subtitle, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: 'power2.out',
-    }, '-=0.5');
-
-  }, [appVisible, isMounted]);
-
 
   // Custom Cursor Animation
   useEffect(() => {
@@ -307,24 +254,6 @@ export default function Home() {
     }
   };
 
-  const enterApp = () => {
-      const tl = gsap.timeline({
-        onComplete: () => {
-            setAppVisible(true);
-        }
-      });
-      
-      tl.to(introHeroRef.current, {
-        duration: 0.8,
-        opacity: 0,
-        scale: 0.9,
-        ease: 'power3.in',
-        onComplete: () => {
-          gsap.set(introHeroRef.current, { display: 'none' });
-        }
-      });
-  };
-
   const handleGenerateMood = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!customMoodFormData.name || !customMoodFormData.emoji || !customMoodFormData.description) return;
@@ -440,17 +369,6 @@ export default function Home() {
       <div id="cursor-dot" ref={cursorDotRef} />
       <div id="cursor-ring" ref={cursorRingRef} />
       
-      {!appVisible && (
-        <div className="creative-hero" ref={introHeroRef} onClick={enterApp}>
-            <div className="hero-content">
-              <SplitText text="Moody" className="split-text-line" />
-              <SplitText text="O" className="split-text-line" />
-              <h2 className="hero-subtitle-intro">AI-Generated Soundscapes</h2>
-            </div>
-        </div>
-      )}
-
-      {appVisible && (
         <div className="app" ref={mainAppRef}>
           <header>
             <div className="header-inner">
@@ -681,7 +599,6 @@ export default function Home() {
             </DialogContent>
           </Dialog>
         </div>
-      )}
     </>
   );
 }
