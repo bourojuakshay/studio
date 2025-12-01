@@ -324,7 +324,6 @@ body.theme-active .badge {
 .now-playing-card .player-actions {
     margin-top: 12px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     gap: 16px;
     width: 100%;
@@ -461,7 +460,7 @@ section.page.active::before {
     gap: 8px;
     margin-bottom: 4px;
 }
-.like-btn {
+.like-btn, .volume-btn {
     background: transparent;
     border: none;
     padding: 0;
@@ -472,7 +471,7 @@ section.page.active::before {
     color: var(--text);
     opacity: 0.7;
 }
-.like-btn:hover {
+.like-btn:hover, .volume-btn:hover {
   opacity: 1;
   transform: scale(1.1);
 }
@@ -886,3 +885,5 @@ body.custom-theme-active .main-menu-sheet.sheet-content {
   opacity: 1;
   transform: scale(1.3);
 }
+
+    

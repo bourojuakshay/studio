@@ -1,10 +1,11 @@
+
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SkipBack, SkipForward, Play, Pause, X, Heart, Menu, Wand2, Loader, Smile, Music } from 'lucide-react';
+import { SkipBack, SkipForward, Play, Pause, X, Heart, Menu, Wand2, Loader, Smile, Music, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -126,6 +127,7 @@ export default function Home() {
   const [tracks, setTracks] = useState<Record<string, Track[]>>(STATIC_TRACKS);
   const [customMoodFormData, setCustomMoodFormData] = useState({ name: '', emoji: '', description: '' });
   const [volume, setVolume] = useState(0.75);
+  const [isVolumeOpen, setIsVolumeOpen] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const introHeroRef = useRef<HTMLDivElement>(null);
@@ -665,7 +667,12 @@ export default function Home() {
                               <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
                                   <Heart size={24} />
                               </button>
-                              <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
+                               <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
+                                <Volume2 size={24} />
+                               </button>
+                              {isVolumeOpen && (
+                                <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
+                              )}
                           </div>
                         </div>
                       ) : (
@@ -729,7 +736,12 @@ export default function Home() {
                         <button onClick={(e) => handleLike(e, { ...currentTrack, mood: nowPlaying.mood, index: nowPlaying.index })} className={cn('like-btn', { 'liked': isLiked(currentTrack) })}>
                             <Heart size={24} />
                         </button>
-                         <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
+                         <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
+                           <Volume2 size={24} />
+                         </button>
+                        {isVolumeOpen && (
+                          <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
+                        )}
                     </div>
                 </div>
             </div>
@@ -791,3 +803,5 @@ export default function Home() {
     </>
   );
 }
+
+    
