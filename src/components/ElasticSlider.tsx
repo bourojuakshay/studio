@@ -1,7 +1,7 @@
 
 'use client';
 
-import { animate, motion, useMotionValue, useMotionValueEvent, useTransform } from 'motion/react';
+import { animate, motion, useMotionValue, useMotionValueEvent, useTransform } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { Volume1, Volume2 } from 'lucide-react';
 
@@ -55,12 +55,14 @@ function Slider({ defaultValue, startingValue, maxValue, isStepped, stepSize, le
   const scale = useMotionValue(1);
 
   useEffect(() => {
-    setValue(defaultValue);
+    if (defaultValue !== undefined) {
+      setValue(defaultValue);
+    }
   }, [defaultValue]);
 
   useEffect(() => {
-    if (onVolumeChange) {
-      onVolumeChange(value / maxValue);
+    if (onVolumeChange && value !== undefined) {
+      onVolumeChange(value / (maxValue || 100));
     }
   }, [value, maxValue, onVolumeChange]);
 
@@ -87,13 +89,13 @@ function Slider({ defaultValue, startingValue, maxValue, isStepped, stepSize, le
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.buttons > 0 && sliderRef.current) {
       const { left, width } = sliderRef.current.getBoundingClientRect();
-      let newValue = startingValue + ((e.clientX - left) / width) * (maxValue - startingValue);
+      let newValue = (startingValue ?? 0) + ((e.clientX - left) / width) * ((maxValue ?? 100) - (startingValue ?? 0));
 
       if (isStepped) {
-        newValue = Math.round(newValue / stepSize) * stepSize;
+        newValue = Math.round(newValue / (stepSize || 1)) * (stepSize || 1);
       }
 
-      newValue = Math.min(Math.max(newValue, startingValue), maxValue);
+      newValue = Math.min(Math.max(newValue, (startingValue ?? 0)), (maxValue ?? 100));
       setValue(newValue);
       clientX.jump(e.clientX);
     }
@@ -109,10 +111,10 @@ function Slider({ defaultValue, startingValue, maxValue, isStepped, stepSize, le
   };
 
   const getRangePercentage = () => {
-    const totalRange = maxValue - startingValue;
+    const totalRange = (maxValue ?? 100) - (startingValue ?? 0);
     if (totalRange === 0) return 0;
 
-    return ((value - startingValue) / totalRange) * 100;
+    return (((value ?? 0) - (startingValue ?? 0)) / totalRange) * 100;
   };
 
   return (
@@ -154,6 +156,7 @@ function Slider({ defaultValue, startingValue, maxValue, isStepped, stepSize, le
                   const { width } = sliderRef.current.getBoundingClientRect();
                   return 1 + overflow.get() / width;
                 }
+                return 1;
               }),
               scaleY: useTransform(overflow, [0, MAX_OVERFLOW], [1, 0.8]),
               transformOrigin: useTransform(() => {
@@ -161,6 +164,7 @@ function Slider({ defaultValue, startingValue, maxValue, isStepped, stepSize, le
                   const { left, width } = sliderRef.current.getBoundingClientRect();
                   return clientX.get() < left + width / 2 ? 'right' : 'left';
                 }
+                return 'center';
               }),
               height: useTransform(scale, [1, 1.2], [6, 12]),
               marginTop: useTransform(scale, [1, 1.2], [0, -3]),
@@ -186,7 +190,7 @@ function Slider({ defaultValue, startingValue, maxValue, isStepped, stepSize, le
           {rightIcon}
         </motion.div>
       </motion.div>
-      <p className="value-indicator">{Math.round(value)}</p>
+      <p className="value-indicator">{value !== undefined ? Math.round(value) : ''}</p>
     </>
   );
 }
