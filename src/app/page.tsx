@@ -21,6 +21,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { generateMood, GenerateMoodInput, GenerateMoodOutput } from '@/ai/flows/mood-generator';
 import { generateImage } from '@/ai/flows/image-generator';
 import { ThemeProvider } from '@/components/theme-provider';
+import ElasticSlider from '@/components/ElasticSlider';
 
 export const dynamic = 'force-dynamic';
 
@@ -126,6 +127,7 @@ export default function Home() {
   const [customMoods, setCustomMoods] = useState<Record<string, MoodDefinition>>({});
   const [tracks, setTracks] = useState<Record<string, Track[]>>(STATIC_TRACKS);
   const [customMoodFormData, setCustomMoodFormData] = useState({ name: '', emoji: '', description: '' });
+  const [volume, setVolume] = useState(0.75);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const introHeroRef = useRef<HTMLDivElement>(null);
@@ -287,7 +289,7 @@ export default function Home() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-  
+
     if (currentTrack) {
       if (audio.src !== window.location.origin + currentTrack.src) {
         audio.src = currentTrack.src;
@@ -303,6 +305,13 @@ export default function Home() {
       audio.src = '';
     }
   }, [isPlaying, currentTrack]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.volume = volume;
+    }
+  }, [volume]);
   
   const handlePlayPause = () => {
     const audio = audioRef.current;
@@ -658,6 +667,10 @@ export default function Home() {
                               <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
                                   <Heart size={24} />
                               </button>
+                               <ElasticSlider 
+                                  defaultValue={volume * 100}
+                                  onVolumeChange={(v) => setVolume(v)}
+                                />
                           </div>
                         </div>
                       ) : (
@@ -721,6 +734,10 @@ export default function Home() {
                         <button onClick={(e) => handleLike(e, { ...currentTrack, mood: nowPlaying.mood, index: nowPlaying.index })} className={cn('like-btn', { 'liked': isLiked(currentTrack) })}>
                             <Heart size={24} />
                         </button>
+                         <ElasticSlider 
+                            defaultValue={volume * 100}
+                            onVolumeChange={(v) => setVolume(v)}
+                          />
                     </div>
                 </div>
             </div>
