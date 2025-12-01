@@ -86,11 +86,17 @@ body.custom-theme-active {
   padding:48px;
   color: var(--text);
   transition: background .5s ease-in-out, color .5s ease-in-out;
+  display: flex;
+  flex-direction: column;
 }
 
 body.home-active .app {
   background: linear-gradient(135deg, #1d2b3c 0%, #0f1724 100%);
   color: #e6eef8;
+}
+
+main {
+  flex-grow: 1;
 }
 
 header{
@@ -124,7 +130,7 @@ nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 
 /* home */
 .home-section {
-  min-height: 100vh;
+  min-height: 70vh;
   display: grid;
   place-content: center;
   text-align: center;
@@ -132,7 +138,7 @@ nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 }
 
 .home-section .home-title {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 700;
 }
 .home-section .home-subtitle {
@@ -610,12 +616,10 @@ audio { display: none; }
 
 /* footer */
 footer {
-  margin-top: 28px;
+  margin-top: auto;
+  padding-top: 28px;
   text-align: center;
   opacity: .8;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 footer a {
@@ -646,10 +650,10 @@ footer a:hover {
 }
 @media (max-width:520px){
   .home-section .home-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
   .interactive-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
   .emotion-card-new {
     flex-basis: 100%;
@@ -703,7 +707,7 @@ footer a:hover {
 }
 
 .interactive-title {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 700;
   display: flex;
   flex-wrap: wrap;

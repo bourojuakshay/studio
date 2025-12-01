@@ -220,22 +220,6 @@ export default function Home() {
           }
         });
     }
-    
-    const cards = document.querySelectorAll('.how-it-works-step');
-    cards.forEach(card => {
-        const htmlCard = card as HTMLElement;
-        const onMouseMove = (e: MouseEvent) => {
-            const rect = htmlCard.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            htmlCard.style.setProperty('--x', `${x}px`);
-            htmlCard.style.setProperty('--y', `${y}px`);
-        };
-        htmlCard.addEventListener('mousemove', onMouseMove);
-
-        return () => htmlCard.removeEventListener('mousemove', onMouseMove);
-    });
-
 
   }, [activePage, appVisible, isMounted]);
 
@@ -410,6 +394,13 @@ export default function Home() {
       }, "-=0.6");
   };
 
+  useEffect(() => {
+    // Automatically "enter" the app if the intro is not there.
+    // This is for a simplified homepage experience.
+    setAppVisible(true);
+  }, []);
+
+
   const handleGenerateMood = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!customMoodFormData.name || !customMoodFormData.emoji || !customMoodFormData.description) return;
@@ -537,15 +528,6 @@ export default function Home() {
       <div id="cursor-dot" ref={cursorDotRef} />
       <div id="cursor-ring" ref={cursorRingRef} />
       
-      {!appVisible && (
-        <section className="creative-hero" ref={introHeroRef} onClick={enterApp}>
-            <div className="hero-content" ref={introHeroContentRef}>
-              <h1 className="sr-only">MoodyO</h1>
-              <AnimatedText text="MoodyO" className="word" as="div" />
-            </div>
-        </section>
-      )}
-
       {appVisible && (
         <div className="app" ref={mainAppRef}>
           <header>
@@ -592,19 +574,10 @@ export default function Home() {
 
           <main>
             <section id="home" className={cn('page', {active: activePage === 'home'})} ref={homePageRef}>
-                <div className="home-section creative-hero">
-                  <div className="hero-content">
-                    <h1 className="sr-only">MoodyO</h1>
-                    <AnimatedText text="MoodyO" className="word" as="div" />
-                  </div>
-                </div>
-
-                <div className="home-section home-section-animate">
-                    <InteractiveTitle text="How are you feeling today?" className="interactive-title" />
+                <div className="home-section">
+                    <h1 className="home-title">How are you feeling today?</h1>
                     <p className="home-subtitle">Tap a mood to explore curated songs and vibes. Each page has its own theme ✨</p>
-                </div>
-
-                <div className="home-section home-section-animate">
+                
                   <div className="home-mood-selector">
                     {Object.entries(allMoods).map(([key, { emoji, title }]) => (
                       <div key={key} className={cn('emotion-card-new', key)} onClick={() => openPage(key)}>
@@ -622,29 +595,6 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-
-                <div className="home-section home-section-animate">
-                    <AnimatedText text="How It Works" className="interactive-title" as="h2" />
-                    <p className="home-subtitle">Three easy steps to your perfect vibe.</p>
-                    <div className="how-it-works-grid">
-                      <div className="how-it-works-step">
-                        <Smile className="icon" />
-                        <h3>1. Choose Your Mood</h3>
-                        <p>Select from our curated moods or get creative and generate your own with AI.</p>
-                      </div>
-                      <div className="how-it-works-step">
-                        <Wand2 className="icon" />
-                        <h3>2. Get Your Vibe</h3>
-                        <p>Instantly receive a unique playlist, color theme, and atmosphere tailored to you.</p>
-                      </div>
-                      <div className="how-it-works-step">
-                        <Music className="icon" />
-                        <h3>3. Listen & Enjoy</h3>
-                        <p>Immerse yourself in the music and discover new tracks that perfectly match your feeling.</p>
-                      </div>
-                    </div>
-                </div>
-
             </section>
 
             {Object.entries(allMoods).map(([mood, def]) => {
@@ -721,9 +671,7 @@ export default function Home() {
           </main>
           
           <footer>
-            <small>Made with ❤️ by Bouroju Akshay</small>
-            <small><a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a></small>
-            <small>MoodyO — mood based audio UI demo</small>
+             <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
           </footer>
 
           {nowPlaying && currentTrack && (
