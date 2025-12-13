@@ -4,35 +4,35 @@
 @tailwind utilities;
 
 :root{
-  --background: 220 40% 5%; /* New Deep Ocean background */
+  --background: 240 5% 10%; /* Very Dark Gray */
   --foreground: 210 40% 98%;
 
-  --card: 222 84% 4.9%;
+  --card: 240 5% 15%;
   --card-foreground: 210 40% 98%;
 
-  --popover: 222 84% 4-9%;
+  --popover: 240 5% 15%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 175 90% 45%; /* New Vibrant Teal */
-  --primary-foreground: 210 40% 98%;
+  --primary: 100 82% 51%; /* Vibrant Lime Green */
+  --primary-foreground: 240 5% 10%;
 
-  --secondary: 217 33% 17%;
+  --secondary: 258 60% 70%; /* Vibrant Purple */
   --secondary-foreground: 210 40% 98%;
 
-  --muted: 217 33% 17%;
+  --muted: 240 5% 20%;
   --muted-foreground: 215 20% 65%;
 
-  --accent: 217 33% 17%;
+  --accent: 240 5% 25%;
   --accent-foreground: 210 40% 98%;
 
   --destructive: 0 63% 31%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 217 33% 17%;
-  --input: 217 33% 17%;
-  --ring: 175 90% 45%; /* New Vibrant Teal */
+  --border: 240 5% 25%;
+  --input: 240 5% 20%;
+  --ring: 100 82% 51%; /* Vibrant Lime Green */
 
-  --radius: 1rem;
+  --radius: 0.8rem;
   --font-sans: 'Poppins', sans-serif;
 
   --glass-bg: rgba(255, 255, 255, 0.06);
@@ -47,33 +47,33 @@
 }
 
 .dark {
-  --background: 220 40% 5%;
+  --background: 240 5% 10%;
   --foreground: 210 40% 98%;
 
-  --card: 222 84% 4.9%;
+  --card: 240 5% 15%;
   --card-foreground: 210 40% 98%;
 
-  --popover: 222 84% 4.9%;
+  --popover: 240 5% 15%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 175 90% 45%;
-  --primary-foreground: 210 40% 98%;
+  --primary: 100 82% 51%;
+  --primary-foreground: 240 5% 10%;
 
-  --secondary: 217 33% 17%;
+  --secondary: 258 60% 70%;
   --secondary-foreground: 210 40% 98%;
 
-  --muted: 217 33% 17%;
+  --muted: 240 5% 20%;
   --muted-foreground: 215 20% 65%;
 
-  --accent: 217 33% 17%;
+  --accent: 240 5% 25%;
   --accent-foreground: 210 40% 98%;
 
   --destructive: 0 63% 31%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 217 33% 17%;
-  --input: 217 33% 17%;
-  --ring: 175 90% 45%;
+  --border: 240 5% 25%;
+  --input: 240 5% 20%;
+  --ring: 100 82% 51%;
 }
 
 *{box-sizing:border-box}
@@ -988,79 +988,40 @@ body.custom-theme-active body {
   position: relative;
   width: 190px;
   height: 254px;
-  background: mediumturquoise;
+  background: hsl(var(--card));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 25px;
+  font-size: 4rem;
   font-weight: bold;
-  border-radius: 15px;
+  border-radius: 1.5rem;
   cursor: pointer;
-  overflow: hidden;
-  color: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid hsl(var(--border));
 }
 
-.interactive-card::before,
-.interactive-card::after {
-  position: absolute;
-  content: "";
-  width: 20%;
-  height: 20%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 25px;
-  font-weight: bold;
-  background-color: lightblue;
-  transition: all 0.5s;
-  z-index: 1;
-}
-
-.interactive-card::before {
-  top: 0;
-  right: 0;
-  border-radius: 0 15px 0 100%;
-}
-
-.interactive-card::after {
-  bottom: 0;
-  left: 0;
-  border-radius: 0 100% 0 15px;
-}
-
-.interactive-card:hover::before,
-.interactive-card:hover::after {
-  width: 100%;
-  height: 100%;
-  border-radius: 15px;
-  transition: all 0.5s;
+.interactive-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
 .interactive-card .card-content {
   position: relative;
   z-index: 2;
   transition: opacity 0.5s;
+  color: hsl(var(--foreground));
 }
 
-.interactive-card .card-title-hover {
-  position: absolute;
-  z-index: 3;
-  opacity: 0;
-  transition: opacity 0.5s;
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: white;
-  text-align: center;
-  padding: 1rem;
+.interactive-card.create-card {
+  border-style: dashed;
+  color: hsl(var(--muted-foreground));
 }
 
-.interactive-card:hover .card-content {
-  opacity: 0;
+.interactive-card.create-card:hover {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
 }
 
-.interactive-card:hover .card-title-hover {
-  opacity: 1;
-}
 
 /* FOOTER PLAYER STYLES */
 .footer-player {
@@ -1254,5 +1215,6 @@ body.custom-theme-active body {
     
 
     
+
 
 

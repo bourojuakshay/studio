@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { Menu, Wand2, Loader, Home as HomeIcon, Github, User, LogOut } from 'lucide-react';
+import { Menu, Wand2, Loader, Home as HomeIcon, Github, User, LogOut, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -35,9 +35,14 @@ import { useToast } from '@/hooks/use-toast';
 export const dynamic = 'force-dynamic';
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
-  const logoText = "MoodyO".split("");
-  const taglineText = "MOOD-DRIVEN AUDIO EXPERIENCE".split(" ");
+  const [isExiting, setIsExiting] = useState(false);
 
+  const handleExit = () => {
+    setIsExiting(true);
+    // Wait for exit animation to complete before calling parent onExit
+    setTimeout(onExit, 1000); 
+  };
+  
   const containerVariants = {
     enter: {
       transition: {
@@ -102,15 +107,22 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
     exit: { opacity: 0, y: 10, transition: { duration: 0.3, ease: 'easeIn' } },
   }
 
+  const logoText = "MoodyO".split("");
+  const taglineText = "MOOD-DRIVEN AUDIO EXPERIENCE".split(" ");
+
 
   return (
     <motion.div
       className="intro-screen-v2"
-      onClick={onExit}
+      onClick={handleExit}
       initial="initial"
       animate="enter"
       exit="exit"
-      variants={{ enter: { transition: { staggerChildren: 0.1 } }, exit: {} }}
+      variants={{ 
+        enter: { transition: { staggerChildren: 0.1 } }, 
+        exit: { transition: { staggerChildren: 0.1 } } 
+      }}
+      data-state={isExiting ? "exit" : "enter"}
     >
       <motion.div className="intro-logo-text" variants={containerVariants}>
         {logoText.map((letter, index) => (
@@ -132,29 +144,20 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
 
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void, style?: React.CSSProperties }) => {
-  const cardStyle = {
-    ...style,
-    background: moodKey === 'create' ? 'transparent' : style.background,
-    border: moodKey === 'create' ? '1px dashed hsl(var(--border))' : 'none',
-  };
 
-  const beforeStyle = {
-    backgroundColor: moodKey === 'create' ? 'hsl(var(--primary))' : 'lightblue'
-  }
-  const afterStyle = {
-    backgroundColor: moodKey === 'create' ? 'hsl(var(--primary))' : 'lightblue'
-  }
+  const cardClasses = cn(
+    'interactive-card',
+    { 'create-card': moodKey === 'create' }
+  );
 
   return (
     <div 
-      className="interactive-card"
-      style={cardStyle}
+      className={cardClasses}
+      style={{ backgroundColor: moodKey !== 'create' ? style.background : undefined }}
       onClick={onClick}
+      title={title}
     >
       <div className="card-content">{emoji}</div>
-      <div className="card-title-hover">{title}</div>
-      <div className="interactive-card-after" style={afterStyle}></div>
-      <div className="interactive-card-before" style={beforeStyle}></div>
     </div>
   );
 };
@@ -186,18 +189,14 @@ export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
   const [progress, setProgress] = useState({ currentTime: 0, duration: 0 });
   const [authForm, setAuthForm] = useState({ email: '', password: '', mode: 'signin' });
-  const [isExiting, setIsExiting] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const homePageRef = useRef<HTMLElement>(null);
 
-  const handleExit = () => {
-    setIsExiting(true);
-    setTimeout(() => {
-        setShowIntro(false);
-    }, 1000); // Wait for exit animation
+  const handleExitIntro = () => {
+    setShowIntro(false);
   };
 
   useEffect(() => {
@@ -496,7 +495,7 @@ export default function Home() {
   }, []);
 
   if (!isMounted) {
-    return <AnimatePresence>{showIntro && <MoodyOLoader onExit={handleExit} />}</AnimatePresence>;
+    return <AnimatePresence>{showIntro && <MoodyOLoader onExit={handleExitIntro} />}</AnimatePresence>;
   }
 
   const isAuthFormValid = authForm.email && authForm.password;
@@ -505,7 +504,7 @@ export default function Home() {
   return (
     <>
       <AnimatePresence>
-        {showIntro && <MoodyOLoader onExit={handleExit} />}
+        {showIntro && <MoodyOLoader onExit={handleExitIntro} />}
       </AnimatePresence>
       
       <ThemeProvider 
@@ -587,7 +586,7 @@ export default function Home() {
           <section id="home" className={cn('page', {active: activePage === 'home'})} ref={homePageRef}>
               <div className="home-section">
                   <h1 className="home-title">How are you feeling today?</h1>
-                  <p className="home-subtitle">Hover over a card to see the magic. Each page has its own theme ✨</p>
+                  <p className="home-subtitle">Each card has its own theme. Choose a vibe or create your own.</p>
               
                 <div className="home-mood-selector">
                   {Object.entries(allMoods).map(([key, { emoji, title, bg }]) => (
@@ -602,7 +601,7 @@ export default function Home() {
                   ))}
                   <InteractiveCard
                     moodKey="create"
-                    emoji={<Wand2 size={64} />}
+                    emoji={<Plus size={48} />}
                     title="Create Your Own"
                     onClick={() => setIsCustomMoodDialogOpen(true)}
                   />
