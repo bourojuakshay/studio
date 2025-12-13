@@ -87,23 +87,23 @@ const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
         </svg>
         {/* O */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -27 a 27,27 0 1,1 0,54 a 27,27 0 1,1 0,-54" className="draw" pathLength="360"></path>
+          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw" pathLength="360"></path>
         </svg>
         {/* O */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -27 a 27,27 0 1,1 0,54 a 27,27 0 1,1 0,-54" className="draw" pathLength="360"></path>
+          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw" pathLength="360"></path>
         </svg>
         {/* d */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M45,54 V2 M45,32 C45,43.8 35.8,54 24,54 C12.2,54 3,43.8 3,32 C3,20.2 12.2,10 24,10 C35.8,10 45,20.2 45,32" className="draw" pathLength="360"></path>
+            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M 54 54 V 10 M 54 32 a 22,22 0 1,1 -44,0 a 22,22 0 1,1 44,0" className="draw" pathLength="360"></path>
         </svg>
         {/* Y */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 10 L 32 32 L 54 10 M 32 32 V 54" className="draw" pathLength="360"></path>
+          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 10 l 22 22 l 22 -22 M 32 32 V 54" className="draw" pathLength="360"></path>
         </svg>
         {/* O */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="80" width="80" className="inline-block">
-            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -27 a 27,27 0 1,1 0,54 a 27,27 0 1,1 0,-54" className="draw" id="o" pathLength="360"></path>
+            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw" id="o" pathLength="360"></path>
         </svg>
       </div>
       <motion.p
