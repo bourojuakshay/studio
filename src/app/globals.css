@@ -870,7 +870,7 @@ body.custom-theme-active body {
 .tr-21:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(-10deg) rotateZ(0deg); }
 .tr-22:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(-5deg) rotateZ(0deg); }
 .tr-23:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(0deg) rotateZ(0deg); }
-.tr-24:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(5deg) rotateZ(0deg); }
+_24:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(5deg) rotateZ(0deg); }
 .tr-25:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(10deg) rotateZ(0deg); }
 
 .noselect {
@@ -1165,10 +1165,12 @@ body.custom-theme-active body {
   100% { stroke-dashoffset: 5; }
 }
 @keyframes spin {
-  0%, 10% { rotate: 0deg; }
-  22.5%, 35% { rotate: 360deg; }
-  47.5%, 60% { rotate: 720deg; }
-  72.5%, 85% { rotate: 1080deg; }
-  97.5%, 100% { rotate: 1440deg; }
+  0% { rotate: 0deg; }
+  10% { rotate: 0deg; } /* Start pause at beginning */
+  22.5% { rotate: 360deg; } /* End first rotation */
+  60% { rotate: 360deg; } /* 3 second pause (37.5% of 8s) */
+  72.5% { rotate: 720deg; } /* End second rotation */
+  85% { rotate: 1080deg; } /* End third rotation */
+  97.5%, 100% { rotate: 1440deg; } /* End final rotation */
 }
     
