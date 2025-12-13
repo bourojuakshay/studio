@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils"
 const Separator = React.forwardRef<
   React.ElementRef<typeof SeparatorPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>
->(function Separator(
-  { className, orientation = "horizontal", decorative = true, ...props },
-  ref
-) {
-  return (
+>(
+  (
+    { className, orientation = "horizontal", decorative = true, ...props },
+    ref
+  ) => (
     <SeparatorPrimitive.Root
       ref={ref}
       decorative={decorative}
@@ -25,6 +25,7 @@ const Separator = React.forwardRef<
       {...props}
     />
   )
-})
+)
+Separator.displayName = SeparatorPrimitive.Root.displayName
 
 export { Separator }
