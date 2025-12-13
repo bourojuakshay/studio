@@ -3,7 +3,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Heart, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Track } from '@/app/lib/mood-definitions';
@@ -13,10 +13,73 @@ type PlaylistViewProps = {
     tracks: Track[];
     currentTrack: Track | null;
     mood: string;
-    handleLike: (e: React.MouseEvent, track: Track) => void;
+    handleLike: (e: React.MouseEvent | PanInfo, track: Track) => void;
     isLiked: (track: Track) => boolean;
     openPlayer: (mood: string, index: number) => void;
 };
+
+const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike, isLiked }: { track: Track; index: number; } & Omit<PlaylistViewProps, 'tracks'>) => {
+    const x = useMotionValue(0);
+    
+    // Make the background grow from 0 to 1 as we drag.
+    // The input range is the drag distance, output is opacity.
+    const backgroundScaleX = useTransform(x, [0, 100], [0, 1]);
+    const heartScale = useTransform(x, [0, 100], [0.5, 1.2]);
+    const heartOpacity = useTransform(x, [0, 70], [0, 1]);
+
+    const onDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+        if (info.offset.x > 100) {
+            handleLike(info, { ...track, mood, index });
+        }
+    };
+    
+    const trackWithContext = { ...track, mood, index };
+
+    return (
+        <motion.div 
+            className="playlist-list-item-wrapper"
+            variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+            }}
+        >
+            <motion.div 
+                className="playlist-swipe-background"
+                style={{ scaleX: backgroundScaleX, transformOrigin: 'left' }}
+            >
+                <motion.div style={{ scale: heartScale, opacity: heartOpacity }}>
+                    <Heart size={24} />
+                </motion.div>
+            </motion.div>
+            <motion.div
+                className={cn('playlist-list-item', { active: currentTrack?.src === track.src })}
+                onClick={() => openPlayer(mood, index)}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragSnapToOrigin={true}
+                onDragEnd={onDragEnd}
+                style={{ x }}
+            >
+                <Image className="playlist-list-item-cover" src={track.cover} alt={`${track.title} cover`} width={40} height={40} data-ai-hint="song cover" unoptimized={track.cover.startsWith('data:')} />
+                <div className="playlist-list-item-info">
+                    <div className="song-title-wrapper">
+                        <div className="title">{track.title}</div>
+                        <button onClick={(e) => handleLike(e, trackWithContext)} className={cn('like-btn control-btn !p-0 h-auto', { 'liked': isLiked(trackWithContext) })}>
+                            <Heart size={16} />
+                        </button>
+                    </div>
+                    <div className="artist">{track.artist}</div>
+                </div>
+                <div className="actions">
+                    <button onClick={(e) => e.stopPropagation()} className="control-btn more-btn">
+                        <MoreVertical size={18} />
+                    </button>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
 
 export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, openPlayer }: PlaylistViewProps) {
     
@@ -31,11 +94,6 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
                 staggerChildren: 0.05
             } 
         }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
     };
 
     if (!tracks || tracks.length === 0) {
@@ -64,25 +122,16 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
                     animate="visible"
                 >
                     {tracks.map((track, index) => (
-                        <motion.div key={index} variants={itemVariants}>
-                            <div className={cn('playlist-list-item', { active: currentTrack?.src === track.src })} onClick={() => openPlayer(mood, index)}>
-                                <Image className="playlist-list-item-cover" src={track.cover} alt={`${track.title} cover`} width={40} height={40} data-ai-hint="song cover" unoptimized={track.cover.startsWith('data:')} />
-                                <div className="playlist-list-item-info">
-                                    <div className="song-title-wrapper">
-                                        <div className="title">{track.title}</div>
-                                        <button onClick={(e) => handleLike(e, { ...track, mood: mood, index: index })} className={cn('like-btn control-btn !p-0 h-auto', { 'liked': isLiked(track) })}>
-                                            <Heart size={16} />
-                                        </button>
-                                    </div>
-                                    <div className="artist">{track.artist}</div>
-                                </div>
-                                <div className="actions">
-                                    <button onClick={(e) => e.stopPropagation()} className="control-btn more-btn">
-                                        <MoreVertical size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
+                        <PlaylistItem 
+                            key={`${track.src}-${index}`} 
+                            track={track} 
+                            index={index} 
+                            mood={mood} 
+                            currentTrack={currentTrack}
+                            openPlayer={openPlayer}
+                            handleLike={handleLike}
+                            isLiked={isLiked}
+                        />
                     ))}
                 </motion.div>
             </ScrollArea>
