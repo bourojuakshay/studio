@@ -40,7 +40,7 @@ const MOOD_DEFS: { [key: string]: MoodDefinition } = {
     title: 'Happy — Vibrant Beats',
     subtitle: 'Feel-good tracks with a deep groove',
     accent: '#FFB347',
-    bg: 'linear-gradient(135deg, #FFF8E1 0%, #FFE0B2 100%)',
+    bg: 'linear-gradient(43deg, rgb(65, 88, 208) 0%, rgb(200, 80, 192) 46%, rgb(255, 204, 112) 100%)',
     emoji: '😄',
     themeClass: 'happy-active',
   },
@@ -48,7 +48,7 @@ const MOOD_DEFS: { [key: string]: MoodDefinition } = {
     title: 'Joyful — Energetic Beats',
     subtitle: 'High-energy songs — perfect for smiles and movement',
     accent: '#FF4081',
-    bg: 'linear-gradient(135deg, #FFF0F6 0%, #FF80AB 100%)',
+    bg: 'linear-gradient(43deg, rgb(65, 88, 208) 0%, rgb(200, 80, 192) 46%, rgb(255, 204, 112) 100%)',
     emoji: '🥳',
     themeClass: 'joyful-active',
   },
@@ -56,7 +56,7 @@ const MOOD_DEFS: { [key: string]: MoodDefinition } = {
     title: 'Sad — Melancholy',
     subtitle: 'Slow, emotional tracks to reflect',
     accent: '#2196F3',
-    bg: 'linear-gradient(135deg, #E3F2FD 0%, #90CAF9 100%)',
+    bg: 'linear-gradient(43deg, rgb(65, 88, 208) 0%, rgb(200, 80, 192) 46%, rgb(255, 204, 112) 100%)',
     emoji: '😢',
     themeClass: 'sad-active',
   },
@@ -64,7 +64,7 @@ const MOOD_DEFS: { [key: string]: MoodDefinition } = {
     title: 'Depression — Ambient & Soothing',
     subtitle: 'Ambient textures and slow soundscapes',
     accent: '#5E3370',
-    bg: 'linear-gradient(135deg, #1a1a1a 0%, #000000 100%)',
+    bg: 'linear-gradient(43deg, rgb(65, 88, 208) 0%, rgb(200, 80, 192) 46%, rgb(255, 204, 112) 100%)',
     emoji: '😔',
     themeClass: 'depression-active',
   }
@@ -122,6 +122,23 @@ const AnimatedText = ({ text, el: Wrapper = 'h1', className }) => {
     </Wrapper>
   );
 };
+
+const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }) => {
+  return (
+    <div className="interactive-card-container noselect" onClick={onClick}>
+      <div className="canvas">
+        {Array.from({ length: 25 }, (_, i) => (
+          <div key={i} className={`tracker tr-${i + 1}`}></div>
+        ))}
+        <div id="card" className="interactive-card" style={style}>
+          <div className="card-emoji">{emoji}</div>
+          <div className="card-title">{title}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
@@ -402,27 +419,21 @@ export default function Home() {
             <div className="intro-bg-elements">
                 <motion.div 
                     className="intro-bg-element" 
-                    style={{ top: '10%', left: '15%', width: '150px', height: '150px', '--orb-color': '#3b82f6' } as React.CSSProperties}
+                    style={{ top: '10%', left: '15%', width: '150px', height: '150px', '--orb-color': 'rgb(65, 88, 208)' } as React.CSSProperties}
                     animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
                     transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <motion.div 
                     className="intro-bg-element" 
-                    style={{ top: '60%', left: '5%', width: '80px', height: '80px', '--orb-color': '#8b5cf6' } as React.CSSProperties}
+                    style={{ top: '60%', left: '5%', width: '80px', height: '80px', '--orb-color': 'rgb(200, 80, 192)' } as React.CSSProperties}
                     animate={{ y: [0, 15, 0], x: [0, 10, 0] }}
                     transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
                 />
                 <motion.div 
                     className="intro-bg-element" 
-                    style={{ top: '25%', left: '80%', width: '120px', height: '120px', '--orb-color': '#ec4899' } as React.CSSProperties}
+                    style={{ top: '25%', left: '80%', width: '120px', height: '120px', '--orb-color': 'rgb(255, 204, 112)' } as React.CSSProperties}
                     animate={{ y: [0, -10, 0], x: [0, -15, 0] }}
                     transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div 
-                    className="intro-bg-element" 
-                    style={{ top: '70%', left: '75%', width: '60px', height: '60px', '--orb-color': '#10b981' } as React.CSSProperties}
-                    animate={{ y: [0, 25, 0] }}
-                    transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                 />
             </div>
             <div className="intro-content">
@@ -493,23 +504,26 @@ export default function Home() {
               <section id="home" className={cn('page', {active: activePage === 'home'})} ref={homePageRef}>
                   <div className="home-section">
                       <h1 className="home-title">How are you feeling today?</h1>
-                      <p className="home-subtitle">Tap a mood to explore curated songs and vibes. Each page has its own theme ✨</p>
+                      <p className="home-subtitle">Hover over a card to see the magic. Each page has its own theme ✨</p>
                   
                     <div className="home-mood-selector">
-                      {Object.entries(allMoods).map(([key, { emoji, title }]) => (
-                        <div key={key} className={cn('emotion-card-new', key)} onClick={() => openPage(key)}>
-                          <div className="card-content">
-                            <div className="emoji">{emoji}</div>
-                            <div className="title">{title.split('—')[0]}</div>
-                          </div>
-                        </div>
+                      {Object.entries(allMoods).map(([key, { emoji, title, bg }]) => (
+                        <InteractiveCard
+                          key={key}
+                          moodKey={key}
+                          emoji={emoji}
+                          title={title.split('—')[0]}
+                          onClick={() => openPage(key)}
+                          style={{ background: bg }}
+                        />
                       ))}
-                      <div className="emotion-card-new create-mood-card" onClick={() => setIsCustomMoodDialogOpen(true)}>
-                        <div className="card-content">
-                          <div className="emoji"><Wand2 size={72} /></div>
-                          <div className="title">Create Your Own</div>
-                        </div>
-                      </div>
+                      <InteractiveCard
+                        moodKey="create"
+                        emoji={<Wand2 size={64} />}
+                        title="Create Your Own"
+                        onClick={() => setIsCustomMoodDialogOpen(true)}
+                        style={{ background: 'var(--glass-bg)', border: '1px dashed var(--glass-border)' }}
+                      />
                     </div>
                   </div>
               </section>
@@ -681,5 +695,3 @@ export default function Home() {
     </>
   );
 }
-
-    
