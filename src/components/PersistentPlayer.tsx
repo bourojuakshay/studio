@@ -4,110 +4,114 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ListMusic, Heart, SkipBack, Play, Pause, SkipForward } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ListMusic, Heart, SkipBack, Play, Pause, SkipForward, Volume1, Volume2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Track } from '@/app/lib/mood-definitions';
 
 type PersistentPlayerProps = {
     track: Track;
     isPlaying: boolean;
-    playlist: Track[];
     handlePlayPause: () => void;
     handleNext: () => void;
     handlePrev: () => void;
     handleLike: (e: React.MouseEvent, track: Track) => void;
     isLiked: (track: Track) => boolean;
-    openPlayer: (mood: string, index: number) => void;
-    nowPlaying: { mood: string, index: number };
     setNowPlaying: (nowPlaying: { mood: string, index: number } | null) => void;
+    progress: { currentTime: number; duration: number };
+    handleSeek: (time: number) => void;
+    volume: number;
+    setVolume: (volume: number) => void;
 };
 
-export function PersistentPlayer({ track, isPlaying, playlist, handlePlayPause, handleNext, handlePrev, handleLike, isLiked, openPlayer, nowPlaying, setNowPlaying }: PersistentPlayerProps) {
-    const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
+const formatTime = (seconds: number) => {
+    if (isNaN(seconds) || seconds < 0) return '0:00';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
 
+export function PersistentPlayer({ 
+    track, 
+    isPlaying, 
+    handlePlayPause, 
+    handleNext, 
+    handlePrev, 
+    handleLike, 
+    isLiked, 
+    setNowPlaying,
+    progress,
+    handleSeek,
+    volume,
+    setVolume
+}: PersistentPlayerProps) {
+    
     if (!track) return null;
+
+    const onProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!progress.duration) return;
+        const { clientX, currentTarget } = e;
+        const { left, width } = currentTarget.getBoundingClientRect();
+        const clickPosition = clientX - left;
+        const seekRatio = clickPosition / width;
+        const seekTime = progress.duration * seekRatio;
+        handleSeek(seekTime);
+    };
+
+    const progressPercentage = progress.duration > 0 ? (progress.currentTime / progress.duration) * 100 : 0;
 
     return (
         <motion.div 
-            className="persistent-player-wrapper"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ type: 'spring', stiffness: 100 }}
+            className="footer-player"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: 'tween', ease: 'easeOut', duration: 0.3 }}
         >
-            <AnimatePresence>
-                {isPlaylistOpen && (
-                    <motion.div
-                        className="persistent-playlist-bar"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                    >
-                        <div className="persistent-playlist-header">
-                            <h4>Up Next</h4>
-                            <button onClick={() => setIsPlaylistOpen(false)}><X size={18} /></button>
-                        </div>
-                        <ScrollArea className="playlist-scroll-area">
-                            <div className="playlist-list">
-                                {playlist && playlist.map((item, index) => (
-                                    <div 
-                                        key={index}
-                                        className={cn('playlist-list-item', { active: track.src === item.src })}
-                                        onClick={() => openPlayer(nowPlaying.mood, index)}
-                                    >
-                                        <Image src={item.cover} alt={item.title} width={32} height={32} className="playlist-list-item-cover" unoptimized={item.cover.startsWith('data:')}/>
-                                        <div className="playlist-list-item-info">
-                                            <div className="title">{item.title}</div>
-                                            <div className="artist">{item.artist}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </ScrollArea>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <div className="persistent-player-card">
-                <div className="one">
-                    <span className="title">Now Playing</span>
-                    <div className="music">
-                        <Image src={track.cover} alt={track.title} width={80} height={80} unoptimized={track.cover.startsWith('data:')} />
-                    </div>
-                    <div className="info-controls-wrapper">
-                        <span className="name">{track.title}</span>
-                        <span className="name1">{track.artist}</span>
-                        <div className="bar">
-                            <button onClick={handlePrev}>
-                                <SkipBack size={18} className="color" />
-                            </button>
-                            <button onClick={handlePlayPause}>
-                                {isPlaying ? (
-                                    <Pause size={22} className="color1" />
-                                ) : (
-                                    <Play size={22} className="color1" />
-                                )}
-                            </button>
-                            <button onClick={handleNext}>
-                                <SkipForward size={18} className="color" />
-                            </button>
-                        </div>
-                    </div>
-                     <div className="bar">
-                        <button onClick={() => setIsPlaylistOpen(!isPlaylistOpen)}>
-                            <ListMusic size={16} className="color1" />
-                        </button>
-                        <button onClick={(e) => handleLike(e, track)}>
-                            <Heart size={16} className={cn('color1', {'text-red-500 fill-current': isLiked(track)})} />
-                        </button>
-                        <button onClick={() => { setIsPlaylistOpen(false); setNowPlaying(null); }}>
-                             <X size={16} className="color1" />
-                        </button>
-                    </div>
+            <div className="footer-player-info">
+                <Image src={track.cover} alt={track.title} width={56} height={56} unoptimized={track.cover.startsWith('data:')}/>
+                <div className="footer-player-info-text">
+                    <div className="title">{track.title}</div>
+                    <div className="artist">{track.artist}</div>
                 </div>
-                <div className="two"></div>
-                <div className="three"></div>
+                 <button onClick={(e) => handleLike(e, track)} className={cn('like-btn control-btn', { 'liked': isLiked(track) })}>
+                    <Heart size={18} />
+                </button>
+            </div>
+            
+            <div className="footer-player-center">
+                 <div className="footer-player-controls">
+                    <button onClick={handlePrev} className="control-btn"><SkipBack /></button>
+                    <button onClick={handlePlayPause} className="play-main-btn control-btn">
+                        {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                    </button>
+                    <button onClick={handleNext} className="control-btn"><SkipForward /></button>
+                </div>
+                <div className="footer-player-progress">
+                    <span className="time-display">{formatTime(progress.currentTime)}</span>
+                     <div className="progress-bar-container" onClick={onProgressBarClick}>
+                        <div className="progress-bar" style={{ width: `${progressPercentage}%` }}></div>
+                    </div>
+                    <span className="time-display">{formatTime(progress.duration)}</span>
+                </div>
+            </div>
+
+            <div className="footer-player-right">
+                <div className="volume-control">
+                    <button className="control-btn">
+                         {volume > 0.5 ? <Volume2 size={20} /> : <Volume1 size={20} />}
+                    </button>
+                    <input 
+                        type="range" 
+                        min="0" max="1" 
+                        step="0.01" 
+                        value={volume} 
+                        onChange={(e) => setVolume(parseFloat(e.target.value))} 
+                        className="volume-slider" 
+                    />
+                </div>
+                <button onClick={() => setNowPlaying(null)} className="control-btn">
+                    <X size={20} />
+                </button>
             </div>
         </motion.div>
     );

@@ -64,7 +64,7 @@ const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
   return (
     <div className="moody-loader-container">
       <div className={cn("loader items-center", { 'exit-animation': isExiting })}>
-        <svg height="0" width="0" viewBox="0 0 64 64" className="absolute">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="80" width="80" className="inline-block">
           <defs className="s-xJBuHA073rTt" xmlns="http://www.w3.org/2000/svg">
             <linearGradient className="s-xJBuHA073rTt" gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="b">
               <stop className="s-xJBuHA073rTt" stopColor="#973BED"></stop>
@@ -612,19 +612,20 @@ export default function Home() {
             
             {isMounted && (
               <AnimatePresence>
-                  {nowPlaying && currentTrack && activePage === 'home' && (
+                  {nowPlaying && currentTrack && (
                       <PersistentPlayer
                           track={currentTrack}
                           isPlaying={isPlaying}
-                          playlist={tracks[nowPlaying.mood]}
                           handlePlayPause={handlePlayPause}
                           handleNext={handleNext}
                           handlePrev={handlePrev}
                           handleLike={handleLike}
                           isLiked={isLiked}
-                          openPlayer={openPlayer}
-                          nowPlaying={nowPlaying}
                           setNowPlaying={setNowPlaying}
+                          progress={progress}
+                          handleSeek={handleSeek}
+                          volume={volume}
+                          setVolume={setVolume}
                       />
                   )}
               </AnimatePresence>
