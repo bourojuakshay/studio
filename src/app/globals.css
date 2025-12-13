@@ -235,6 +235,8 @@ nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
   margin-top: 0.5rem;
   text-align: center;
   animation: subtitle-fade-in 0.8s ease-out 1s forwards;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 @keyframes subtitle-fade-in {
@@ -503,7 +505,7 @@ body.home-active .nav-btn {
 
 .progress-bar-container {
     height: 4px;
-    background-color: hsla(var(--foreground), 0.2);
+    background-color: hsla(var(--foreground), 0.3);
     border-radius: 2px;
     cursor: pointer;
     width: 100%;
