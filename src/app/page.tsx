@@ -5,7 +5,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, Wand2, Loader, Home as HomeIcon, Github } from 'lucide-react';
+import { Menu, Wand2, Loader, Home as HomeIcon, Github, User } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -103,7 +104,15 @@ const STATIC_TRACKS = {
   depression: SAMPLE_TRACKS(12)
 };
 
-const MoodyOLoader = () => (
+const MoodyOLoader = () => {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
+
+  return (
     <div className="moody-loader-container">
       <div className="loader items-end">
         <svg height="0" width="0" viewBox="0 0 64 64" className="absolute">
@@ -157,6 +166,7 @@ const MoodyOLoader = () => (
       </motion.p>
     </div>
   );
+}
   
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }) => {
@@ -462,15 +472,9 @@ export default function Home() {
             exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
             onClick={handleIntroClick}
           >
-            {!isMounted ? (
-                <div key={spinKey}>
-                    <MoodyOLoader />
-                </div>
-             ) : (
-                <div key={spinKey} onClick={() => setSpinKey(spinKey + 1)}>
-                    <MoodyOLoader />
-                </div>
-             )}
+            <div key={spinKey} onClick={() => setSpinKey(prev => prev + 1)}>
+                <MoodyOLoader />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -492,6 +496,9 @@ export default function Home() {
                     <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="nav-btn">
                       <HomeIcon size={20} />
                     </a>
+                    <Link href="/admin" className="nav-btn">
+                      <User size={20} />
+                    </Link>
                     <a href="https://github.com/bourojuakshay/studio" target="_blank" rel="noopener noreferrer" className="nav-btn">
                       <Github size={20} />
                     </a>
@@ -515,6 +522,7 @@ export default function Home() {
                               {allMoods[mood].title.split('—')[0]}
                             </a>
                           ))}
+                           <Link href="/admin" className="p-4 font-semibold">Admin</Link>
                         </div>
                          <div className="p-4 border-t border-glass-border">
                            <NavMenu />
@@ -659,5 +667,3 @@ export default function Home() {
     </>
   );
 }
-
-    
