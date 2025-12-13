@@ -623,17 +623,19 @@ body.home-active .nav-btn {
   grid-column: span 12;
   display: flex;
   flex-direction: column;
-  min-height: 0;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 20px;
   padding: 1.5rem;
+  height: 65vh;
+  max-height: 65vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @media (min-width: 801px) {
   .playlist-view {
       grid-column: span 7;
-      max-height: 70vh;
   }
 }
 
@@ -801,7 +803,9 @@ footer a:hover {
   }
   .playlist-view {
     grid-row: 2;
+    height: auto;
     max-height: none;
+    overflow-y: visible;
   }
   .playlist-scroll-area > div {
     height: auto;
@@ -1236,6 +1240,8 @@ body.custom-theme-active body {
 .exit-animation .draw {
   animation: draw-out 2s ease-in-out forwards;
 }
+    
+
     
 
     
