@@ -602,7 +602,7 @@ footer a:hover {
     font-size: 2rem;
   }
   .persistent-player-wrapper {
-    bottom: 64px;
+    bottom: 80px;
     right: 16px;
     left: 16px;
     width: auto;
@@ -905,7 +905,7 @@ body.custom-theme-active body {
 /* From Uiverse.io by Tsiangana - Persistent Player Card */
 .persistent-player-wrapper {
   position: fixed;
-  bottom: 64px;
+  bottom: 80px;
   right: 24px;
   z-index: 50;
   display: flex;
