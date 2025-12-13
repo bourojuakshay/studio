@@ -503,7 +503,7 @@ body.home-active .nav-btn {
 
 .progress-bar-container {
     height: 4px;
-    background-color: hsla(var(--foreground), 0.1);
+    background-color: hsla(var(--foreground), 0.2);
     border-radius: 2px;
     cursor: pointer;
     width: 100%;
