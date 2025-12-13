@@ -345,10 +345,10 @@ body.home-active .nav-btn {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-bg);
   padding: 24px;
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
 }
 .now-playing-card .player-cover {
     width: 100%;
@@ -411,13 +411,13 @@ body.home-active .nav-btn {
   grid-column: span 12;
   display: flex;
   flex-direction: column;
-  min-height: 0; /* Prevents flexbox overflow */
+  min-height: 0;
 }
 
 @media (min-width: 801px) {
   .playlist-view {
       grid-column: span 7;
-      max-height: 70vh; /* Set a max height for desktop */
+      max-height: 70vh;
   }
 }
 
@@ -431,8 +431,8 @@ body.home-active .nav-btn {
 }
 
 .playlist-scroll-area {
-  flex-grow: 1; /* Allow scroll area to grow */
-  min-height: 0; /* Prevent flex item from overflowing */
+  flex-grow: 1;
+  min-height: 0;
 }
 
 .playlist-list {
@@ -450,6 +450,7 @@ body.home-active .nav-btn {
   transition: background .3s ease;
   cursor: pointer;
   background: hsla(var(--primary), 0.1);
+  border: 1px solid transparent;
 }
 .playlist-list-item:hover {
   background: hsla(var(--primary), 0.2);
@@ -457,6 +458,7 @@ body.home-active .nav-btn {
 .playlist-list-item.active {
   background: var(--page-accent);
   color: hsl(var(--background));
+  border-color: hsla(0, 0%, 100%, 0.5);
 }
 .playlist-list-item.active .artist, .playlist-list-item.active .like-btn {
   color: hsl(var(--background));
@@ -469,12 +471,17 @@ body.home-active .nav-btn {
   height: 48px;
   border-radius: 8px;
   object-fit: cover;
+  flex-shrink: 0;
 }
 .playlist-list-item-info {
   flex-grow: 1;
+  min-width: 0;
 }
 .playlist-list-item-info .title {
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .playlist-list-item-info .artist {
   font-size: 0.9em;
@@ -482,6 +489,7 @@ body.home-active .nav-btn {
 }
 .playlist-list-item .like-btn {
   margin-left: auto;
+  flex-shrink: 0;
 }
 section.page::before {
   content: '';
@@ -1210,6 +1218,8 @@ body.custom-theme-active body {
   animation: draw 2s ease-in-out;
 }
     
+    
+
     
 
     

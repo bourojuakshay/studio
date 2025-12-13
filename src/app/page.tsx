@@ -571,7 +571,7 @@ export default function Home() {
             
             {isMounted && (
               <AnimatePresence>
-                  {nowPlaying && currentTrack && (
+                  {nowPlaying && currentTrack && activePage === 'home' && (
                       <PersistentPlayer
                           track={currentTrack}
                           isPlaying={isPlaying}
@@ -648,3 +648,5 @@ export default function Home() {
     </>
   );
 }
+
+    
