@@ -1066,6 +1066,7 @@ body.custom-theme-active body {
   justify-content: space-between;
   padding: 0 5px;
   cursor: pointer;
+  gap: 16px;
 }
 @media (min-width: 521px) {
     .persistent-player-card .one .bar {
@@ -1089,6 +1090,7 @@ body.custom-theme-active body {
   margin: 15px auto;
   width: 100%;
   padding: 2px 23px;
+  justify-content: center;
 }
 @media (min-width: 521px) {
     .persistent-player-card .one .bar:last-child {
