@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -7,6 +8,15 @@ import { useToast } from '@/hooks/use-toast';
 import { addSong } from '@/firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { Loader } from 'lucide-react';
+import { MOOD_DEFS } from '../page';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 
 export default function AdminPage() {
   const [title, setTitle] = useState('');
@@ -32,21 +42,32 @@ export default function AdminPage() {
 
     const songData = { title, artist, src, cover, mood: mood.toLowerCase() };
 
-    // No try-catch here. The error is handled by the emitter in addSong.
-    await addSong(firestore, songData);
+    try {
+      await addSong(firestore, songData);
 
-    toast({
-      title: 'Song Added!',
-      description: `${title} by ${artist} has been added to the database.`,
-    });
-    // Clear form
-    setTitle('');
-    setArtist('');
-    setSrc('');
-    setCover('');
-    setMood('');
-    
-    setIsSubmitting(false);
+      toast({
+        title: 'Song Added!',
+        description: `${title} by ${artist} has been added to the database.`,
+      });
+      // Clear form
+      setTitle('');
+      setArtist('');
+      setSrc('');
+      setCover('');
+      setMood('');
+    } catch (error) {
+      // The FirestorePermissionError is thrown by the listener, 
+      // but we can still show a generic toast for other potential errors.
+      if (!(error as any).name?.includes('FirestorePermissionError')) {
+          toast({
+              variant: 'destructive',
+              title: 'Uh oh! Something went wrong.',
+              description: (error as any).message || "Could not save song.",
+          });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -83,12 +104,19 @@ export default function AdminPage() {
                 onChange={(e) => setCover(e.target.value)}
                 required
               />
-              <Input
-                placeholder="Mood (e.g., happy, sad)"
-                value={mood}
-                onChange={(e) => setMood(e.target.value)}
-                required
-              />
+              <Select onValueChange={setMood} value={mood}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a mood" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(MOOD_DEFS).map((moodKey) => (
+                    <SelectItem key={moodKey} value={moodKey}>
+                      {MOOD_DEFS[moodKey as keyof typeof MOOD_DEFS].title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? <><Loader className="animate-spin mr-2" size={16} /> Adding...</> : 'Add Song'}
               </Button>

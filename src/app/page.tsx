@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,6 +23,8 @@ import { generateImage } from '@/ai/flows/image-generator';
 import { ThemeProvider } from '@/components/theme-provider';
 import { PersistentPlayer } from '@/components/PersistentPlayer';
 import { MoodPage } from '@/components/MoodPage';
+import { useSongs } from '@/hooks/use-songs';
+import { Song } from '@/firebase/firestore';
 
 
 export const dynamic = 'force-dynamic';
@@ -37,7 +39,7 @@ export type MoodDefinition = {
   themeClass: string;
 };
 
-const MOOD_DEFS: { [key: string]: MoodDefinition } = {
+export const MOOD_DEFS: { [key: string]: MoodDefinition } = {
   happy: {
     title: 'Happy',
     subtitle: 'Feel-good tracks with a deep groove',
@@ -196,7 +198,6 @@ export default function Home() {
   const [isCustomMoodDialogOpen, setIsCustomMoodDialogOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [customMoods, setCustomMoods] = useState<Record<string, MoodDefinition>>({});
-  const [tracks, setTracks] = useState<Record<string, Track[]>>(STATIC_TRACKS);
   const [customMoodFormData, setCustomMoodFormData] = useState({ name: '', emoji: '', description: '' });
   const [volume, setVolume] = useState(0.75);
   const [appVisible, setAppVisible] = useState(false);
@@ -207,6 +208,28 @@ export default function Home() {
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const homePageRef = useRef<HTMLElement>(null);
   const mainAppRef = useRef<HTMLDivElement>(null);
+
+  const { songs: firestoreSongs, loading, error } = useSongs();
+
+  const tracks = useMemo(() => {
+    const combinedTracks: Record<string, Track[]> = { ...STATIC_TRACKS };
+
+    if (firestoreSongs) {
+      firestoreSongs.forEach(song => {
+        if (song.mood) {
+          if (!combinedTracks[song.mood]) {
+            combinedTracks[song.mood] = [];
+          }
+          // Avoid duplicates
+          if (!combinedTracks[song.mood].some(t => t.src === song.src)) {
+            combinedTracks[song.mood].push(song as Track);
+          }
+        }
+      });
+    }
+    return combinedTracks;
+  }, [firestoreSongs]);
+
 
   useEffect(() => {
     setIsMounted(true);
@@ -235,7 +258,7 @@ export default function Home() {
     };
   }, [isMounted]);
 
-  const currentTrack = nowPlaying ? tracks[nowPlaying.mood as keyof typeof tracks][nowPlaying.index] : null;
+  const currentTrack = nowPlaying ? tracks[nowPlaying.mood as keyof typeof tracks]?.[nowPlaying.index] : null;
 
   // Effect for loading the track
   useEffect(() => {
@@ -278,12 +301,9 @@ export default function Home() {
       setIsPlaying(!isPlaying);
     } else {
       const currentMood = activePage;
-      if (currentMood !== 'home') {
-        const firstTrack = tracks[currentMood as keyof typeof tracks]?.[0];
-        if (firstTrack) {
-          setNowPlaying({ mood: currentMood, index: 0 });
-          setIsPlaying(true);
-        }
+      if (currentMood !== 'home' && tracks[currentMood as keyof typeof tracks]?.length > 0) {
+        setNowPlaying({ mood: currentMood, index: 0 });
+        setIsPlaying(true);
       }
     }
   };
@@ -296,6 +316,7 @@ export default function Home() {
     if (!nowPlaying) return;
     const { mood, index } = nowPlaying;
     const playlist = tracks[mood as keyof typeof tracks];
+    if (!playlist) return;
     const nextIndex = (index + 1) % playlist.length;
     setNowPlaying({ mood, index: nextIndex });
     setIsPlaying(true);
@@ -305,6 +326,7 @@ export default function Home() {
     if (!nowPlaying) return;
     const { mood, index } = nowPlaying;
     const playlist = tracks[mood as keyof typeof tracks];
+    if (!playlist) return;
     const prevIndex = (index - 1 + playlist.length) % playlist.length;
     setNowPlaying({ mood, index: prevIndex });
     setIsPlaying(true);
@@ -328,7 +350,9 @@ export default function Home() {
       if (isLiked(track)) {
         return prev.filter(likedTrack => likedTrack.src !== track.src);
       } else {
-        const trackWithContext = { ...track, mood: track.mood || nowPlaying?.mood, index: track.index ?? nowPlaying?.index };
+        const playlist = tracks[track.mood as keyof typeof tracks];
+        const trackIndex = playlist?.findIndex(t => t.src === track.src) ?? -1;
+        const trackWithContext = { ...track, mood: track.mood || nowPlaying?.mood, index: track.index ?? trackIndex };
         return [...prev, trackWithContext];
       }
     });
@@ -364,17 +388,18 @@ export default function Home() {
         }
       }));
 
-      const initialTracks = result.playlist.map((song, index) => ({
+      const initialTracks: Track[] = result.playlist.map((song, index) => ({
         ...song,
         src: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${(1 + index) % 16 + 1}.mp3`,
         cover: '/placeholder-cover.png',
-      }));
-
-      setTracks(prev => ({
-        ...prev,
-        [moodId]: initialTracks,
+        mood: moodId,
       }));
       
+      const newTracks = { ...tracks, [moodId]: initialTracks };
+
+      // Manually set tracks state to include the new mood's empty playlist
+      setTracks(prev => ({ ...prev, [moodId]: initialTracks }));
+
       openPage(moodId);
       setCustomMoodFormData({ name: '', emoji: '', description: '' });
 
@@ -389,18 +414,18 @@ export default function Home() {
       const settledImages = await Promise.allSettled(imagePromises);
 
       setTracks(prev => {
-        const newTracks = [...(prev[moodId] || [])];
-        settledImages.forEach((settledResult, index) => {
-            if (settledResult.status === 'fulfilled' && newTracks[settledResult.value.index]) {
-                newTracks[settledResult.value.index] = { ...newTracks[settledResult.value.index], cover: settledResult.value.cover };
-            } else if (settledResult.status === 'rejected') {
-                console.error(`Image generation failed for track ${index}:`, settledResult.reason);
-                if (newTracks[index]) {
-                    newTracks[index] = { ...newTracks[index], cover: `https://picsum.photos/seed/${moodId}${index}/600/600` };
+        const updatedPlaylist = [...(prev[moodId] || [])];
+        settledImages.forEach((settledResult) => {
+            if (settledResult.status === 'fulfilled') {
+                const { index, cover } = settledResult.value;
+                if (updatedPlaylist[index]) {
+                    updatedPlaylist[index] = { ...updatedPlaylist[index], cover: cover };
                 }
+            } else if (settledResult.status === 'rejected') {
+                console.error(`Image generation failed:`, settledResult.reason);
             }
         });
-        return { ...prev, [moodId]: newTracks };
+        return { ...prev, [moodId]: updatedPlaylist };
       });
 
     } catch (error) {
