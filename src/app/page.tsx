@@ -36,49 +36,48 @@ export const dynamic = 'force-dynamic';
 
 const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
     return (
-        <motion.div 
-            className="intro-content"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-        >
-            <div className="intro-title">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="80" width="80" className="inline-block">
-                    <defs>
-                        <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="b">
-                            <stop stopColor="#973BED"></stop>
-                            <stop stopColor="#007CFF" offset="1"></stop>
-                        </linearGradient>
-                        <linearGradient gradientUnits="userSpaceOnUse" y2="0" x2="0" y1="64" x1="0" id="c">
-                            <stop stopColor="#FFC800"></stop>
-                            <stop stopColor="#F0F" offset="1"></stop>
-                        </linearGradient>
-                        <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="d">
-                            <stop stopColor="#00E0ED"></stop>
-                            <stop stopColor="#00DA72" offset="1"></stop>
-                        </linearGradient>
-                    </defs>
-                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 54 V 10 L 32 32 L 54 10 V 54"></path>
-                </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44"></path>
-                </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44"></path>
-                </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M 54 54 V 10 M 54 32 a 22,22 0 1,1 -44,0 a 22,22 0 1,1 44,0"></path>
-                </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 10 l 22 22 l 22 -22 M 32 32 V 54"></path>
-                </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="80" width="80" className="inline-block">
-                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44"></path>
-                </svg>
+        <div className={cn("moody-loader-container", { 'exit-animation': isExiting })}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="80" width="80" className="inline-block">
+                <defs>
+                    <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="b">
+                        <stop stopColor="#973BED"></stop>
+                        <stop stopColor="#007CFF" offset="1"></stop>
+                    </linearGradient>
+                    <linearGradient gradientUnits="userSpaceOnUse" y2="0" x2="0" y1="64" x1="0" id="c">
+                        <stop stopColor="#FFC800"></stop>
+                        <stop stopColor="#F0F" offset="1"></stop>
+                    </linearGradient>
+                    <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="d">
+                        <stop stopColor="#00E0ED"></stop>
+                        <stop stopColor="#00DA72" offset="1"></stop>
+                    </linearGradient>
+                </defs>
+                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 54 V 10 L 32 32 L 54 10 V 54" className="draw"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
+                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
+                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
+                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M 54 54 V 10 M 54 32 a 22,22 0 1,1 -44,0 a 22,22 0 1,1 44,0" className="draw"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
+                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 10 l 22 22 l 22 -22 M 32 32 V 54" className="draw"></path>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="80" width="80" className="inline-block">
+                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw"></path>
+            </svg>
+             <div className="loader moody-loader-text">
+                <span>M</span>
+                <span>O</span>
+                <span>O</span>
+                <span>D</span>
+                <span>Y</span>
+                <span>O</span>
             </div>
-            <p className="intro-subtitle">MOOD-DRIVEN AUDIO EXPERIENCE</p>
-        </motion.div>
+        </div>
     );
 };
   
@@ -498,6 +497,7 @@ export default function Home() {
             className="intro-screen"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
+            onClick={handleIntroClick}
           >
             <MoodyOLoader isExiting={isExiting} />
           </motion.div>
