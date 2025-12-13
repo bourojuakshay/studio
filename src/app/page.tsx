@@ -628,6 +628,7 @@ export default function Home() {
                         isLiked={isLiked}
                         openPlayer={openPlayer}
                         nowPlaying={nowPlaying}
+                        setNowPlaying={setNowPlaying}
                     />
                 )}
             </AnimatePresence>
