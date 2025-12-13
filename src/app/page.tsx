@@ -95,7 +95,7 @@ const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
         </svg>
         {/* d */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M 54 54 V 10 L 54 32 C 54 45.8 43.8 54 32 54 C 20.2 54 10 43.8 10 32 C 10 20.2 20.2 10 32 10 C 43.8 10 54 20.2 54 32" className="draw" pathLength="360"></path>
+            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M48 54V12C48 8 52 4 56 4C60 4 64 8 64 12C64 16 60 20 56 20C52 20 48 16 48 12M32 54C43.8 54 54 43.8 54 32C54 20.2 43.8 10 32 10C20.2 10 10 20.2 10 32C10 43.8 20.2 54 32 54Z" className="draw" pathLength="360"></path>
         </svg>
         {/* Y */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
@@ -672,6 +672,7 @@ export default function Home() {
     
 
     
+
 
 
 
