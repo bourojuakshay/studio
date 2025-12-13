@@ -430,7 +430,7 @@ export default function Home() {
   
   const handleIntroClick = () => {
     if (appVisible) return;
-    setSpinKey(prev => prev + 1);
+    setAppVisible(true);
   };
 
   return (
@@ -452,7 +452,6 @@ export default function Home() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
             onClick={handleIntroClick}
-            onDoubleClick={() => setAppVisible(true)}
           >
              <div key={spinKey}>
                 <MoodyOLoader />
