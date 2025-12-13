@@ -437,31 +437,35 @@ body.home-active .nav-btn {
 .now-playing-card .player-controls {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+    width: 100%;
 }
 .now-playing-card .player-controls button {
     background: none;
     border: none;
     color: var(--text);
-    transition: transform .2s ease;
+    transition: transform .2s ease, color .2s ease, opacity .2s ease;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .now-playing-card .player-controls button:hover {
     transform: scale(1.1);
+    opacity: 1;
 }
 .now-playing-card .player-controls .play-main-btn {
     background: var(--page-accent);
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     display: grid;
     place-items: center;
     color: hsl(var(--background));
+    opacity: 1;
 }
 .now-playing-card .player-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
+    display: contents; /* No longer needed as a separate flex container */
 }
 
 .playlist-view {
@@ -601,16 +605,30 @@ section.page.active::before {
   position: relative;
   display: flex;
   align-items: center;
+  margin-left: auto;
 }
 .volume-slider {
   position: absolute;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-left: 12px;
+  left: 50%;
+  bottom: calc(100% + 12px);
+  transform: translateX(-50%);
   width: 100px;
   accent-color: var(--page-accent);
+  background: var(--glass-bg);
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
 }
+@media (min-width: 521px) {
+  .volume-slider {
+    left: 100%;
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 12px;
+  }
+}
+
 
 audio { display: none; }
 

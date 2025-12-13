@@ -71,19 +71,17 @@ export function MoodHero({
                             </div>
                         </div>
                         <div className="player-controls">
-                            <button onClick={handlePrev}><SkipBack size={24} /></button>
+                            <button onClick={handlePrev}><SkipBack size={20} /></button>
                             <button onClick={handlePlayPause} className="play-main-btn">
-                                {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={32} /> : <Play size={32} />}
+                                {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={24} /> : <Play size={24} />}
                             </button>
-                            <button onClick={handleNext}><SkipForward size={24}/></button>
-                        </div>
-                        <div className="player-actions">
-                            <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
-                                <Heart size={24} />
+                            <button onClick={handleNext}><SkipForward size={20}/></button>
+                             <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
+                                <Heart size={20} />
                             </button>
                             <div className="volume-control">
                                 <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
-                                    {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24} />}
+                                    {volume > 0.5 ? <Volume2 size={20} /> : <Volume1 size={20} />}
                                 </button>
                                 {isVolumeOpen && (
                                     <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
