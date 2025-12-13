@@ -118,17 +118,29 @@ const MoodyOLoader = () => {
   
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void, style?: React.CSSProperties }) => {
+  const cardStyle = {
+    ...style,
+    background: moodKey === 'create' ? 'transparent' : style.background,
+    border: moodKey === 'create' ? '1px dashed hsl(var(--border))' : 'none',
+  };
+
+  const beforeStyle = {
+    backgroundColor: moodKey === 'create' ? 'hsl(var(--primary))' : 'lightblue'
+  }
+  const afterStyle = {
+    backgroundColor: moodKey === 'create' ? 'hsl(var(--primary))' : 'lightblue'
+  }
+
   return (
-    <div className="interactive-card-container noselect" onClick={onClick}>
-      <div className="canvas">
-        {Array.from({ length: 25 }, (_, i) => (
-          <div key={i} className={`tracker tr-${i + 1}`}></div>
-        ))}
-        <div id="card" className="interactive-card" style={style}>
-          <div className="card-emoji">{emoji}</div>
-          <div className="card-title">{title}</div>
-        </div>
-      </div>
+    <div 
+      className="interactive-card"
+      style={cardStyle}
+      onClick={onClick}
+    >
+      <div className="card-content">{emoji}</div>
+      <div className="card-title-hover">{title}</div>
+      <div className="interactive-card-after" style={afterStyle}></div>
+      <div className="interactive-card-before" style={beforeStyle}></div>
     </div>
   );
 };
@@ -523,7 +535,6 @@ export default function Home() {
                         emoji={<Wand2 size={64} />}
                         title="Create Your Own"
                         onClick={() => setIsCustomMoodDialogOpen(true)}
-                        style={{ background: 'var(--glass-bg)', border: '1px dashed var(--glass-border)' }}
                       />
                     </div>
                   </div>
