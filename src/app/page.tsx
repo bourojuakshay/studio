@@ -195,23 +195,27 @@ export default function Home() {
 
   const currentTrack = nowPlaying ? tracks[nowPlaying.mood as keyof typeof tracks][nowPlaying.index] : null;
 
+  // Effect for loading the track
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (currentTrack) {
-      if (audio.src !== window.location.origin + currentTrack.src) {
-        audio.src = currentTrack.src;
-        audio.load();
+      const audio = audioRef.current;
+      if (!audio) return;
+      if (currentTrack) {
+          if (audio.src !== window.location.origin + currentTrack.src) {
+              audio.src = currentTrack.src;
+              audio.load();
+          }
       }
-      if (isPlaying) {
-        audio.play().catch(e => console.error("Audio play error:", e));
+  }, [currentTrack]);
+  
+  // Effect for playing/pausing
+  useEffect(() => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      if (isPlaying && currentTrack) {
+          audio.play().catch(e => console.error("Audio play error:", e));
       } else {
-        audio.pause();
+          audio.pause();
       }
-    } else {
-      audio.pause();
-    }
   }, [isPlaying, currentTrack]);
 
   useEffect(() => {
