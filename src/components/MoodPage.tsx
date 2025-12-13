@@ -22,6 +22,8 @@ type MoodPageProps = {
   handleLike: (e: React.MouseEvent, track: Track) => void;
   isLiked: (track: Track) => boolean;
   openPlayer: (mood: string, index: number) => void;
+  progress: { currentTime: number; duration: number; };
+  handleSeek: (time: number) => void;
 };
 
 export function MoodPage({
@@ -39,6 +41,8 @@ export function MoodPage({
   handleLike,
   isLiked,
   openPlayer,
+  progress,
+  handleSeek,
 }: MoodPageProps) {
 
   const pageVariants = {
@@ -78,6 +82,8 @@ export function MoodPage({
           handlePrev={handlePrev}
           handleLike={handleLike}
           isLiked={isLiked}
+          progress={progress}
+          handleSeek={handleSeek}
         />
         <PlaylistView
           tracks={tracks}
@@ -91,3 +97,5 @@ export function MoodPage({
     </motion.section>
   );
 }
+
+    

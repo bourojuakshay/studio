@@ -162,6 +162,7 @@ export default function Home() {
   const [appVisible, setAppVisible] = useState(false);
   const [spinKey, setSpinKey] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
+  const [progress, setProgress] = useState({ currentTime: 0, duration: 0 });
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
@@ -284,6 +285,16 @@ export default function Home() {
     }
   };
   
+  const handleTimeUpdate = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      setProgress({
+        currentTime: audio.currentTime,
+        duration: audio.duration,
+      });
+    }
+  };
+
   const handleSongEnd = () => {
     handleNext();
   };
@@ -306,6 +317,14 @@ export default function Home() {
     const prevIndex = (index - 1 + playlist.length) % playlist.length;
     setNowPlaying({ mood, index: prevIndex });
     setIsPlaying(true);
+  };
+
+  const handleSeek = (newTime: number) => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.currentTime = newTime;
+      setProgress(prev => ({...prev, currentTime: newTime}));
+    }
   };
   
   const openPlayer = (mood: string, index: number) => {
@@ -579,6 +598,8 @@ export default function Home() {
                           handleLike={handleLike}
                           isLiked={isLiked}
                           openPlayer={openPlayer}
+                          progress={progress}
+                          handleSeek={handleSeek}
                        />
                     )}
                   </AnimatePresence>
@@ -610,7 +631,12 @@ export default function Home() {
             )}
 
 
-            <audio ref={audioRef} onEnded={handleSongEnd} />
+            <audio 
+              ref={audioRef} 
+              onEnded={handleSongEnd} 
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleTimeUpdate}
+            />
 
             <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
               <DialogContent className="sheet-content">
@@ -670,19 +696,5 @@ export default function Home() {
 }
 
     
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
 
     
