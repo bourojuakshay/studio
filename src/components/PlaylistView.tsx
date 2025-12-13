@@ -28,7 +28,6 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
             transition: { 
                 duration: 0.5, 
                 ease: 'easeOut',
-                when: "beforeChildren",
                 staggerChildren: 0.05
             } 
         }
@@ -53,12 +52,12 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
     }
 
     return (
-        <motion.div className="playlist-view" variants={playlistVariants}>
+        <motion.div className="playlist-view" variants={playlistVariants} initial="hidden" animate="visible">
             <div className="playlist-header">
                 <h3>Playlist</h3>
             </div>
             <ScrollArea className="playlist-scroll-area">
-                <motion.div className="playlist-list" initial="hidden" animate="visible" variants={{}}>
+                <div className="playlist-list">
                     {tracks.map((track, index) => (
                         <motion.div key={index} variants={itemVariants}>
                             <div className={cn('playlist-list-item', { active: currentTrack?.src === track.src })} onClick={() => openPlayer(mood, index)}>
@@ -73,7 +72,7 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
                             </div>
                         </motion.div>
                     ))}
-                </motion.div>
+                </div>
             </ScrollArea>
         </motion.div>
     );
