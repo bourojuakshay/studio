@@ -22,6 +22,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { generateMood, GenerateMoodInput, GenerateMoodOutput } from '@/ai/flows/mood-generator';
 import { generateImage } from '@/ai/flows/image-generator';
 import { ThemeProvider } from '@/components/theme-provider';
+import { PersistentPlayer } from '@/components/PersistentPlayer';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -70,7 +72,7 @@ const MOOD_DEFS: { [key: string]: MoodDefinition } = {
   }
 };
 
-type Track = {
+export type Track = {
   title: string;
   artist: string;
   src: string;
@@ -124,6 +126,7 @@ const AnimatedText = ({ text, el: Wrapper = 'h1', className }) => {
 };
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }) => {
+  const cardTitle = typeof title === 'string' ? title.split('—')[0] : '';
   return (
     <div className="interactive-card-container noselect" onClick={onClick}>
       <div className="canvas">
@@ -132,7 +135,7 @@ const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }) => {
         ))}
         <div id="card" className="interactive-card" style={style}>
           <div className="card-emoji">{emoji}</div>
-          <div className="card-title">{title}</div>
+          <div className="card-title">{cardTitle}</div>
         </div>
       </div>
     </div>
@@ -208,7 +211,6 @@ export default function Home() {
       }
     } else {
       audio.pause();
-      audio.src = '';
     }
   }, [isPlaying, currentTrack]);
 
@@ -227,10 +229,12 @@ export default function Home() {
       setIsPlaying(!isPlaying);
     } else {
       const currentMood = activePage;
-      const firstTrack = tracks[currentMood as keyof typeof tracks]?.[0];
-      if (firstTrack) {
-        setNowPlaying({ mood: currentMood, index: 0 });
-        setIsPlaying(true);
+      if (currentMood !== 'home') {
+        const firstTrack = tracks[currentMood as keyof typeof tracks]?.[0];
+        if (firstTrack) {
+          setNowPlaying({ mood: currentMood, index: 0 });
+          setIsPlaying(true);
+        }
       }
     }
   };
@@ -288,7 +292,9 @@ export default function Home() {
   const openPage = (id: string) => {
     setActivePage(id);
     setIsMenuSheetOpen(false);
-    if(nowPlaying && nowPlaying.mood !== id) {
+    if(id === 'home' || (nowPlaying && nowPlaying.mood !== id)) {
+        // Don't stop music when going home
+    } else if (!nowPlaying) {
       setIsPlaying(false);
     }
   };
@@ -512,7 +518,7 @@ export default function Home() {
                           key={key}
                           moodKey={key}
                           emoji={emoji}
-                          title={title.split('—')[0]}
+                          title={title}
                           onClick={() => openPage(key)}
                           style={{ background: bg }}
                         />
@@ -604,39 +610,25 @@ export default function Home() {
             <footer>
               <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
             </footer>
+            
+            <AnimatePresence>
+                {nowPlaying && currentTrack && (
+                    <PersistentPlayer
+                        track={currentTrack}
+                        isPlaying={isPlaying}
+                        playlist={tracks[nowPlaying.mood]}
+                        handlePlayPause={handlePlayPause}
+                        handleNext={handleNext}
+                        handlePrev={handlePrev}
+                        handleLike={handleLike}
+                        isLiked={isLiked}
+                        openPlayer={openPlayer}
+                        nowPlaying={nowPlaying}
+                    />
+                )}
+            </AnimatePresence>
 
-            {nowPlaying && currentTrack && (
-              <div className="player-dialog-overlay" style={{display:'none'}}>
-                  <div className="player-dialog glass">
-                      <button onClick={closePlayer} className="player-close-btn"><X size={24} /></button>
-                      <Image className="player-cover" src={currentTrack.cover} alt={currentTrack.title} width={400} height={400} data-ai-hint="song cover" unoptimized={currentTrack.cover.startsWith('data:')} />
-                      <div className="player-info">
-                          <h3>{currentTrack.title}</h3>
-                          <p>{currentTrack.artist}</p>
-                      </div>
-                        <div className="player-controls">
-                          <button onClick={handlePrev}><SkipBack /></button>
-                          <button onClick={handlePlayPause} className="play-main-btn">
-                              {isPlaying ? <Pause size={32} /> : <Play size={32} />}
-                          </button>
-                          <button onClick={handleNext}><SkipForward /></button>
-                      </div>
-                        <div className="player-actions">
-                          <button onClick={(e) => handleLike(e, { ...currentTrack, mood: nowPlaying.mood, index: nowPlaying.index })} className={cn('like-btn', { 'liked': isLiked(currentTrack) })}>
-                              <Heart size={24} />
-                          </button>
-                           <div className="volume-control">
-                             <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
-                               {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24} />}
-                             </button>
-                             {isVolumeOpen && (
-                               <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider"/>
-                             )}
-                           </div>
-                      </div>
-                  </div>
-              </div>
-            )}
+
             <audio ref={audioRef} onEnded={handleSongEnd} />
 
             <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
