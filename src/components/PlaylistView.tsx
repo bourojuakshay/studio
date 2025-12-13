@@ -4,7 +4,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import { Heart, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Track } from '@/app/lib/mood-definitions';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -66,14 +66,19 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
                     {tracks.map((track, index) => (
                         <motion.div key={index} variants={itemVariants}>
                             <div className={cn('playlist-list-item', { active: currentTrack?.src === track.src })} onClick={() => openPlayer(mood, index)}>
-                                <Image className="playlist-list-item-cover" src={track.cover} alt={`${track.title} cover`} width={48} height={48} data-ai-hint="song cover" unoptimized={track.cover.startsWith('data:')} />
+                                <Image className="playlist-list-item-cover" src={track.cover} alt={`${track.title} cover`} width={40} height={40} data-ai-hint="song cover" unoptimized={track.cover.startsWith('data:')} />
                                 <div className="playlist-list-item-info">
                                     <div className="title">{track.title}</div>
                                     <div className="artist">{track.artist}</div>
                                 </div>
-                                <button onClick={(e) => handleLike(e, { ...track, mood: mood, index: index })} className={cn('like-btn control-btn', { 'liked': isLiked(track) })}>
-                                    <Heart size={18} />
-                                </button>
+                                <div className="actions">
+                                     <button onClick={(e) => handleLike(e, { ...track, mood: mood, index: index })} className={cn('like-btn control-btn', { 'liked': isLiked(track) })}>
+                                        <Heart size={18} />
+                                    </button>
+                                    <button onClick={(e) => e.stopPropagation()} className="control-btn more-btn">
+                                        <MoreVertical size={18} />
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     ))}
