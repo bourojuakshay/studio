@@ -102,48 +102,19 @@ const STATIC_TRACKS = {
   depression: SAMPLE_TRACKS(12)
 };
 
-const AnimatedText = ({ text, el: Wrapper = 'p', className, variants }) => {
-  const defaultVariants = {
-    hidden: { opacity: 0 },
-    visible: (i = 1) => ({
-      opacity: 1,
-      transition: { staggerChildren: 0.08, delayChildren: i * 0 }
-    })
-  };
-
-  const childVariants = {
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 100,
-      }
-    },
-    hidden: {
-      opacity: 0,
-      y: 20,
-      transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 100,
-      }
-    }
-  };
-
+const AnimatedText = ({ text, el: Wrapper = 'h1', className }) => {
   return (
-    <Wrapper
-      className={className}
-      variants={variants || defaultVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <Wrapper className={className}>
       {text.split("").map((char, index) => (
         <motion.span
           key={index}
-          style={{ display: 'inline-block' }}
-          variants={childVariants}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: index * 0.05,
+            duration: 0.5,
+            ease: "easeOut"
+          }}
         >
           {char === " " ? "\u00A0" : char}
         </motion.span>
@@ -426,29 +397,30 @@ export default function Home() {
             className="intro-screen"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
+            onClick={() => setAppVisible(true)}
           >
             <div className="intro-bg-elements">
                 <motion.div 
                     className="intro-bg-element" 
-                    style={{ top: '10%', left: '15%', width: '150px', height: '150px' }}
+                    style={{ top: '10%', left: '15%', width: '150px', height: '150px', '--orb-color': '#3b82f6' } as React.CSSProperties}
                     animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
                     transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <motion.div 
                     className="intro-bg-element" 
-                    style={{ top: '60%', left: '5%', width: '80px', height: '80px' }}
+                    style={{ top: '60%', left: '5%', width: '80px', height: '80px', '--orb-color': '#8b5cf6' } as React.CSSProperties}
                     animate={{ y: [0, 15, 0], x: [0, 10, 0] }}
                     transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
                 />
                 <motion.div 
                     className="intro-bg-element" 
-                    style={{ top: '25%', left: '80%', width: '120px', height: '120px' }}
+                    style={{ top: '25%', left: '80%', width: '120px', height: '120px', '--orb-color': '#ec4899' } as React.CSSProperties}
                     animate={{ y: [0, -10, 0], x: [0, -15, 0] }}
                     transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <motion.div 
                     className="intro-bg-element" 
-                    style={{ top: '70%', left: '75%', width: '60px', height: '60px' }}
+                    style={{ top: '70%', left: '75%', width: '60px', height: '60px', '--orb-color': '#10b981' } as React.CSSProperties}
                     animate={{ y: [0, 25, 0] }}
                     transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                 />
@@ -462,16 +434,6 @@ export default function Home() {
                 >
                   AI-Generated Soundscapes
                 </motion.p>
-                <motion.button 
-                  className="intro-enter-btn"
-                  onClick={() => setAppVisible(true)}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1, transition: { duration: 0.8, delay: 1.2 } }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Enter
-                </motion.button>
             </div>
           </motion.div>
         )}
