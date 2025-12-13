@@ -34,27 +34,81 @@ import { useToast } from '@/hooks/use-toast';
 
 export const dynamic = 'force-dynamic';
 
-const MoodyOLoader = () => (
-    <div className="intro-screen">
-        <svg
-            className="loader"
-            width="250"
-            height="150"
-            viewBox="0 0 500 200"
-            xmlns="http://www.w3.org/2000/svg"
-            stroke="hsl(var(--primary))"
-            strokeWidth="4"
-            fill="none"
-        >
-            <path className="draw" d="M 50 150 Q 50 50 150 50 Q 250 50 250 150" />
-            <path className="draw" d="M 150 50 Q 150 150 250 150" />
-            <path className="draw" d="M 250 150 Q 350 150 350 50" />
-            <path className="draw" d="M 350 50 Q 450 50 450 150" />
-            <path className="draw" d="M 100 150 C 150 100 200 100 250 150" />
-            <path className="draw" d="M 300 150 C 350 100 400 100 450 150" />
-        </svg>
-    </div>
-);
+const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
+  const logoText = "MoodyO".split("");
+
+  const containerVariants = {
+    enter: {
+      transition: {
+        staggerChildren: 0.06, // 60ms delay
+      },
+    },
+    exit: {
+      transition: {
+        staggerChildren: 0.06,
+        staggerDirection: -1,
+      },
+    },
+  };
+
+  const letterVariants = {
+    initial: {
+      opacity: 0,
+      y: 20,
+      rotate: -5,
+      scale: 0.95,
+    },
+    enter: {
+      opacity: 1,
+      y: 0,
+      rotate: 0,
+      scale: 1,
+      transition: {
+        duration: 0.35, // 350ms
+        ease: [0.22, 1, 0.36, 1], // cubic-bezier(0.22, 1, 0.36, 1)
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: 20,
+      rotate: 5,
+      scale: 0.95,
+      transition: {
+        duration: 0.35,
+        ease: [0.76, 0, 0.24, 1], // ease-in-out-quart
+      },
+    },
+  };
+  
+  const taglineVariants = {
+    initial: { opacity: 0 },
+    enter: { opacity: 1, transition: { delay: 0.5, duration: 0.5 } },
+    exit: { opacity: 0, transition: { duration: 0.3 } }
+  }
+
+  return (
+    <motion.div
+      className="intro-screen-v2"
+      onClick={onExit}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      variants={{ enter: { transition: { staggerChildren: 0.1 } }, exit: {} }}
+    >
+      <motion.div className="intro-logo-text" variants={containerVariants}>
+        {logoText.map((letter, index) => (
+          <motion.span key={index} variants={letterVariants}>
+            {letter}
+          </motion.span>
+        ))}
+      </motion.div>
+      <motion.p className="intro-tagline" variants={taglineVariants}>
+        MOOD-DRIVEN AUDIO EXPERIENCE
+      </motion.p>
+    </motion.div>
+  );
+};
+
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void, style?: React.CSSProperties }) => {
   const cardStyle = {
@@ -111,13 +165,19 @@ export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
   const [progress, setProgress] = useState({ currentTime: 0, duration: 0 });
   const [authForm, setAuthForm] = useState({ email: '', password: '', mode: 'signin' });
+  const [isExiting, setIsExiting] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const homePageRef = useRef<HTMLElement>(null);
-  const introRef = useRef<HTMLDivElement>(null);
 
+  const handleExit = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+        setShowIntro(false);
+    }, 1000); // Wait for exit animation
+  };
 
   useEffect(() => {
     if (firestoreSongs) {
@@ -151,18 +211,6 @@ export default function Home() {
       initiateAnonymousSignIn(auth);
     }
   }, [isUserLoading, user, auth]);
-
-  useEffect(() => {
-    if (isMounted) {
-      const timer = setTimeout(() => {
-        if (introRef.current) {
-            introRef.current.classList.add('hidden');
-        }
-        setShowIntro(false);
-      }, 4000); // Same as animation duration + delay
-      return () => clearTimeout(timer);
-    }
-  }, [isMounted]);
 
   // Custom Cursor Animation
   useEffect(() => {
@@ -422,8 +470,12 @@ export default function Home() {
     </Accordion>
   );
   
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   if (!isMounted) {
-    return <div ref={introRef}><MoodyOLoader /></div>;
+    return <AnimatePresence>{showIntro && <MoodyOLoader onExit={handleExit} />}</AnimatePresence>;
   }
 
   const isAuthFormValid = authForm.email && authForm.password;
@@ -432,7 +484,7 @@ export default function Home() {
   return (
     <>
       <AnimatePresence>
-        {showIntro && <div ref={introRef}><MoodyOLoader /></div>}
+        {showIntro && <MoodyOLoader onExit={handleExit} />}
       </AnimatePresence>
       
       <ThemeProvider 

@@ -133,6 +133,62 @@ body.custom-theme-active {
   --text: hsl(var(--foreground));
 }
 
+.intro-screen-v2 {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background-color: #0A0A0A;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  perspective: 800px;
+}
+
+.intro-screen-v2::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, hsla(var(--primary), 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(50px);
+  animation: pulse-glow-intro 6s infinite ease-in-out;
+  opacity: 0;
+  animation-delay: 0.5s; /* Delay glow until text animation is done */
+}
+
+@keyframes pulse-glow-intro {
+  0%, 100% { transform: scale(0.9); opacity: 0; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+[data-state="enter"] .intro-screen-v2::before {
+  animation-play-state: running;
+}
+
+
+.intro-logo-text {
+  display: flex;
+  font-size: 4rem;
+  font-weight: 800;
+  color: hsl(var(--primary));
+  background-image: linear-gradient(45deg, hsl(var(--primary)) 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.intro-tagline {
+  position: absolute;
+  top: calc(50% + 40px); /* Position below logo */
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: hsl(var(--foreground) / 0.5);
+  text-transform: uppercase;
+}
+
 
 /* app shell */
 .app{
