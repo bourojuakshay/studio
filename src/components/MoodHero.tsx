@@ -60,8 +60,15 @@ export function MoodHero({
                     <Image className="player-cover" src={displayTrack.cover} alt={displayTrack.title} width={400} height={400} data-ai-hint="song cover" unoptimized={displayTrack.cover.startsWith('data:')} />
                     <div className="w-full">
                         <div className="player-info">
-                            <h3>{displayTrack.title}</h3>
-                            <p>{displayTrack.artist}</p>
+                            {(isPlaying && nowPlaying?.mood === mood) && (
+                                <div className="sound-wave">
+                                    <span /><span /><span />
+                                </div>
+                            )}
+                            <div>
+                                <h3>{displayTrack.title}</h3>
+                                <p>{displayTrack.artist}</p>
+                            </div>
                         </div>
                         <div className="player-controls">
                             <button onClick={handlePrev}><SkipBack /></button>
