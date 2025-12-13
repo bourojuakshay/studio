@@ -1,7 +1,7 @@
 
 'use a client';
 
-import { collection, addDoc, updateDoc, deleteDoc, doc, type Firestore, query, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, type Firestore, query, onSnapshot, where, getDocs, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from './error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from './errors';
 
@@ -13,6 +13,16 @@ export interface Song {
     cover: string;
     mood: string;
 }
+
+export interface UserSongPreference {
+    id?: string;
+    userId: string;
+    songId: string;
+    liked: boolean;
+    // You could add other preferences here, like custom moods, ratings, etc.
+}
+
+// Functions for the global 'songs' collection (Admin actions)
 
 export function addSong(firestore: Firestore, song: Omit<Song, 'id'>) {
     const songsCollection = collection(firestore, 'songs');
@@ -30,7 +40,7 @@ export function addSong(firestore: Firestore, song: Omit<Song, 'id'>) {
         });
 }
 
-export function updateSong(firestore: Firestore, songId: string, song: Omit<Song, 'id'>) {
+export function updateSong(firestore: Firestore, songId: string, song: Partial<Omit<Song, 'id'>>) {
     const songDoc = doc(firestore, 'songs', songId);
 
     return updateDoc(songDoc, song)
@@ -88,4 +98,68 @@ export function getSongs(
     return unsubscribe;
 }
 
-    
+
+// Functions for user-specific song preferences
+
+export async function setUserSongPreference(firestore: Firestore, userId: string, songId: string, liked: boolean) {
+    if (!userId || !songId) return;
+
+    const preferenceCollection = collection(firestore, `users/${userId}/song_preferences`);
+    const q = query(preferenceCollection, where("songId", "==", songId));
+
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+        // No preference doc exists, so create a new one
+        const newPrefRef = doc(preferenceCollection);
+        const preferenceData: UserSongPreference = { id: newPrefRef.id, userId, songId, liked };
+        
+        setDoc(newPrefRef, preferenceData).catch((serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: newPrefRef.path,
+                operation: 'create',
+                requestResourceData: preferenceData,
+            } satisfies SecurityRuleContext);
+            errorEmitter.emit('permission-error', permissionError);
+        });
+    } else {
+        // Preference doc exists, so update it
+        const docToUpdate = querySnapshot.docs[0];
+        updateDoc(docToUpdate.ref, { liked }).catch((serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: docToUpdate.ref.path,
+                operation: 'update',
+                requestResourceData: { liked },
+            } satisfies SecurityRuleContext);
+            errorEmitter.emit('permission-error', permissionError);
+        });
+    }
+}
+
+export function getUserSongPreferences(
+    firestore: Firestore,
+    userId: string,
+    callback: (preferences: UserSongPreference[]) => void,
+    onError: (error: Error) => void
+) {
+    const preferenceCollection = collection(firestore, `users/${userId}/song_preferences`);
+    const q = query(preferenceCollection);
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const preferences: UserSongPreference[] = [];
+        querySnapshot.forEach((doc) => {
+            preferences.push({ id: doc.id, ...doc.data() } as UserSongPreference);
+        });
+        callback(preferences);
+    }, (error) => {
+        const permissionError = new FirestorePermissionError({
+            path: preferenceCollection.path,
+            operation: 'list',
+        } satisfies SecurityRuleContext);
+        
+        errorEmitter.emit('permission-error', permissionError);
+        onError(permissionError);
+    });
+
+    return unsubscribe;
+}

@@ -1,151 +1,42 @@
-/**
- * This ruleset enforces a strict user-ownership security model for the MoodyO application.
- *
- * Core Philosophy:
- * All user-generated data, including profiles, playlists, and song preferences, is considered
- * private and is accessible only by the user who created it. There are no public collections
- * or admin roles defined in this ruleset.
- *
- * Data Structure:
- * The data is organized hierarchically under the `/users/{userId}` path. Each user's data,
- * such as playlists (`/playlists`) and preferences (`/song_preferences`), is stored in
- * subcollections within their own user document tree. This structure inherently links data
- * to its owner.
- *
- * Key Security Decisions:
- * - User Isolation: A user can only access documents located under their own unique user ID (`/users/{request.auth.uid}`).
- * - No Public Listing: Listing all users from the root `/users` collection is explicitly disallowed to protect user privacy.
- * - Path-Based Security: Authorization decisions are made primarily using the document's path, which is efficient and avoids costly `get` or `exists` calls to other documents.
- * - Relational Integrity: On document creation, rules ensure that internal ID fields (e.g., `userId`) match the user ID in the document's path, enforcing data consistency. These IDs are immutable on update.
- */
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    //-------------------------------------------------------------------------
     // Helper Functions
-    //-------------------------------------------------------------------------
-
-    /**
-     * Checks if the user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Checks if the currently authenticated user's UID matches the given userId.
-     * This is the primary function for establishing document ownership.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-
-    /**
-     * A robust check for update and delete operations.
-     * Ensures the document exists and the user is the owner.
-     */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
+    
+    // In a real app, you would have an admin check, e.g., request.auth.token.isAdmin == true
+    // For this prototype, we'll allow any authenticated user to act as an admin for the songs collection.
+    function isAdmin() {
+      return isSignedIn();
     }
 
-    /**
-     * Validates that the User document being created has an `id` field
-     * that matches the document's ID (`userId`).
-     */
-    function hasValidUserData(userId) {
-      return request.resource.data.id == userId;
-    }
-
-    /**
-     * Enforces immutability of the User's `id` field during updates.
-     */
-    function isUserDataImmutable() {
-      return request.resource.data.id == resource.data.id;
-    }
-
-    /**
-     * Validates that the Playlist document being created has a `userId` field
-     * that matches the owner's ID from the path.
-     */
-    function hasValidPlaylistData(userId) {
-      return request.resource.data.userId == userId;
-    }
-
-    /**
-     * Enforces immutability of the Playlist's `userId` field during updates.
-     */
-    function isPlaylistDataImmutable() {
-      return request.resource.data.userId == resource.data.userId;
-    }
-
-    /**
-     * Validates that the UserSongPreference document being created has a `userId` field
-     * that matches the owner's ID from the path.
-     */
-    function hasValidPreferenceData(userId) {
-      return request.resource.data.userId == userId;
-    }
-
-    /**
-     * Enforces immutability of the UserSongPreference's `userId` field during updates.
-     */
-    function isPreferenceDataImmutable() {
-      return request.resource.data.userId == resource.data.userId;
-    }
-
-
-    //-------------------------------------------------------------------------
-    // Collection Rules
-    //-------------------------------------------------------------------------
-
-    /**
-     * @description Controls access to a user's profile document.
-     * @path /users/{userId}
-     * @allow (get, update, delete) An authenticated user `user_abc` accesses their own document at `/users/user_abc`.
-     * @allow (create) An authenticated user `user_abc` creates their own profile document for the first time at `/users/user_abc`.
-     * @deny (list) Any user, authenticated or not, tries to list all documents in the `/users` collection.
-     * @deny (get) User `user_xyz` tries to read the profile of `user_abc` at `/users/user_abc`.
-     * @principle Restricts access to a user's own data tree and prevents enumeration of all application users.
-     */
+    // User Profile Rules
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if isOwner(userId) && hasValidUserData(userId);
-      allow update: if isExistingOwner(userId) && isUserDataImmutable();
-      allow delete: if isExistingOwner(userId);
+      allow read, update, delete: if isOwner(userId);
+      allow create: if isSignedIn();
+    }
 
-      /**
-       * @description Controls access to a user's private playlists.
-       * @path /users/{userId}/playlists/{playlistId}
-       * @allow (get, list, create, update, delete) User `user_abc` manages their own playlists at `/users/user_abc/playlists/...`.
-       * @deny (get) User `user_xyz` attempts to read a playlist at `/users/user_abc/playlists/playlist_123`.
-       * @deny (list) User `user_xyz` attempts to list playlists at `/users/user_abc/playlists`.
-       * @principle Enforces strict ownership for a user's private subcollections.
-       */
-      match /playlists/{playlistId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidPlaylistData(userId);
-        allow update: if isExistingOwner(userId) && isPlaylistDataImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
-
-      /**
-       * @description Controls access to a user's private song preferences (likes/moods).
-       * @path /users/{userId}/song_preferences/{songPreferenceId}
-       * @allow (get, list, create, update, delete) User `user_abc` manages their own song preferences at `/users/user_abc/song_preferences/...`.
-       * @deny (get) User `user_xyz` attempts to read a preference at `/users/user_abc/song_preferences/pref_123`.
-       * @deny (list) User `user_xyz` attempts to list preferences at `/users/user_abc/song_preferences`.
-       * @principle Enforces strict ownership for a user's private subcollections.
-       */
-      match /song_preferences/{songPreferenceId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidPreferenceData(userId);
-        allow update: if isExistingOwner(userId) && isPreferenceDataImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
+    // User-specific Subcollection Rules (Playlists, Preferences)
+    match /users/{userId}/{collection}/{docId} {
+      allow read, list, create, update, delete: if isOwner(userId);
+    }
+    
+    // Global Songs Collection Rules
+    match /songs/{songId} {
+        // Any authenticated user can read the list of songs
+        allow get, list: if isSignedIn();
+        
+        // Only "admins" can create, update, or delete songs
+        allow create, update, delete: if isAdmin();
     }
   }
 }

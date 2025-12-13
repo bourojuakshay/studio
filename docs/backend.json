@@ -1,7 +1,6 @@
 {
   "entities": {
     "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
       "description": "Represents a user of the MoodyO application.",
@@ -18,20 +17,11 @@
         "displayName": {
           "type": "string",
           "description": "User's display name."
-        },
-        "photoURL": {
-          "type": "string",
-          "description": "URL of the user's profile photo.",
-          "format": "uri"
         }
       },
-      "required": [
-        "id",
-        "email"
-      ]
+      "required": ["id", "email"]
     },
     "Playlist": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Playlist",
       "type": "object",
       "description": "Represents a user-created playlist.",
@@ -51,19 +41,12 @@
         "songIds": {
           "type": "array",
           "description": "References to Songs in this playlist. (Relationship: Playlist N:N Song)",
-          "items": {
-            "type": "string"
-          }
+          "items": { "type": "string" }
         }
       },
-      "required": [
-        "id",
-        "userId",
-        "name"
-      ]
+      "required": ["id", "userId", "name"]
     },
     "Song": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Song",
       "type": "object",
       "description": "Represents a song in the application.",
@@ -80,31 +63,27 @@
           "type": "string",
           "description": "Artist of the song."
         },
-        "audioURL": {
+        "src": {
           "type": "string",
           "description": "URL of the audio file.",
           "format": "uri"
         },
-        "moods": {
-          "type": "array",
-          "description": "Array of moods associated with the song.",
-          "items": {
-            "type": "string"
-          }
+        "cover": {
+          "type": "string",
+          "description": "URL of the cover art.",
+          "format": "uri"
+        },
+        "mood": {
+          "type": "string",
+          "description": "The primary mood associated with the song."
         }
       },
-      "required": [
-        "id",
-        "title",
-        "artist",
-        "audioURL"
-      ]
+      "required": ["id", "title", "artist", "src", "cover", "mood"]
     },
     "UserSongPreference": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "UserSongPreference",
       "type": "object",
-      "description": "Represents a user's preference for a particular song.",
+      "description": "Represents a user's preference for a particular song, e.g., a 'like'.",
       "properties": {
         "id": {
           "type": "string",
@@ -118,20 +97,12 @@
           "type": "string",
           "description": "Reference to Song. (Relationship: Song 1:N UserSongPreference)"
         },
-        "like": {
+        "liked": {
           "type": "boolean",
-          "description": "Whether the user likes the song."
-        },
-        "mood": {
-          "type": "string",
-          "description": "The mood associated with the user's preference for the song."
+          "description": "Indicates if the user has liked the song."
         }
       },
-      "required": [
-        "id",
-        "userId",
-        "songId"
-      ]
+      "required": ["id", "userId", "songId", "liked"]
     }
   },
   "auth": {
@@ -146,59 +117,34 @@
         "path": "/users/{userId}",
         "definition": {
           "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profiles. User data is private; only the authenticated user can access their own profile.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
+          "schema": { "$ref": "#/backend/entities/User" },
+          "description": "Stores user profiles. Data is private; only the authenticated user can access their own profile."
         }
       },
       {
         "path": "/users/{userId}/playlists/{playlistId}",
         "definition": {
           "entityName": "Playlist",
-          "schema": {
-            "$ref": "#/backend/entities/Playlist"
-          },
-          "description": "Stores playlists created by each user. Playlists are private; only the owning user can manage them.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who owns the playlist."
-            },
-            {
-              "name": "playlistId",
-              "description": "The unique identifier of the playlist."
-            }
-          ]
+          "schema": { "$ref": "#/backend/entities/Playlist" },
+          "description": "Stores user-created playlists. Data is private to the owning user."
         }
       },
       {
         "path": "/users/{userId}/song_preferences/{songPreferenceId}",
         "definition": {
           "entityName": "UserSongPreference",
-          "schema": {
-            "$ref": "#/backend/entities/UserSongPreference"
-          },
-          "description": "Stores user's song preferences (likes, moods). Preferences are private; only the owning user can manage them.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who owns the song preference."
-            },
-            {
-              "name": "songPreferenceId",
-              "description": "The unique identifier of the song preference."
-            }
-          ]
+          "schema": { "$ref": "#/backend/entities/UserSongPreference" },
+          "description": "Stores a user's song preferences (e.g., likes). Data is private to the owning user."
+        }
+      },
+      {
+        "path": "/songs/{songId}",
+        "definition": {
+          "entityName": "Song",
+          "schema": { "$ref": "#/backend/entities/Song" },
+          "description": "Stores all available songs. This collection is public to read for all authenticated users, but writable only by admins."
         }
       }
-    ],
-    "reasoning": "The Firestore structure is designed to provide a secure and scalable solution for MoodyO, focusing on user-owned data and personalized experiences. By adhering to the principle of Authorization Independence, we avoid hierarchical authorization dependencies, enabling atomic operations and simplifying security rules. The structure facilitates clear authorization intent and supports secure list operations.\n\n1.  **User Data:** User profiles are stored in `/users/{userId}`.  This path-based ownership ensures only the authenticated user can access their own data.  No denormalization is needed here because access control is simply based on the `userId`.\n2.  **Playlists:** Playlists are stored in `/users/{userId}/playlists/{playlistId}`.  This hierarchical structure clearly establishes the relationship between users and their playlists, providing a secure and easily understandable ownership model.\n3. **User Song Preferences:** User Song Preferences are stored in `/users/{userId}/song_preferences/{songPreferenceId}`.  This path-based ownership ensures only the authenticated user can access their preferences. No denormalization is needed here because access control is simply based on the `userId`.\n\nThis design allows straightforward security rules: users can only read/write data under their own `userId` path.  The hierarchical structure clearly defines ownership, enabling secure `list` operations (QAPs) by preventing unauthorized access to other users' data.  Authorization Independence is achieved via path-based ownership, eliminating the need for `get()` calls in security rules. No membership maps or role collections are needed."
+    ]
   }
 }

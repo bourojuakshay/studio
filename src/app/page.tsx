@@ -6,7 +6,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, Wand2, Loader, Home as HomeIcon, Github, User } from 'lucide-react';
+import { Menu, Wand2, Loader, Home as HomeIcon, Github, User, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -25,8 +25,12 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { PersistentPlayer } from '@/components/PersistentPlayer';
 import { MoodPage } from '@/components/MoodPage';
 import { useSongs } from '@/hooks/use-songs';
-import type { Song } from '@/firebase/firestore';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
+import { setUserSongPreference, type Song } from '@/firebase/firestore';
+import { useAuth, useFirestore, useUser } from '@/firebase';
+import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
 import { MOOD_DEFS, type MoodDefinition, type Track } from '@/app/lib/mood-definitions';
+import { useToast } from '@/hooks/use-toast';
 
 
 export const dynamic = 'force-dynamic';
@@ -39,12 +43,6 @@ const SAMPLE_TRACKS = (baseIdx = 1): Track[] => Array.from({ length: 10 }, (_, i
 }));
 
 const happyTracks = SAMPLE_TRACKS(0);
-happyTracks[0] = {
-  title: 'Suvvi Suvvi',
-  artist: 'Local Artist',
-  src: '/audio/suvvi-suvvi.mp3',
-  cover: `https://picsum.photos/seed/h-local/600/600`
-};
 
 const STATIC_TRACKS: Record<string, Track[]> = {
   happy: happyTracks,
@@ -153,16 +151,27 @@ export default function Home() {
   const [nowPlaying, setNowPlaying] = useState<{ mood: string; index: number } | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMenuSheetOpen, setIsMenuSheetOpen] = useState(false);
-  const [likedSongs, setLikedSongs] = useState<Track[]>([]);
+  const [isAuthSheetOpen, setIsAuthSheetOpen] = useState(false);
+  
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+  const auth = useAuth();
+  const { toast } = useToast();
+  
+  const { preferences: likedSongPrefs } = useUserPreferences(user?.uid);
+  const { songs: firestoreSongs } = useSongs();
+  
+  const [tracks, setTracks] = useState<Record<string, Track[]>>(STATIC_TRACKS);
+  
   const [isCustomMoodDialogOpen, setIsCustomMoodDialogOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [customMoods, setCustomMoods] = useState<Record<string, MoodDefinition>>({});
   const [customMoodFormData, setCustomMoodFormData] = useState({ name: '', emoji: '', description: '' });
   const [volume, setVolume] = useState(0.75);
   const [appVisible, setAppVisible] = useState(false);
-  const [spinKey, setSpinKey] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
   const [progress, setProgress] = useState({ currentTime: 0, duration: 0 });
+  const [authForm, setAuthForm] = useState({ email: '', password: '', mode: 'signin' });
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
@@ -171,15 +180,11 @@ export default function Home() {
   const mainAppRef = useRef<HTMLDivElement>(null);
   const introClickedRef = useRef(false);
 
-  const { songs: firestoreSongs } = useSongs();
-  const [tracks, setTracks] = useState<Record<string, Track[]>>(STATIC_TRACKS);
-
   useEffect(() => {
     if (firestoreSongs) {
       setTracks(prevTracks => {
-        // Start with a fresh copy of the static tracks
-        const newTracks = JSON.parse(JSON.stringify(STATIC_TRACKS));
-        
+        const newTracks: Record<string, Track[]> = {};
+  
         // Group firestore songs by mood
         const firestoreSongsByMood: Record<string, Song[]> = {};
         firestoreSongs.forEach(song => {
@@ -188,21 +193,17 @@ export default function Home() {
           }
           firestoreSongsByMood[song.mood].push(song);
         });
-
-        // Prepend firestore songs to the appropriate mood playlist
-        for (const mood in firestoreSongsByMood) {
-          if (newTracks[mood]) {
-            const existingSrcs = new Set(newTracks[mood].map((t: Track) => t.src));
-            const songsToAdd = firestoreSongsByMood[mood]
-              .filter(song => !existingSrcs.has(song.src))
-              .map(song => song as Track);
-            
-            newTracks[mood].unshift(...songsToAdd);
-          } else {
-            newTracks[mood] = firestoreSongsByMood[mood].map(song => song as Track);
-          }
-        }
-        
+  
+        // Create playlists for all defined moods
+        Object.keys(MOOD_DEFS).forEach(moodKey => {
+          const staticSongsForMood = STATIC_TRACKS[moodKey] || [];
+          const firestoreSongsForMood = firestoreSongsByMood[moodKey] || [];
+          // Prepend firestore songs to static songs, avoiding duplicates
+          const combined = [...firestoreSongsForMood, ...staticSongsForMood];
+          const uniqueSongs = Array.from(new Map(combined.map(s => [s.id || s.src, s])).values());
+          newTracks[moodKey] = uniqueSongs;
+        });
+  
         return newTracks;
       });
     }
@@ -243,12 +244,12 @@ export default function Home() {
     const audio = audioRef.current;
     if (!audio) return;
   
-    if (currentTrack && currentTrack.src) {
-      const newSrc = currentTrack.src.startsWith('http') ? currentTrack.src : window.location.origin + currentTrack.src;
-      if (audio.src !== newSrc) {
-        audio.src = newSrc;
+    if (currentTrack?.src) {
+        audio.src = currentTrack.src;
         audio.load();
-      }
+        if (isPlaying) {
+          audio.play().catch(e => console.error("Audio play error:", e));
+        }
     }
   }, [currentTrack]);
   
@@ -256,12 +257,12 @@ export default function Home() {
   useEffect(() => {
       const audio = audioRef.current;
       if (!audio) return;
-      if (isPlaying && currentTrack) {
+      if (isPlaying) {
           audio.play().catch(e => console.error("Audio play error:", e));
       } else {
           audio.pause();
       }
-  }, [isPlaying, currentTrack]);
+  }, [isPlaying]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -271,9 +272,6 @@ export default function Home() {
   }, [volume]);
   
   const handlePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-  
     if (nowPlaying) {
       setIsPlaying(!isPlaying);
     } else {
@@ -333,24 +331,26 @@ export default function Home() {
   };
 
   const isLiked = (track: Track) => {
-    return likedSongs.some(likedTrack => likedTrack.src === track.src);
+    if (!track.id) return false;
+    return likedSongPrefs.some(pref => pref.songId === track.id && pref.liked);
   }
 
   const handleLike = (e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
-    const target = e.currentTarget;
-    gsap.fromTo(target, { scale: 1 }, { scale: 1.3, duration: 0.2, ease: 'back.out(1.7)', yoyo: true, repeat: 1 });
+    if (!user) {
+        setIsAuthSheetOpen(true);
+        toast({
+            title: 'Please sign in',
+            description: 'You need to be signed in to like songs.',
+        });
+        return;
+    }
+    if (!track.id) return;
 
-    setLikedSongs(prev => {
-      if (isLiked(track)) {
-        return prev.filter(likedTrack => likedTrack.src !== track.src);
-      } else {
-        const playlist = tracks[track.mood as keyof typeof tracks];
-        const trackIndex = playlist?.findIndex(t => t.src === track.src) ?? -1;
-        const trackWithContext = { ...track, mood: track.mood || nowPlaying?.mood, index: track.index ?? trackIndex };
-        return [...prev, trackWithContext];
-      }
-    });
+    gsap.fromTo(e.currentTarget, { scale: 1 }, { scale: 1.3, duration: 0.2, ease: 'back.out(1.7)', yoyo: true, repeat: 1 });
+
+    const currentlyLiked = isLiked(track);
+    setUserSongPreference(firestore, user.uid, track.id, !currentlyLiked);
   }
 
   const openPage = (id: string) => {
@@ -427,19 +427,35 @@ export default function Home() {
     }
   };
   
+  const handleAuthSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (authForm.mode === 'signin') {
+        initiateEmailSignIn(auth, authForm.email, authForm.password);
+    } else {
+        initiateEmailSignUp(auth, authForm.email, authForm.password);
+    }
+    toast({
+        title: 'Check your email',
+        description: `An email has been sent to ${authForm.email}`,
+    });
+    setIsAuthSheetOpen(false);
+};
+
   const allMoods = { ...MOOD_DEFS, ...customMoods };
-  const isFormValid = customMoodFormData.name && customMoodFormData.emoji && customMoodFormData.description;
+  const likedSongs = firestoreSongs.filter(isLiked);
 
   const NavMenu = () => (
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="item-1">
         <AccordionTrigger className="accordion-trigger">My Playlist</AccordionTrigger>
         <AccordionContent>
-          {likedSongs.length > 0 ? (
+          {!user ? (
+            <p className="px-1 text-sm opacity-80">Sign in to see your liked songs.</p>
+          ) : likedSongs.length > 0 ? (
             <ul className="mobile-menu-items">
               {likedSongs.map((track, index) => (
                 <li key={index}>
-                  <a href="#" className="playlist-item" onClick={(e) => { e.preventDefault(); if (track.mood && track.index !== undefined) openPlayer(track.mood, track.index) }}>
+                  <a href="#" className="playlist-item" onClick={(e) => { e.preventDefault(); if (track.mood && track.id) openPlayer(track.mood, tracks[track.mood]?.findIndex(t => t.id === track.id) ?? 0) }}>
                     <Image src={track.cover} alt={track.title} width={40} height={40} className="playlist-item-cover" data-ai-hint="song cover" />
                     <span>{track.title}</span>
                   </a>
@@ -465,6 +481,11 @@ export default function Home() {
     }, 2000); // Match animation duration
   };
 
+  const handleSignOut = () => {
+    auth.signOut();
+    setIsMenuSheetOpen(false);
+  }
+
   if (!isMounted) {
     return (
       <div className="intro-screen">
@@ -472,6 +493,8 @@ export default function Home() {
       </div>
     );
   }
+
+  const isAuthFormValid = authForm.email && authForm.password;
 
   return (
     <>
@@ -515,9 +538,14 @@ export default function Home() {
                     <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="nav-btn">
                       <HomeIcon size={20} />
                     </a>
-                    <Link href="/admin" className="nav-btn">
+                    <button onClick={() => setIsAuthSheetOpen(true)} className="nav-btn">
                       <User size={20} />
-                    </Link>
+                    </button>
+                    {user && (
+                      <Link href="/admin" className="nav-btn">
+                        Admin
+                      </Link>
+                    )}
                     <a href="https://github.com/bourojuakshay/studio" target="_blank" rel="noopener noreferrer" className="nav-btn">
                       <Github size={20} />
                     </a>
@@ -546,6 +574,14 @@ export default function Home() {
                          <div className="p-4 border-t border-glass-border">
                            <NavMenu />
                          </div>
+                         {user && (
+                          <div className="p-4 border-t border-glass-border">
+                            <button onClick={handleSignOut} className="w-full text-left flex items-center gap-2 font-semibold">
+                              <LogOut size={16} />
+                              Sign Out
+                            </button>
+                          </div>
+                         )}
                       </SheetContent>
                     </Sheet>
                   </div>
@@ -637,6 +673,7 @@ export default function Home() {
               onEnded={handleSongEnd} 
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleTimeUpdate}
+              crossOrigin="anonymous"
             />
 
             <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
@@ -689,13 +726,64 @@ export default function Home() {
                 </form>
               </DialogContent>
             </Dialog>
+
+             <Sheet open={isAuthSheetOpen} onOpenChange={setIsAuthSheetOpen}>
+                <SheetContent side="right" className="main-menu-sheet sheet-content">
+                    <SheetHeader>
+                        <SheetTitle className="text-2xl">
+                          {user ? `Welcome, ${user.displayName || user.email}`: 'Sign In or Sign Up'}
+                        </SheetTitle>
+                    </SheetHeader>
+                    {isUserLoading ? (
+                        <div className="flex justify-center items-center p-8">
+                            <Loader className="animate-spin" />
+                        </div>
+                    ) : user ? (
+                        <div className="p-4 flex flex-col gap-4">
+                            <p>You are signed in as {user.email}.</p>
+                            <Link href="/admin" passHref>
+                               <Button variant="outline" onClick={() => setIsAuthSheetOpen(false)}>Go to Admin</Button>
+                            </Link>
+                            <Button onClick={handleSignOut}>
+                                <LogOut className="mr-2" />
+                                Sign Out
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="p-4">
+                            <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
+                                <div className="flex justify-center gap-2">
+                                    <Button type="button" variant={authForm.mode === 'signin' ? 'default' : 'outline'} onClick={() => setAuthForm({...authForm, mode: 'signin'})}>Sign In</Button>
+                                    <Button type="button" variant={authForm.mode === 'signup' ? 'default' : 'outline'} onClick={() => setAuthForm({...authForm, mode: 'signup'})}>Sign Up</Button>
+                                </div>
+                                <Input 
+                                    type="email" 
+                                    name="email" 
+                                    placeholder="Email" 
+                                    required
+                                    value={authForm.email}
+                                    onChange={(e) => setAuthForm({...authForm, email: e.target.value})} 
+                                />
+                                <Input 
+                                    type="password" 
+                                    name="password" 
+                                    placeholder="Password" 
+                                    required 
+                                    value={authForm.password}
+                                    onChange={(e) => setAuthForm({...authForm, password: e.target.value})}
+                                />
+                                <Button type="submit" disabled={!isAuthFormValid}>
+                                    {authForm.mode === 'signin' ? 'Sign In' : 'Sign Up'}
+                                </Button>
+                            </form>
+                        </div>
+                    )}
+                </SheetContent>
+            </Sheet>
+
           </motion.div>
         )}
       </AnimatePresence>
     </>
   );
 }
-
-    
-
-    
