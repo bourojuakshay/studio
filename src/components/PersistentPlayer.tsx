@@ -112,5 +112,3 @@ export function PersistentPlayer({ track, isPlaying, playlist, handlePlayPause, 
         </motion.div>
     );
 }
-
-    
