@@ -1147,7 +1147,7 @@ body.custom-theme-active body {
 .spin {
   animation: spinDashArray 2s ease-in-out,
     spin 12s ease-in-out,
-    dashOffset 2s linear;
+    dashOffset 2s linear infinite;
   transform-origin: center;
 }
 @keyframes dashArray {
@@ -1173,4 +1173,6 @@ body.custom-theme-active body {
   85% { rotate: 1080deg; } /* End third rotation */
   97.5%, 100% { rotate: 1440deg; } /* End final rotation */
 }
+    
+
     
