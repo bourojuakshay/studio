@@ -81,7 +81,7 @@ const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
           </defs>
         </svg>
         {/* M */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="52" width="52" className="inline-block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="90" width="90" className="inline-block">
           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#b)" d="M 8 60 V 4 L 32 32 L 56 4 V 60" className="draw" pathLength="360"></path>
         </svg>
         {/* O */}
@@ -101,7 +101,7 @@ const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#b)" d="M 12 4 L 32 32 L 52 4 M 32 32 V 60" className="draw" pathLength="360"></path>
         </svg>
         {/* O */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="52" width="52" className="inline-block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="90" width="90" className="inline-block">
             <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0 -27 a 27 27 0 1 1 0 54 a 27 27 0 1 1 0 -54" className="draw" id="o" pathLength="360"></path>
         </svg>
       </div>
