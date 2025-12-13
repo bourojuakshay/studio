@@ -1,13 +1,14 @@
 
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Image from 'next/image';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Heart, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Track } from '@/app/lib/mood-definitions';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useVirtualizer } from '@/hooks/use-virtualizer';
 
 type PlaylistViewProps = {
     tracks: Track[];
@@ -18,11 +19,9 @@ type PlaylistViewProps = {
     openPlayer: (mood: string, index: number) => void;
 };
 
-const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike, isLiked }: { track: Track; index: number; } & Omit<PlaylistViewProps, 'tracks'>) => {
+const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike, isLiked, style }: { track: Track; index: number; style: React.CSSProperties } & Omit<PlaylistViewProps, 'tracks' | 'virtualizer'>) => {
     const x = useMotionValue(0);
     
-    // Make the background grow from 0 to 1 as we drag.
-    // The input range is the drag distance, output is opacity.
     const backgroundScaleX = useTransform(x, [0, 100], [0, 1]);
     const heartScale = useTransform(x, [0, 100], [0.5, 1.2]);
     const heartOpacity = useTransform(x, [0, 70], [0, 1]);
@@ -38,10 +37,7 @@ const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike
     return (
         <motion.div 
             className="playlist-list-item-wrapper"
-            variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0 }
-            }}
+            style={style}
         >
             <motion.div 
                 className="playlist-swipe-background"
@@ -59,6 +55,7 @@ const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike
                 dragSnapToOrigin={true}
                 onDragEnd={onDragEnd}
                 style={{ x }}
+                layout
             >
                 <Image className="playlist-list-item-cover" src={track.cover} alt={`${track.title} cover`} width={40} height={40} data-ai-hint="song cover" unoptimized={track.cover.startsWith('data:')} />
                 <div className="playlist-list-item-info">
@@ -83,6 +80,14 @@ const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike
 
 export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, openPlayer }: PlaylistViewProps) {
     
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const { virtualItems, totalHeight } = useVirtualizer({
+      count: tracks?.length ?? 0,
+      getScrollElement: () => scrollRef.current,
+      estimateSize: () => 64, // Estimate height of each item
+      overscan: 5, // Render 5 extra items above and below the visible area
+    });
+
     const playlistVariants = {
         hidden: { opacity: 0, x: 50 },
         visible: { 
@@ -91,7 +96,6 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
             transition: { 
                 duration: 0.5, 
                 ease: 'easeOut',
-                staggerChildren: 0.05
             } 
         }
     };
@@ -114,25 +118,37 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
             <motion.div className="playlist-header" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <h3>Playlist</h3>
             </motion.div>
-            <ScrollArea className="playlist-scroll-area">
+            <ScrollArea className="playlist-scroll-area" ref={scrollRef}>
                 <motion.div 
                     className="playlist-list"
+                    style={{ height: totalHeight }}
                     variants={playlistVariants}
                     initial="hidden"
                     animate="visible"
                 >
-                    {tracks.map((track, index) => (
-                        <PlaylistItem 
-                            key={`${track.src}-${index}`} 
-                            track={track} 
-                            index={index} 
-                            mood={mood} 
-                            currentTrack={currentTrack}
-                            openPlayer={openPlayer}
-                            handleLike={handleLike}
-                            isLiked={isLiked}
-                        />
-                    ))}
+                    {virtualItems.map((virtualItem) => {
+                        const track = tracks[virtualItem.index];
+                        return (
+                           <PlaylistItem
+                                key={virtualItem.key}
+                                track={track}
+                                index={virtualItem.index}
+                                mood={mood}
+                                currentTrack={currentTrack}
+                                openPlayer={openPlayer}
+                                handleLike={handleLike}
+                                isLiked={isLiked}
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: `${virtualItem.size}px`,
+                                    transform: `translateY(${virtualItem.start}px)`,
+                                }}
+                            />
+                        )
+                    })}
                 </motion.div>
             </ScrollArea>
         </div>

@@ -659,6 +659,7 @@ body.home-active .nav-btn {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
 }
 
 .playlist-list-item-wrapper {
@@ -790,7 +791,6 @@ section.page.active::before {
 
 audio { display: none; }
 
-/* footer */
 footer {
   margin-top: auto;
   padding-top: 28px;
