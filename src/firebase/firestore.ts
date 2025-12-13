@@ -1,7 +1,7 @@
 
 'use a client';
 
-import { collection, addDoc, type Firestore, query, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, type Firestore, query, onSnapshot } from 'firebase/firestore';
 import { errorEmitter } from './error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from './errors';
 
@@ -17,7 +17,6 @@ export interface Song {
 export function addSong(firestore: Firestore, song: Omit<Song, 'id'>) {
     const songsCollection = collection(firestore, 'songs');
     
-    // No await, chaining .catch() for error handling
     return addDoc(songsCollection, song)
         .catch((serverError) => {
             const permissionError = new FirestorePermissionError({
@@ -27,9 +26,37 @@ export function addSong(firestore: Firestore, song: Omit<Song, 'id'>) {
             } satisfies SecurityRuleContext);
 
             errorEmitter.emit('permission-error', permissionError);
-            
-            // Re-throw the original error to be caught by the caller if needed,
-            // though in this new architecture, we let the emitter handle it.
+            throw serverError;
+        });
+}
+
+export function updateSong(firestore: Firestore, songId: string, song: Omit<Song, 'id'>) {
+    const songDoc = doc(firestore, 'songs', songId);
+
+    return updateDoc(songDoc, song)
+        .catch((serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: songDoc.path,
+                operation: 'update',
+                requestResourceData: song,
+            } satisfies SecurityRuleContext);
+
+            errorEmitter.emit('permission-error', permissionError);
+            throw serverError;
+        });
+}
+
+export function deleteSong(firestore: Firestore, songId: string) {
+    const songDoc = doc(firestore, 'songs', songId);
+
+    return deleteDoc(songDoc)
+        .catch((serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: songDoc.path,
+                operation: 'delete',
+            } satisfies SecurityRuleContext);
+
+            errorEmitter.emit('permission-error', permissionError);
             throw serverError;
         });
 }
@@ -60,3 +87,5 @@ export function getSongs(
 
     return unsubscribe;
 }
+
+    

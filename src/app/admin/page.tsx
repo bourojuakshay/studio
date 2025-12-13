@@ -1,13 +1,14 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { addSong } from '@/firebase/firestore';
+import { addSong, updateSong, deleteSong, type Song } from '@/firebase/firestore';
 import { useFirestore } from '@/firebase';
-import { Loader } from 'lucide-react';
+import { useSongs } from '@/hooks/use-songs';
+import { Loader, Trash2, Pencil } from 'lucide-react';
 import { MOOD_DEFS } from '../lib/mood-definitions';
 import {
   Select,
@@ -16,7 +17,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import Image from 'next/image';
 
 export default function AdminPage() {
   const [title, setTitle] = useState('');
@@ -25,8 +45,19 @@ export default function AdminPage() {
   const [cover, setCover] = useState('');
   const [mood, setMood] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editMode, setEditMode] = useState<string | null>(null); // To store the ID of the song being edited
   const { toast } = useToast();
   const firestore = useFirestore();
+  const { songs, loading: songsLoading } = useSongs();
+
+  const resetForm = () => {
+    setTitle('');
+    setArtist('');
+    setSrc('');
+    setCover('');
+    setMood('');
+    setEditMode(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,30 +65,30 @@ export default function AdminPage() {
       toast({
         variant: 'destructive',
         title: 'Missing Fields',
-        description: 'Please fill out all fields to add a new song.',
+        description: 'Please fill out all fields to add or update a song.',
       });
       return;
     }
     setIsSubmitting(true);
 
-    const songData = { title, artist, src, cover, mood: mood.toLowerCase() };
+    const songData: Omit<Song, 'id'> = { title, artist, src, cover, mood: mood.toLowerCase() };
 
     try {
-      await addSong(firestore, songData);
-
-      toast({
-        title: 'Song Added!',
-        description: `${title} by ${artist} has been added to the database.`,
-      });
-      // Clear form
-      setTitle('');
-      setArtist('');
-      setSrc('');
-      setCover('');
-      setMood('');
+      if (editMode) {
+        await updateSong(firestore, editMode, songData);
+        toast({
+          title: 'Song Updated!',
+          description: `${title} by ${artist} has been updated.`,
+        });
+      } else {
+        await addSong(firestore, songData);
+        toast({
+          title: 'Song Added!',
+          description: `${title} by ${artist} has been added to the database.`,
+        });
+      }
+      resetForm();
     } catch (error) {
-      // The FirestorePermissionError is thrown by the listener, 
-      // but we can still show a generic toast for other potential errors.
       if (!(error as any).name?.includes('FirestorePermissionError')) {
           toast({
               variant: 'destructive',
@@ -70,15 +101,44 @@ export default function AdminPage() {
     }
   };
 
+  const handleEdit = (song: Song) => {
+    setEditMode(song.id!);
+    setTitle(song.title);
+    setArtist(song.artist);
+    setSrc(song.src);
+    setCover(song.cover);
+    setMood(song.mood);
+  };
+
+  const handleDelete = async (songId: string) => {
+    try {
+      await deleteSong(firestore, songId);
+      toast({
+        title: 'Song Deleted',
+        description: 'The song has been removed from the database.',
+      });
+    } catch (error) {
+        if (!(error as any).name?.includes('FirestorePermissionError')) {
+          toast({
+              variant: 'destructive',
+              title: 'Uh oh! Something went wrong.',
+              description: (error as any).message || "Could not delete song.",
+          });
+      }
+    }
+  };
+
   return (
     <div className="app">
       <header>
         <h1 className="text-3xl font-bold">Admin Panel</h1>
       </header>
-      <main>
-        <div className="max-w-xl mx-auto">
+      <main className="flex flex-col gap-8">
+        <div className="max-w-xl mx-auto w-full">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-            <h2 className="text-2xl font-semibold leading-none tracking-tight mb-4">Add New Song</h2>
+            <h2 className="text-2xl font-semibold leading-none tracking-tight mb-4">
+              {editMode ? 'Update Song' : 'Add New Song'}
+            </h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <Input
                 placeholder="Song Title"
@@ -117,13 +177,95 @@ export default function AdminPage() {
                 </SelectContent>
               </Select>
 
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? <><Loader className="animate-spin mr-2" size={16} /> Adding...</> : 'Add Song'}
-              </Button>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={isSubmitting} className="flex-grow">
+                  {isSubmitting ? <><Loader className="animate-spin mr-2" size={16} /> {editMode ? 'Updating...' : 'Adding...'}</> : (editMode ? 'Update Song' : 'Add Song')}
+                </Button>
+                {editMode && (
+                  <Button variant="outline" onClick={resetForm}>
+                    Cancel
+                  </Button>
+                )}
+              </div>
             </form>
           </div>
+        </div>
+
+        <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+           <div className="p-6">
+            <h2 className="text-2xl font-semibold leading-none tracking-tight">Manage Songs</h2>
+           </div>
+           <div className="border-t">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[80px]">Cover</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Artist</TableHead>
+                  <TableHead>Mood</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {songsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center">
+                      <Loader className="animate-spin mx-auto my-4" />
+                    </TableCell>
+                  </TableRow>
+                ) : songs.length > 0 ? (
+                  songs.map((song) => (
+                    <TableRow key={song.id}>
+                      <TableCell>
+                        <Image src={song.cover} alt={song.title} width={48} height={48} className="rounded-md object-cover w-12 h-12" />
+                      </TableCell>
+                      <TableCell className="font-medium">{song.title}</TableCell>
+                      <TableCell>{song.artist}</TableCell>
+                      <TableCell>{song.mood}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(song)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the song
+                                "{song.title}" from the database.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(song.id!)}>
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center">
+                      No songs found. Add one using the form above.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+           </div>
         </div>
       </main>
     </div>
   );
 }
+
+    
