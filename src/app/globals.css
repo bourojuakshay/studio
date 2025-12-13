@@ -905,7 +905,7 @@ body.custom-theme-active body {
 /* From Uiverse.io by Tsiangana - Persistent Player Card */
 .persistent-player-wrapper {
   position: fixed;
-  bottom: 120px;
+  bottom: 200px;
   right: 24px;
   z-index: 50;
   display: flex;
