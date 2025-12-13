@@ -34,50 +34,68 @@ import { useToast } from '@/hooks/use-toast';
 
 export const dynamic = 'force-dynamic';
 
-const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
+const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
+    const letters = "MOODYO".split("");
+
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2,
+            },
+        },
+        exit: {
+            opacity: 0,
+            transition: {
+                staggerChildren: 0.05,
+                staggerDirection: -1,
+                when: "afterChildren",
+            },
+        }
+    };
+
+    const letterVariants = {
+        hidden: { opacity: 0, y: 20, scale: 0.98 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: { type: 'spring', damping: 12, stiffness: 100 },
+        },
+        exit: {
+            opacity: 0,
+            y: -20,
+            transition: { duration: 0.2, ease: 'easeOut' },
+        }
+    };
+
     return (
-        <div className={cn("moody-loader-container", { 'exit-animation': isExiting })}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="80" width="80" className="inline-block">
-                <defs>
-                    <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="b">
-                        <stop stopColor="#973BED"></stop>
-                        <stop stopColor="#007CFF" offset="1"></stop>
-                    </linearGradient>
-                    <linearGradient gradientUnits="userSpaceOnUse" y2="0" x2="0" y1="64" x1="0" id="c">
-                        <stop stopColor="#FFC800"></stop>
-                        <stop stopColor="#F0F" offset="1"></stop>
-                    </linearGradient>
-                    <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="d">
-                        <stop stopColor="#00E0ED"></stop>
-                        <stop stopColor="#00DA72" offset="1"></stop>
-                    </linearGradient>
-                </defs>
-                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 54 V 10 L 32 32 L 54 10 V 54" className="draw"></path>
-            </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw"></path>
-            </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw"></path>
-            </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M 54 54 V 10 M 54 32 a 22,22 0 1,1 -44,0 a 22,22 0 1,1 44,0" className="draw"></path>
-            </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 10 l 22 22 l 22 -22 M 32 32 V 54" className="draw"></path>
-            </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="80" width="80" className="inline-block">
-                <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw"></path>
-            </svg>
-             <div className="loader moody-loader-text">
-                <span>M</span>
-                <span>O</span>
-                <span>O</span>
-                <span>D</span>
-                <span>Y</span>
-                <span>O</span>
-            </div>
-        </div>
+        <motion.div 
+            className="moody-loader-container"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onAnimationComplete={onExit}
+        >
+            <motion.div className="moody-loader-text" aria-label="MOODYO">
+                {letters.map((letter, index) => (
+                    <motion.span key={index} variants={letterVariants} className="inline-block">
+                        {letter}
+                    </motion.span>
+                ))}
+            </motion.div>
+            <motion.p
+                className="moody-loader-tagline"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0, transition: { delay: 1, duration: 0.5 } }}
+                exit={{ opacity: 0, y: -10, transition: { duration: 0.3 } }}
+            >
+                Mood-Driven Audio Experience
+            </motion.p>
+        </motion.div>
     );
 };
   
@@ -440,38 +458,32 @@ export default function Home() {
   const handleIntroClick = () => {
     if (introClickedRef.current) return;
     introClickedRef.current = true;
-
     setIsExiting(true);
-
-    setTimeout(() => {
-        setAppVisible(true);
-    }, 800); // Match animation duration
   };
-
-  const handleSignOut = () => {
-    auth.signOut();
-    setIsMenuSheetOpen(false);
+  
+  const handleExitComplete = () => {
+      setAppVisible(true);
   }
 
   useEffect(() => {
-    // Automatically transition after a delay
     const timer = setTimeout(() => {
         handleIntroClick();
-    }, 2500); // Auto-play after 2.5 seconds
+    }, 4000); 
 
-    // Also allow click to transition
     window.addEventListener('click', handleIntroClick);
+    window.addEventListener('touchstart', handleIntroClick);
 
     return () => {
         clearTimeout(timer);
         window.removeEventListener('click', handleIntroClick);
+        window.removeEventListener('touchstart', handleIntroClick);
     };
   }, []);
 
   if (!isMounted) {
     return (
       <div className="intro-screen">
-        <MoodyOLoader isExiting={false} />
+        <MoodyOLoader onExit={() => {}} />
       </div>
     );
   }
@@ -495,11 +507,11 @@ export default function Home() {
         {!appVisible && (
           <motion.div
             className="intro-screen"
+            key="intro"
             initial={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
-            onClick={handleIntroClick}
+            exit={{ opacity: 0, transition: { duration: 0.5, delay: 0.2 } }}
           >
-            <MoodyOLoader isExiting={isExiting} />
+            {isMounted && <MoodyOLoader onExit={isExiting ? handleExitComplete : () => {}} />}
           </motion.div>
         )}
       </AnimatePresence>
@@ -559,7 +571,7 @@ export default function Home() {
                          </div>
                          {user && (
                           <div className="p-4 border-t border-glass-border">
-                            <button onClick={handleSignOut} className="w-full text-left flex items-center gap-2 font-semibold">
+                            <button onClick={() => auth.signOut()} className="w-full text-left flex items-center gap-2 font-semibold">
                               <LogOut size={16} />
                               Sign Out
                             </button>
@@ -727,7 +739,7 @@ export default function Home() {
                             <Link href="/admin" passHref>
                                <Button variant="outline" onClick={() => setIsAuthSheetOpen(false)}>Go to Admin</Button>
                             </Link>
-                            <Button onClick={handleSignOut}>
+                            <Button onClick={() => auth.signOut()}>
                                 <LogOut className="mr-2" />
                                 Sign Out
                             </Button>
@@ -770,3 +782,5 @@ export default function Home() {
     </>
   );
 }
+
+    
