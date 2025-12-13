@@ -376,7 +376,7 @@ export default function Home() {
         [moodId]: {
           title: result.title,
           subtitle: result.subtitle,
-          accent: 'hsl(var(--primary))',
+          accent: result.theme.accent,
           bg: `linear-gradient(135deg, ${result.theme.start} 0%, ${result.theme.end} 100%)`,
           emoji: input.emoji,
           themeClass: 'custom-theme-active'

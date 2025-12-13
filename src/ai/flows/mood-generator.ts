@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A custom mood generator AI flow.
@@ -56,7 +57,7 @@ const moodPrompt = ai.definePrompt({
     2.  **Color Theme**: Generate a visually appealing color theme with three hex color codes:
         - \`start\`: A starting color for a background gradient.
         - \`end\`: An ending color for the background gradient.
-        - \`accent\`: An accent color for buttons and highlights that contrasts well with the background.
+        - \`accent\`: An accent color for buttons and highlights that contrasts well with the background. The accent color should be provided in HSL format like 'hsl(175, 90%, 45%)'.
     3.  **Playlist**: Generate a list of exactly 10 unique, imaginary song titles and fictional artist names that perfectly match the described vibe. The song titles and artists should be creative and sound plausible.
 
     Ensure the final output strictly follows the JSON schema provided.

@@ -38,7 +38,9 @@ export function ThemeProvider({ activePage, customMoods, tracks, nowPlaying, all
         const activePlaylist = tracks[activePage as keyof typeof tracks];
         if (activePageElement && activePlaylist && activePlaylist.length > 0) {
             const currentTrack = nowPlaying && nowPlaying.mood === activePage ? tracks[nowPlaying.mood][nowPlaying.index] : activePlaylist[0];
-            activePageElement.style.setProperty('--bg-image', `url(${currentTrack.cover})`);
+            if (currentTrack) {
+              activePageElement.style.setProperty('--bg-image', `url(${currentTrack.cover})`);
+            }
         }
 
         let classes = `${activePage}-active `;
