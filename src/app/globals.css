@@ -1165,11 +1165,10 @@ body.custom-theme-active body {
   100% { stroke-dashoffset: 5; }
 }
 @keyframes spin {
-  0% { rotate: 0deg; }
-  12.5%, 25% { rotate: 270deg; }
-  37.5%, 50% { rotate: 540deg; }
-  62.5%, 75% { rotate: 810deg; }
-  87.5%, 100% { rotate: 1080deg; }
+  0%, 10% { rotate: 0deg; }
+  22.5%, 35% { rotate: 360deg; }
+  47.5%, 60% { rotate: 720deg; }
+  72.5%, 85% { rotate: 1080deg; }
+  97.5%, 100% { rotate: 1440deg; }
 }
-
     
