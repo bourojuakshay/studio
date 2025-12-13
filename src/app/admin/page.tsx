@@ -1,14 +1,14 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { addSong, updateSong, deleteSong, type Song } from '@/firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { useSongs } from '@/hooks/use-songs';
-import { Loader, Trash2, Pencil } from 'lucide-react';
+import { Loader, Trash2, Pencil, ArrowLeft } from 'lucide-react';
 import { MOOD_DEFS } from '../lib/mood-definitions';
 import {
   Select,
@@ -130,8 +130,14 @@ export default function AdminPage() {
 
   return (
     <div className="app">
-      <header>
+      <header className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Admin Panel</h1>
+        <Link href="/" passHref>
+           <Button variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Home
+           </Button>
+        </Link>
       </header>
       <main className="flex flex-col gap-8">
         <div className="max-w-xl mx-auto w-full">
@@ -267,5 +273,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    
