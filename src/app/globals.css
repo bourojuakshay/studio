@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 :root{
-  --background: 222 84% 4.9%; /* New dark blue background */
+  --background: 220 40% 5%; /* New Deep Ocean background */
   --foreground: 210 40% 98%;
 
   --card: 222 84% 4.9%;
@@ -13,7 +13,7 @@
   --popover: 222 84% 4-9%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 262 100% 70%; /* Vibrant purple */
+  --primary: 175 90% 45%; /* New Vibrant Teal */
   --primary-foreground: 210 40% 98%;
 
   --secondary: 217 33% 17%;
@@ -30,7 +30,7 @@
 
   --border: 217 33% 17%;
   --input: 217 33% 17%;
-  --ring: 262 100% 70%;
+  --ring: 175 90% 45%; /* New Vibrant Teal */
 
   --radius: 1rem;
   --font-sans: 'Poppins', sans-serif;
@@ -47,7 +47,7 @@
 }
 
 .dark {
-  --background: 222 84% 4.9%;
+  --background: 220 40% 5%;
   --foreground: 210 40% 98%;
 
   --card: 222 84% 4.9%;
@@ -56,7 +56,7 @@
   --popover: 222 84% 4.9%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 262 100% 70%;
+  --primary: 175 90% 45%;
   --primary-foreground: 210 40% 98%;
 
   --secondary: 217 33% 17%;
@@ -73,7 +73,7 @@
 
   --border: 217 33% 17%;
   --input: 217 33% 17%;
-  --ring: 262 100% 70%;
+  --ring: 175 90% 45%;
 }
 
 *{box-sizing:border-box}
