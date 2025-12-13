@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -104,7 +105,7 @@ const STATIC_TRACKS = {
 
 const MoodyOLoader = () => (
     <div className="moody-loader-container">
-      <div className="loader">
+      <div className="loader items-end">
         <svg height="0" width="0" viewBox="0 0 64 64" className="absolute">
           <defs className="s-xJBuHA073rTt" xmlns="http://www.w3.org/2000/svg">
             <linearGradient className="s-xJBuHA073rTt" gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="b">
@@ -127,19 +128,19 @@ const MoodyOLoader = () => (
           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#b)" d="M 8 60 V 4 L 32 32 L 56 4 V 60" className="dash" pathLength="360"></path>
         </svg>
         {/* O */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="64" width="64" className="inline-block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#c)" d="M 32, 60 C 17,60 10,48 10,32 C 10,16 17,4 32,4 C 47,4 54,16 54,32 C 54,48 47,60 32,60 z" className="dash" pathLength="360"></path>
         </svg>
         {/* O */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="64" width="64" className="inline-block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#c)" d="M 32, 60 C 17,60 10,48 10,32 C 10,16 17,4 32,4 C 47,4 54,16 54,32 C 54,48 47,60 32,60 z" className="dash" pathLength="360"></path>
         </svg>
-        {/* D */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="64" width="64" className="inline-block">
-          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#d)" d="M 12 4 V 60 M 12 32 C 12 16 32 16 48 32 C 64 48 12 48 12 32" className="dash" pathLength="360"></path>
+        {/* d */}
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
+            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#d)" d="M 50 60 V 4 M 50 32 C 50 48 38 60 24 60 C 10 60 4 48 4 32 C 4 16 10 4 24 4 C 38 4 50 16 50 32 Z" className="dash" pathLength="360"></path>
         </svg>
         {/* Y */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="64" width="64" className="inline-block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#b)" d="M 12 4 L 32 32 L 52 4 M 32 32 V 60" className="dash" pathLength="360"></path>
         </svg>
         {/* O */}
@@ -635,3 +636,5 @@ export default function Home() {
     </>
   );
 }
+
+    
