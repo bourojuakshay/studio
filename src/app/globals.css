@@ -606,6 +606,7 @@ footer a:hover {
     right: 16px;
     left: 16px;
     width: auto;
+    align-items: center;
   }
   .app {
     padding: 16px;
@@ -911,10 +912,12 @@ body.custom-theme-active body {
   flex-direction: column;
   align-items: flex-end;
   gap: 16px;
+  max-width: calc(100vw - 48px);
 }
 
 .persistent-player-card {
-  width: 190px;
+  width: 100%;
+  max-width: 190px;
   height: 254px;
   border-radius: 10px;
   position: relative;
@@ -937,6 +940,9 @@ body.custom-theme-active body {
 }
 
 @media (min-width: 521px) {
+  .persistent-player-wrapper {
+    max-width: 280px;
+  }
   .persistent-player-card {
     width: 280px;
     height: auto;
@@ -1168,7 +1174,8 @@ body.custom-theme-active body {
 
 
 .persistent-playlist-bar {
-  width: 250px;
+  width: 100%;
+  max-width: 250px;
   max-height: 200px;
   background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
@@ -1185,7 +1192,7 @@ body.custom-theme-active body {
 }
 @media (min-width: 521px) {
   .persistent-playlist-bar {
-    width: 280px;
+    max-width: 280px;
   }
 }
 
