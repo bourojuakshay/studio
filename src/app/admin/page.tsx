@@ -29,28 +29,24 @@ export default function AdminPage() {
       return;
     }
     setIsSubmitting(true);
-    try {
-      await addSong(firestore, { title, artist, src, cover, mood: mood.toLowerCase() });
-      toast({
-        title: 'Song Added!',
-        description: `${title} by ${artist} has been added to the database.`,
-      });
-      // Clear form
-      setTitle('');
-      setArtist('');
-      setSrc('');
-      setCover('');
-      setMood('');
-    } catch (error: any) {
-      console.error('Error adding song:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: error.message || 'Could not add the song.',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+
+    const songData = { title, artist, src, cover, mood: mood.toLowerCase() };
+
+    // No try-catch here. The error is handled by the emitter in addSong.
+    await addSong(firestore, songData);
+
+    toast({
+      title: 'Song Added!',
+      description: `${title} by ${artist} has been added to the database.`,
+    });
+    // Clear form
+    setTitle('');
+    setArtist('');
+    setSrc('');
+    setCover('');
+    setMood('');
+    
+    setIsSubmitting(false);
   };
 
   return (
