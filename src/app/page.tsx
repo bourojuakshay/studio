@@ -94,7 +94,7 @@ const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
         </svg>
         {/* d */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M 54 54 V 10 M 54 32 C 54 48.43 41.43 61 25 61 C 8.57 61 6 48.43 6 32 C 6 15.57 8.57 3 25 3 C 41.43 3 54 15.57 54 32" className="draw" pathLength="360"></path>
+            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M 54 54 V 10 M 32, 54 C 45.8, 54 54, 43.8 54, 32 C 54, 20.2 45.8, 10 32, 10 C 20.2, 10 10, 20.2 10, 32 C 10, 43.8 20.2, 54 32, 54 Z" className="draw" pathLength="360"></path>
         </svg>
         {/* Y */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
@@ -107,8 +107,8 @@ const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
       </div>
       <motion.p
         className="intro-subtitle moody-loader-text"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.8 } }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration: 0.8, delay: 0.8 } }}
       >
         AI-Generated Soundscapes
       </motion.p>
@@ -671,6 +671,7 @@ export default function Home() {
     
 
     
+
 
 
 
