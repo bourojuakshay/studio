@@ -71,7 +71,7 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
                                     <div className="title">{track.title}</div>
                                     <div className="artist">{track.artist}</div>
                                 </div>
-                                <button onClick={(e) => handleLike(e, { ...track, mood: mood, index: index })} className={cn('like-btn', { 'liked': isLiked(track) })}>
+                                <button onClick={(e) => handleLike(e, { ...track, mood: mood, index: index })} className={cn('like-btn control-btn', { 'liked': isLiked(track) })}>
                                     <Heart size={18} />
                                 </button>
                             </div>
