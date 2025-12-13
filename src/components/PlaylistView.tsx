@@ -39,6 +39,19 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
         visible: { opacity: 1, y: 0 }
     };
 
+    if (!tracks || tracks.length === 0) {
+        return (
+            <motion.div className="playlist-view" variants={playlistVariants}>
+                <div className="playlist-header">
+                    <h3>Playlist</h3>
+                </div>
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <p>No songs available for this mood yet.</p>
+                </div>
+            </motion.div>
+        )
+    }
+
     return (
         <motion.div className="playlist-view" variants={playlistVariants}>
             <div className="playlist-header">
@@ -46,7 +59,7 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
             </div>
             <ScrollArea className="playlist-scroll-area">
                 <motion.div className="playlist-list" initial="hidden" animate="visible" variants={{}}>
-                    {tracks && tracks.map((track, index) => (
+                    {tracks.map((track, index) => (
                         <motion.div key={index} variants={itemVariants}>
                             <div className={cn('playlist-list-item', { active: currentTrack?.src === track.src })} onClick={() => openPlayer(mood, index)}>
                                 <Image className="playlist-list-item-cover" src={track.cover} alt={`${track.title} cover`} width={48} height={48} data-ai-hint="song cover" unoptimized={track.cover.startsWith('data:')} />

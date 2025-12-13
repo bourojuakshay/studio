@@ -411,24 +411,26 @@ body.home-active .nav-btn {
   grid-column: span 12;
   display: flex;
   flex-direction: column;
+  min-height: 0; /* Fix for flexbox + scroll */
 }
 
 @media (min-width: 801px) {
     .playlist-view {
         grid-column: span 7;
+        max-height: 70vh; /* Set a max height for desktop */
     }
 }
 
 .playlist-header {
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 .playlist-header h3 {
   font-size: 1.5rem;
   font-weight: 700;
 }
 .playlist-scroll-area {
-  height: auto;
-  max-height: 65vh;
+  height: 100%; /* Make scroll area fill the container */
   padding-right: 12px;
   flex-grow: 1;
 }
@@ -581,10 +583,10 @@ footer a:hover {
   }
   .playlist-view {
     grid-row: 2;
+    max-height: 40vh; /* Set height for mobile */
   }
   .playlist-scroll-area {
     height: auto;
-    max-height: 40vh;
   }
   .now-playing-card {
     grid-column: 1 / -1;
