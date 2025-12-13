@@ -89,7 +89,7 @@ const MoodyOLoader = () => {
           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#c)" d="M 32, 60 C 17,60 10,48 10,32 C 10,16 17,4 32,4 C 47,4 54,16 54,32 C 54,48 47,60 32,60 z" className="draw" pathLength="360"></path>
         </svg>
         {/* O */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0.0 64 64" height="48" width="48" className="inline-block">
           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#c)" d="M 32, 60 C 17,60 10,48 10,32 C 10,16 17,4 32,4 C 47,4 54,16 54,32 C 54,48 47,60 32,60 z" className="draw" pathLength="360"></path>
         </svg>
         {/* d */}
@@ -166,6 +166,7 @@ export default function Home() {
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const homePageRef = useRef<HTMLElement>(null);
   const mainAppRef = useRef<HTMLDivElement>(null);
+  const introClickedRef = useRef(false);
 
   const { songs: firestoreSongs } = useSongs();
   const [tracks, setTracks] = useState<Record<string, Track[]>>(STATIC_TRACKS);
@@ -433,8 +434,14 @@ export default function Home() {
   );
   
   const handleIntroClick = () => {
-    if (appVisible) return;
-    setAppVisible(true);
+    if (introClickedRef.current) return;
+    introClickedRef.current = true;
+
+    setSpinKey(prev => prev + 1);
+
+    setTimeout(() => {
+        setAppVisible(true);
+    }, 2000); // Match animation duration
   };
 
   if (!isMounted) {
@@ -467,7 +474,7 @@ export default function Home() {
             exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
             onClick={handleIntroClick}
           >
-            <div key={spinKey} onClick={() => setSpinKey(prev => prev + 1)}>
+            <div key={spinKey}>
                 <MoodyOLoader />
             </div>
           </motion.div>
@@ -663,3 +670,5 @@ export default function Home() {
     </>
   );
 }
+
+    
