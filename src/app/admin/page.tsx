@@ -140,7 +140,7 @@ export default function AdminPage() {
         </Link>
       </header>
       <main className="flex flex-col gap-8">
-        <div className="max-w-xl mx-auto w-full">
+        <div className="max-w-2xl mx-auto w-full">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
             <h2 className="text-2xl font-semibold leading-none tracking-tight mb-4">
               {editMode ? 'Update Song' : 'Add New Song'}
