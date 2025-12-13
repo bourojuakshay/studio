@@ -590,23 +590,25 @@ export default function Home() {
               <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
             </footer>
             
-            <AnimatePresence>
-                {nowPlaying && currentTrack && (
-                    <PersistentPlayer
-                        track={currentTrack}
-                        isPlaying={isPlaying}
-                        playlist={tracks[nowPlaying.mood]}
-                        handlePlayPause={handlePlayPause}
-                        handleNext={handleNext}
-                        handlePrev={handlePrev}
-                        handleLike={handleLike}
-                        isLiked={isLiked}
-                        openPlayer={openPlayer}
-                        nowPlaying={nowPlaying}
-                        setNowPlaying={setNowPlaying}
-                    />
-                )}
-            </AnimatePresence>
+            {isMounted && (
+              <AnimatePresence>
+                  {nowPlaying && currentTrack && (
+                      <PersistentPlayer
+                          track={currentTrack}
+                          isPlaying={isPlaying}
+                          playlist={tracks[nowPlaying.mood]}
+                          handlePlayPause={handlePlayPause}
+                          handleNext={handleNext}
+                          handlePrev={handlePrev}
+                          handleLike={handleLike}
+                          isLiked={isLiked}
+                          openPlayer={openPlayer}
+                          nowPlaying={nowPlaying}
+                          setNowPlaying={setNowPlaying}
+                      />
+                  )}
+              </AnimatePresence>
+            )}
 
 
             <audio ref={audioRef} onEnded={handleSongEnd} />
