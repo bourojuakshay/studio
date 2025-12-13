@@ -62,7 +62,7 @@ const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
 
   return (
     <div className="moody-loader-container">
-      <div className={cn("loader items-end", { 'exit-animation': isExiting })}>
+      <div className={cn("loader items-center", { 'exit-animation': isExiting })}>
         <svg height="0" width="0" viewBox="0 0 64 64" className="absolute">
           <defs className="s-xJBuHA073rTt" xmlns="http://www.w3.org/2000/svg">
             <linearGradient className="s-xJBuHA073rTt" gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="b">
@@ -106,7 +106,7 @@ const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
         </svg>
       </div>
       <motion.p
-        className="intro-subtitle"
+        className="intro-subtitle moody-loader-text"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.8 } }}
       >
@@ -671,6 +671,7 @@ export default function Home() {
     
 
     
+
 
 
 
