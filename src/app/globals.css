@@ -318,8 +318,8 @@ body.home-active .nav-btn {
   justify-content: center;
   gap: 1.5rem;
   text-align: left;
-  position: static;
-  top: auto;
+  position: sticky;
+  top: 120px;
 }
 
 @media (min-width: 801px) {
@@ -1231,6 +1231,8 @@ body.custom-theme-active body {
 
 
 
+
+    
 
     
 
