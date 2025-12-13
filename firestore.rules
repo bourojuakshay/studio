@@ -1,0 +1,13 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow anyone to create songs. In a real app, you'd want to restrict this
+    // to authenticated admins.
+    match /songs/{songId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null; // Or restrict to admins
+    }
+  }
+}
