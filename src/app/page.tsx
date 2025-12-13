@@ -229,14 +229,17 @@ export default function Home() {
 
   // Effect for loading the track
   useEffect(() => {
-      const audio = audioRef.current;
-      if (!audio) return;
-      if (currentTrack) {
-          if (audio.src !== window.location.origin + currentTrack.src) {
-              audio.src = currentTrack.src;
-              audio.load();
-          }
+    const audio = audioRef.current;
+    if (!audio) return;
+  
+    // Only update src if we have a valid track with a src
+    if (currentTrack && currentTrack.src) {
+      const newSrc = currentTrack.src.startsWith('http') ? currentTrack.src : window.location.origin + currentTrack.src;
+      if (audio.src !== newSrc) {
+        audio.src = newSrc;
+        audio.load();
       }
+    }
   }, [currentTrack]);
   
   // Effect for playing/pausing
@@ -459,9 +462,15 @@ export default function Home() {
             exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
             onClick={handleIntroClick}
           >
-             <div key={spinKey}>
-                <MoodyOLoader />
-            </div>
+            {!isMounted ? (
+                <div key={spinKey}>
+                    <MoodyOLoader />
+                </div>
+             ) : (
+                <div key={spinKey} onClick={() => setSpinKey(spinKey + 1)}>
+                    <MoodyOLoader />
+                </div>
+             )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -650,3 +659,5 @@ export default function Home() {
     </>
   );
 }
+
+    
