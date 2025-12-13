@@ -34,22 +34,6 @@ import { useToast } from '@/hooks/use-toast';
 
 export const dynamic = 'force-dynamic';
 
-const SAMPLE_TRACKS = (baseIdx = 1): Track[] => Array.from({ length: 10 }, (_, i) => ({
-  title: ['Sunny Days', 'Golden Hour', 'Sparkle', 'Warm Breeze', 'Lemonade', 'Candy Skies', 'Bloom', 'Brightside', 'Hummingbird', 'Radiant'][i],
-  artist: ['MoodyO Mix', 'Acoustic', 'Indie Pop', 'Lo-Fi', 'Electro Pop', 'Indie', 'Bedroom Pop', 'Folk', 'Chillhop', 'Dance'][i],
-  src: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${(baseIdx + i) % 16 + 1}.mp3`,
-  cover: `https://picsum.photos/seed/h${baseIdx + i}/600/600`
-}));
-
-const happyTracks = SAMPLE_TRACKS(0);
-
-const STATIC_TRACKS: Record<string, Track[]> = {
-  happy: happyTracks,
-  joyful: SAMPLE_TRACKS(4),
-  sad: SAMPLE_TRACKS(8),
-  depression: SAMPLE_TRACKS(12)
-};
-
 const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
@@ -160,7 +144,7 @@ export default function Home() {
   const { preferences: likedSongPrefs } = useUserPreferences(user?.uid);
   const { songs: firestoreSongs } = useSongs();
   
-  const [tracks, setTracks] = useState<Record<string, Track[]>>(STATIC_TRACKS);
+  const [tracks, setTracks] = useState<Record<string, Track[]>>({});
   
   const [isCustomMoodDialogOpen, setIsCustomMoodDialogOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -195,12 +179,8 @@ export default function Home() {
   
         // Create playlists for all defined moods
         Object.keys(MOOD_DEFS).forEach(moodKey => {
-          const staticSongsForMood = STATIC_TRACKS[moodKey] || [];
           const firestoreSongsForMood = firestoreSongsByMood[moodKey] || [];
-          // Prepend firestore songs to static songs, avoiding duplicates
-          const combined = [...firestoreSongsForMood, ...staticSongsForMood];
-          const uniqueSongs = Array.from(new Map(combined.map(s => [s.id || s.src, s])).values());
-          newTracks[moodKey] = uniqueSongs;
+          newTracks[moodKey] = firestoreSongsForMood;
         });
   
         return newTracks;
@@ -792,5 +772,7 @@ export default function Home() {
     </>
   );
 }
+
+    
 
     
