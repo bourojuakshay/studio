@@ -190,6 +190,7 @@ export default function Home() {
   const [customMoodFormData, setCustomMoodFormData] = useState({ name: '', emoji: '', description: '' });
   const [volume, setVolume] = useState(0.75);
   const [appVisible, setAppVisible] = useState(false);
+  const [spinKey, setSpinKey] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
@@ -427,6 +428,11 @@ export default function Home() {
     return null;
   }
   
+  const handleIntroClick = () => {
+    if (appVisible) return;
+    setSpinKey(prev => prev + 1);
+  };
+
   return (
     <>
       <ThemeProvider 
@@ -445,9 +451,12 @@ export default function Home() {
             className="intro-screen"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
-            onClick={() => setAppVisible(true)}
+            onClick={handleIntroClick}
+            onDoubleClick={() => setAppVisible(true)}
           >
-            <MoodyOLoader />
+             <div key={spinKey}>
+                <MoodyOLoader />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

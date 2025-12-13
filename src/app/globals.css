@@ -1145,9 +1145,9 @@ body.custom-theme-active body {
     dashOffset 2s linear infinite;
 }
 .spin {
-  animation: spinDashArray 2s ease-in-out infinite,
-    spin 12s ease-in-out infinite,
-    dashOffset 2s linear infinite;
+  animation: spinDashArray 2s ease-in-out,
+    spin 12s ease-in-out,
+    dashOffset 2s linear;
   transform-origin: center;
 }
 @keyframes dashArray {
