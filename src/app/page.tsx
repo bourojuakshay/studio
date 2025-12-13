@@ -143,7 +143,44 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
 };
 
 
-const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void, style?: React.CSSProperties }) => {
+const InteractiveCard = ({ moodKey, emoji, title, onClick }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+
+    const onMouseMove = (e: MouseEvent) => {
+      const { left, top, width, height } = card.getBoundingClientRect();
+      const x = (e.clientX - left - width / 2) / 15;
+      const y = (e.clientY - top - height / 2) / 15;
+      gsap.to(card, {
+        rotationY: x,
+        rotationX: -y,
+        transformPerspective: 500,
+        ease: 'power3.out',
+        duration: 0.8,
+      });
+    };
+
+    const onMouseLeave = () => {
+      gsap.to(card, {
+        rotationY: 0,
+        rotationX: 0,
+        ease: 'power3.out',
+        duration: 1,
+      });
+    };
+
+    card.addEventListener('mousemove', onMouseMove);
+    card.addEventListener('mouseleave', onMouseLeave);
+
+    return () => {
+      card.removeEventListener('mousemove', onMouseMove);
+      card.removeEventListener('mouseleave', onMouseLeave);
+    };
+  }, []);
 
   const cardClasses = cn(
     'interactive-card',
@@ -152,12 +189,37 @@ const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }: { moodK
 
   return (
     <div 
+      ref={cardRef} 
       className={cardClasses}
-      style={{ backgroundColor: moodKey !== 'create' ? style.background : undefined }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
       title={title}
     >
-      <div className="card-content">{emoji}</div>
+      <AnimatePresence>
+        {!isHovered && (
+          <motion.div 
+            className="card-content"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            {emoji}
+          </motion.div>
+        )}
+        {isHovered && (
+          <motion.div 
+            className="card-content"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            {title.split('—')[0]}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -589,14 +651,13 @@ export default function Home() {
                   <p className="home-subtitle">Each card has its own theme. Choose a vibe or create your own.</p>
               
                 <div className="home-mood-selector">
-                  {Object.entries(allMoods).map(([key, { emoji, title, bg }]) => (
+                  {Object.entries(allMoods).map(([key, { emoji, title }]) => (
                     <InteractiveCard
                       key={key}
                       moodKey={key}
                       emoji={emoji}
                       title={title}
                       onClick={() => openPage(key)}
-                      style={{ background: bg }}
                     />
                   ))}
                   <InteractiveCard
