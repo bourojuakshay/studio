@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { SkipBack, SkipForward, Play, Pause, Heart, Volume1, Volume2, Plus } from 'lucide-react';
+import { SkipBack, SkipForward, Play, Pause, Heart, Volume1, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MoodDefinition, Track } from '@/app/lib/mood-definitions';
 
@@ -69,21 +69,25 @@ export function MoodHero({
                             <p className="card__description">{displayTrack.artist}</p>
                         </div>
                         <div className="player-controls">
-                            <button onClick={handlePrev} className="control-btn"><SkipBack size={20} /></button>
-                            <button onClick={handlePlayPause} className="play-main-btn">
-                                {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={24} /> : <Play size={24} />}
-                            </button>
-                            <button onClick={handleNext} className="control-btn"><SkipForward size={20}/></button>
-                            <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn control-btn', { 'liked': isLiked(displayTrack) })}>
-                                <Heart size={20} />
-                            </button>
-                            <div className="volume-control">
-                                <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn control-btn">
-                                    {volume > 0.5 ? <Volume2 size={20} /> : <Volume1 size={20} />}
+                            <div className="main-controls">
+                                <button onClick={handlePrev} className="control-btn"><SkipBack size={20} /></button>
+                                <button onClick={handlePlayPause} className="play-main-btn">
+                                    {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={24} /> : <Play size={24} />}
                                 </button>
-                                {isVolumeOpen && (
-                                    <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
-                                )}
+                                <button onClick={handleNext} className="control-btn"><SkipForward size={20}/></button>
+                            </div>
+                            <div className="secondary-controls">
+                                <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn control-btn', { 'liked': isLiked(displayTrack) })}>
+                                    <Heart size={20} />
+                                </button>
+                                <div className="volume-control">
+                                    <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn control-btn">
+                                        {volume > 0.5 ? <Volume2 size={20} /> : <Volume1 size={20} />}
+                                    </button>
+                                    {isVolumeOpen && (
+                                        <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

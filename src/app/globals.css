@@ -465,11 +465,19 @@ body.home-active .nav-btn {
 
 .player-controls {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: auto;
+}
+
+.main-controls, .secondary-controls {
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  width: 100%;
-  margin-top: auto;
 }
 
 .control-btn {
@@ -1321,5 +1329,6 @@ body.custom-theme-active body {
     
 
     
+
 
 
