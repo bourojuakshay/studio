@@ -423,15 +423,21 @@ export default function Home() {
       </AccordionItem>
     </Accordion>
   );
-
-  if (!isMounted) {
-    return null;
-  }
   
   const handleIntroClick = () => {
     if (appVisible) return;
     setAppVisible(true);
   };
+
+  if (!isMounted) {
+    return (
+      <div className="intro-screen">
+        <div key={spinKey}>
+          <MoodyOLoader />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -644,5 +650,3 @@ export default function Home() {
     </>
   );
 }
-
-    
