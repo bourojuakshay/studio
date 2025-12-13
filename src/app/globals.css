@@ -301,6 +301,7 @@ body.home-active .nav-btn {
   grid-template-columns: repeat(12, 1fr);
   gap: 24px;
   min-height: 70vh;
+  align-items: flex-start;
 }
 
 .mood-hero {
@@ -310,6 +311,8 @@ body.home-active .nav-btn {
   justify-content: center;
   gap: 1.5rem;
   text-align: left;
+  position: sticky;
+  top: 120px;
 }
 
 .mood-hero .emoji {
@@ -408,7 +411,8 @@ body.home-active .nav-btn {
   font-weight: 700;
 }
 .playlist-scroll-area {
-  height: 60vh;
+  height: auto;
+  max-height: 65vh;
   padding-right: 12px;
   flex-grow: 1;
 }
@@ -550,11 +554,14 @@ footer a:hover {
   .app{padding: 24px;}
   .mood-page-layout {
     grid-template-columns: 1fr;
+    align-items: normal;
   }
   .mood-hero {
     grid-row: 1;
     text-align: center;
     align-items: center;
+    position: static;
+    top: auto;
   }
   .playlist-view {
     grid-row: 2;

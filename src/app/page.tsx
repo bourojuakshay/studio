@@ -5,8 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SkipBack, SkipForward, Play, Pause, X, Heart, Menu, Wand2, Loader, Smile, Music, Volume1, Volume2, Home as HomeIcon, Github } from 'lucide-react';
+import { Menu, Wand2, Loader, Home as HomeIcon, Github } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -18,17 +17,17 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { generateMood, GenerateMoodInput, GenerateMoodOutput } from '@/ai/flows/mood-generator';
+import { generateMood, GenerateMoodInput } from '@/ai/flows/mood-generator';
 import { generateImage } from '@/ai/flows/image-generator';
 import { ThemeProvider } from '@/components/theme-provider';
 import { PersistentPlayer } from '@/components/PersistentPlayer';
+import { MoodPage } from '@/components/MoodPage';
 
 
 export const dynamic = 'force-dynamic';
 
 // --- Data Definitions ---
-type MoodDefinition = {
+export type MoodDefinition = {
   title: string;
   subtitle: string;
   accent: string;
@@ -155,7 +154,6 @@ export default function Home() {
   const [tracks, setTracks] = useState<Record<string, Track[]>>(STATIC_TRACKS);
   const [customMoodFormData, setCustomMoodFormData] = useState({ name: '', emoji: '', description: '' });
   const [volume, setVolume] = useState(0.75);
-  const [isVolumeOpen, setIsVolumeOpen] = useState(false);
   const [appVisible, setAppVisible] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -166,7 +164,6 @@ export default function Home() {
 
   useEffect(() => {
     setIsMounted(true);
-    gsap.registerPlugin(ScrollTrigger);
   }, []);
 
   // Custom Cursor Animation
@@ -528,74 +525,27 @@ export default function Home() {
               </section>
 
               {Object.entries(allMoods).map(([mood, def]) => {
-                const playlist = tracks[mood];
-                const trackPlaying = nowPlaying?.mood === mood ? currentTrack : null;
-                const displayTrack = trackPlaying || playlist?.[0];
-
                 return (
-                <section key={mood} id={mood} className={cn('page', { active: activePage === mood })}>
-                    <div className="mood-page-layout">
-                      <div className="mood-hero">
-                        <div className="emoji">{def.emoji}</div>
-                        <div>
-                          <h2>{def.title}</h2>
-                          <p>{def.subtitle}</p>
-                        </div>
-                         {displayTrack ? (
-                           <div className="now-playing-card">
-                             <Image className="player-cover" src={displayTrack.cover} alt={displayTrack.title} width={400} height={400} data-ai-hint="song cover" unoptimized={displayTrack.cover.startsWith('data:')} />
-                             <div className="w-full">
-                              <div className="player-info">
-                                  <h3>{displayTrack.title}</h3>
-                                  <p>{displayTrack.artist}</p>
-                              </div>
-                              <div className="player-controls">
-                                  <button onClick={handlePrev}><SkipBack /></button>
-                                  <button onClick={handlePlayPause} className="play-main-btn">
-                                      {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={32} /> : <Play size={32} />}
-                                  </button>
-                                  <button onClick={handleNext}><SkipForward /></button>
-                              </div>
-                              <div className="player-actions">
-                                  <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
-                                      <Heart size={24} />
-                                  </button>
-                                   <div className="volume-control">
-                                     <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
-                                      {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24}/>}
-                                     </button>
-                                    {isVolumeOpen && (
-                                      <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
-                                    )}
-                                   </div>
-                              </div>
-                              </div>
-                           </div>
-                         ) : <div></div>}
-                      </div>
-                      <div className="playlist-view">
-                        <div className="playlist-header">
-                          <h3>Playlist</h3>
-                        </div>
-                        <ScrollArea className="playlist-scroll-area">
-                          <div className="playlist-list">
-                            {playlist && playlist.map((track, index) => (
-                              <div key={index} className={cn('playlist-list-item', { active: trackPlaying?.src === track.src })} onClick={() => openPlayer(mood, index)}>
-                                 <Image className="playlist-list-item-cover" src={track.cover} alt={`${track.title} cover`} width={48} height={48} data-ai-hint="song cover" unoptimized={track.cover.startsWith('data:')} />
-                                <div className="playlist-list-item-info">
-                                  <div className="title">{track.title}</div>
-                                  <div className="artist">{track.artist}</div>
-                                </div>
-                                <button onClick={(e) => handleLike(e, { ...track, mood: mood, index: index })} className={cn('like-btn', { 'liked': isLiked(track) })}>
-                                  <Heart size={18} />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </div>
-                    </div>
-                </section>
+                  <AnimatePresence key={mood}>
+                    {activePage === mood && (
+                       <MoodPage
+                          mood={mood}
+                          definition={def}
+                          tracks={tracks[mood]}
+                          nowPlaying={nowPlaying}
+                          isPlaying={isPlaying}
+                          currentTrack={currentTrack}
+                          volume={volume}
+                          setVolume={setVolume}
+                          handlePlayPause={handlePlayPause}
+                          handleNext={handleNext}
+                          handlePrev={handlePrev}
+                          handleLike={handleLike}
+                          isLiked={isLiked}
+                          openPlayer={openPlayer}
+                       />
+                    )}
+                  </AnimatePresence>
               )})}
             </main>
             
