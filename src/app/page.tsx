@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -103,26 +102,43 @@ const STATIC_TRACKS = {
   depression: SAMPLE_TRACKS(12)
 };
 
-const AnimatedText = ({ text, el: Wrapper = 'h1', className }) => {
-  return (
-    <Wrapper className={className}>
-      {text.split("").map((char, index) => (
-        <motion.span
-          key={index}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            delay: index * 0.05,
-            duration: 0.5,
-            ease: "easeOut"
-          }}
-        >
-          {char === " " ? "\u00A0" : char}
-        </motion.span>
-      ))}
-    </Wrapper>
-  );
-};
+const MoodyOLoader = () => (
+  <div className="moody-loader-container">
+    <div className="loader">
+      <svg height="0" width="0" viewBox="0 0 64 64" className="absolute">
+        <defs className="s-xJBuHA073rTt" xmlns="http://www.w3.org/2000/svg">
+          <linearGradient className="s-xJBuHA073rTt" gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="b">
+            <stop className="s-xJBuHA073rTt" stopColor="#973BED"></stop>
+            <stop className="s-xJBuHA073rTt" stopColor="#007CFF" offset="1"></stop>
+          </linearGradient>
+          <linearGradient className="s-xJBuHA073rTt" gradientUnits="userSpaceOnUse" y2="0" x2="0" y1="64" x1="0" id="c">
+            <stop className="s-xJBuHA073rTt" stopColor="#FFC800"></stop>
+            <stop className="s-xJBuHA073rTt" stopColor="#F0F" offset="1"></stop>
+            <animateTransform repeatCount="indefinite" keySplines=".42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1" keyTimes="0; 0.125; 0.25; 0.375; 0.5; 0.625; 0.75; 0.875; 1" dur="8s" values="0 32 32;-270 32 32;-270 32 32;-540 32 32;-540 32 32;-810 32 32;-810 32 32;-1080 32 32;-1080 32 32" type="rotate" attributeName="gradientTransform"></animateTransform>
+          </linearGradient>
+          <linearGradient className="s-xJBuHA073rTt" gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="d">
+            <stop className="s-xJBuHA073rTt" stopColor="#00E0ED"></stop>
+            <stop className="s-xJBuHA073rTt" stopColor="#00DA72" offset="1"></stop>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div className="intro-title moody-loader-text">
+        <span>M</span><span>o</span><span>o</span><span>d</span><span>y</span>
+      </div>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="64" width="64" className="inline-block">
+        <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0 -27 a 27 27 0 1 1 0 54 a 27 27 0 1 1 0 -54" className="spin" id="o" pathLength="360"></path>
+      </svg>
+    </div>
+    <motion.p
+      className="intro-subtitle"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.8 } }}
+    >
+      AI-Generated Soundscapes
+    </motion.p>
+  </div>
+);
+
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }) => {
   return (
@@ -412,36 +428,7 @@ export default function Home() {
             exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
             onClick={() => setAppVisible(true)}
           >
-            <div className="intro-bg-elements">
-                <motion.div 
-                    className="intro-bg-element" 
-                    style={{ top: '10%', left: '15%', width: '150px', height: '150px', '--orb-color': 'hsl(var(--primary))' } as React.CSSProperties}
-                    animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div 
-                    className="intro-bg-element" 
-                    style={{ top: '60%', left: '5%', width: '80px', height: '80px', '--orb-color': '#22d3ee' } as React.CSSProperties}
-                    animate={{ y: [0, 15, 0], x: [0, 10, 0] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                />
-                <motion.div 
-                    className="intro-bg-element" 
-                    style={{ top: '25%', left: '80%', width: '120px', height: '120px', '--orb-color': 'hsl(var(--primary))' } as React.CSSProperties}
-                    animate={{ y: [0, -10, 0], x: [0, -15, 0] }}
-                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                />
-            </div>
-            <div className="intro-content">
-                <AnimatedText text="MoodyO" el={motion.h1} className="intro-title" />
-                <motion.p
-                  className="intro-subtitle"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.8 } }}
-                >
-                  AI-Generated Soundscapes
-                </motion.p>
-            </div>
+            <MoodyOLoader />
           </motion.div>
         )}
       </AnimatePresence>
