@@ -469,18 +469,19 @@ body.home-active .nav-btn {
 }
 
 .player-controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
 }
+
 .main-controls, .secondary-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
 }
 
 .control-btn {
@@ -1336,11 +1337,20 @@ body.custom-theme-active body {
   animation: draw 2s ease-in-out;
 }
     
+@keyframes draw-out {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 360;
+  }
+}
+
+.exit-animation .draw {
+  animation: draw-out 2s ease-in-out forwards;
+}
     
 
-    
-
-    
 
 
 

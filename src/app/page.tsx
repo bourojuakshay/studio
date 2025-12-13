@@ -52,7 +52,7 @@ const STATIC_TRACKS: Record<string, Track[]> = {
   depression: SAMPLE_TRACKS(12)
 };
 
-const MoodyOLoader = () => {
+const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
@@ -62,7 +62,7 @@ const MoodyOLoader = () => {
 
   return (
     <div className="moody-loader-container">
-      <div className="loader items-end">
+      <div className={cn("loader items-end", { 'exit-animation': isExiting })}>
         <svg height="0" width="0" viewBox="0 0 64 64" className="absolute">
           <defs className="s-xJBuHA073rTt" xmlns="http://www.w3.org/2000/svg">
             <linearGradient className="s-xJBuHA073rTt" gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="b">
@@ -81,7 +81,7 @@ const MoodyOLoader = () => {
           </defs>
         </svg>
         {/* M */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="64" width="64" className="inline-block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#b)" d="M 8 60 V 4 L 32 32 L 56 4 V 60" className="draw" pathLength="360"></path>
         </svg>
         {/* O */}
@@ -101,7 +101,7 @@ const MoodyOLoader = () => {
           <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="8" stroke="url(#b)" d="M 12 4 L 32 32 L 52 4 M 32 32 V 60" className="draw" pathLength="360"></path>
         </svg>
         {/* O */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="64" width="64" className="inline-block">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="48" width="48" className="inline-block">
             <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0 -27 a 27 27 0 1 1 0 54 a 27 27 0 1 1 0 -54" className="draw" id="o" pathLength="360"></path>
         </svg>
       </div>
@@ -160,6 +160,7 @@ export default function Home() {
   const [volume, setVolume] = useState(0.75);
   const [appVisible, setAppVisible] = useState(false);
   const [spinKey, setSpinKey] = useState(0);
+  const [isExiting, setIsExiting] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
@@ -437,7 +438,7 @@ export default function Home() {
     if (introClickedRef.current) return;
     introClickedRef.current = true;
 
-    setSpinKey(prev => prev + 1);
+    setIsExiting(true);
 
     setTimeout(() => {
         setAppVisible(true);
@@ -447,9 +448,7 @@ export default function Home() {
   if (!isMounted) {
     return (
       <div className="intro-screen">
-        <div key={spinKey}>
-          <MoodyOLoader />
-        </div>
+        <MoodyOLoader isExiting={false} />
       </div>
     );
   }
@@ -474,9 +473,7 @@ export default function Home() {
             exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
             onClick={handleIntroClick}
           >
-            <div key={spinKey}>
-                <MoodyOLoader />
-            </div>
+            <MoodyOLoader isExiting={isExiting} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -670,5 +667,3 @@ export default function Home() {
     </>
   );
 }
-
-    
