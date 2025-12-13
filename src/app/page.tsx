@@ -4,6 +4,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SkipBack, SkipForward, Play, Pause, X, Heart, Menu, Wand2, Loader, Smile, Music, Volume1, Volume2, Home as HomeIcon, Github } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -116,6 +117,7 @@ export default function Home() {
   const [customMoodFormData, setCustomMoodFormData] = useState({ name: '', emoji: '', description: '' });
   const [volume, setVolume] = useState(0.75);
   const [isVolumeOpen, setIsVolumeOpen] = useState(false);
+  const [appVisible, setAppVisible] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
@@ -369,236 +371,278 @@ export default function Home() {
       <div id="cursor-dot" ref={cursorDotRef} />
       <div id="cursor-ring" ref={cursorRingRef} />
       
-        <div className="app" ref={mainAppRef}>
-          <header>
-            <div className="header-inner">
-                <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">
-                  MoodyO
-                </a>
-                <nav className="hidden md:flex">
-                  <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="nav-btn">
-                    <HomeIcon size={20} />
+      <AnimatePresence>
+        {!appVisible && (
+          <motion.div
+            className="intro-screen"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.5 } }}
+          >
+            <motion.h1 
+              className="intro-title"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.2 } }}
+            >
+              MoodyO
+            </motion.h1>
+            <motion.p
+              className="intro-subtitle"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.5 } }}
+            >
+              AI-Generated Soundscapes
+            </motion.p>
+            <motion.button 
+              className="intro-enter-btn"
+              onClick={() => setAppVisible(true)}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.8 } }}
+            >
+              Enter
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {appVisible && (
+          <motion.div 
+            className="app" 
+            ref={mainAppRef}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.8 } }}
+          >
+            <header>
+              <div className="header-inner">
+                  <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">
+                    MoodyO
                   </a>
-                  <a href="https://github.com/bourojuakshay/studio" target="_blank" rel="noopener noreferrer" className="nav-btn">
-                    <Github size={20} />
-                  </a>
-                </nav>
-                <div className="md:hidden">
-                  <Sheet open={isMenuSheetOpen} onOpenChange={setIsMenuSheetOpen}>
-                    <SheetTrigger asChild>
-                       <button className="nav-btn">
-                        <Menu size={20} />
-                      </button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="main-menu-sheet sheet-content">
-                      <SheetHeader>
-                         <SheetTitle className="sr-only">Main Menu</SheetTitle>
-                        <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">MoodyO</a>
-                      </SheetHeader>
-                      <div className="flex flex-col py-4">
-                         <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }}>Home</a>
-                        {Object.keys(allMoods).map(mood => (
-                          <a key={mood} href="#" onClick={(e) => { e.preventDefault(); openPage(mood); }}>
-                            {allMoods[mood].title.split('—')[0]}
-                          </a>
-                        ))}
-                      </div>
-                       <div className="p-4 border-t border-glass-border">
-                         <NavMenu />
-                       </div>
-                    </SheetContent>
-                  </Sheet>
-                </div>
-            </div>
-          </header>
-
-          <main>
-            <section id="home" className={cn('page', {active: activePage === 'home'})} ref={homePageRef}>
-                <div className="home-section">
-                    <h1 className="home-title">How are you feeling today?</h1>
-                    <p className="home-subtitle">Tap a mood to explore curated songs and vibes. Each page has its own theme ✨</p>
-                
-                  <div className="home-mood-selector">
-                    {Object.entries(allMoods).map(([key, { emoji, title }]) => (
-                      <div key={key} className={cn('emotion-card-new', key)} onClick={() => openPage(key)}>
-                        <div className="card-content">
-                          <div className="emoji">{emoji}</div>
-                          <div className="title">{title.split('—')[0]}</div>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="emotion-card-new create-mood-card" onClick={() => setIsCustomMoodDialogOpen(true)}>
-                      <div className="card-content">
-                        <div className="emoji"><Wand2 size={72} /></div>
-                        <div className="title">Create Your Own</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-            </section>
-
-            {Object.entries(allMoods).map(([mood, def]) => {
-              const playlist = tracks[mood];
-              const trackPlaying = nowPlaying?.mood === mood ? currentTrack : null;
-              const displayTrack = trackPlaying || playlist?.[0];
-
-              return (
-              <section key={mood} id={mood} className={cn('page', { active: activePage === mood })}>
-                <div className="glass">
-                  <div className="mood-page-layout">
-                    <div className="mood-hero">
-                      {displayTrack ? (
-                        <div className="now-playing-card">
-                          <Image className="player-cover" src={displayTrack.cover} alt={displayTrack.title} width={400} height={400} data-ai-hint="song cover" unoptimized={displayTrack.cover.startsWith('data:')} />
-                          <div className="player-info">
-                              <h3>{displayTrack.title}</h3>
-                              <p>{displayTrack.artist}</p>
-                          </div>
-                          <div className="player-controls">
-                              <button onClick={handlePrev}><SkipBack /></button>
-                              <button onClick={handlePlayPause} className="play-main-btn">
-                                  {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={32} /> : <Play size={32} />}
-                              </button>
-                              <button onClick={handleNext}><SkipForward /></button>
-                          </div>
-                          <div className="player-actions">
-                              <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
-                                  <Heart size={24} />
-                              </button>
-                               <div className="volume-control">
-                                 <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
-                                  {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24}/>}
-                                 </button>
-                                {isVolumeOpen && (
-                                  <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
-                                )}
-                               </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="emoji">{def.emoji}</div>
-                          <h2>{def.title}</h2>
-                          <p>{def.subtitle}</p>
-                        </>
-                      )}
-                    </div>
-                    <div className="playlist-view">
-                      <div className="playlist-header">
-                        <h3>Playlist</h3>
-                      </div>
-                      <ScrollArea className="playlist-scroll-area">
-                        <div className="playlist-list">
-                          {playlist && playlist.map((track, index) => (
-                            <div key={index} className={cn('playlist-list-item', { active: trackPlaying?.src === track.src })} onClick={() => openPlayer(mood, index)}>
-                               <Image className="playlist-list-item-cover" src={track.cover} alt={`${track.title} cover`} width={48} height={48} data-ai-hint="song cover" unoptimized={track.cover.startsWith('data:')} />
-                              <div className="playlist-list-item-info">
-                                <div className="title">{track.title}</div>
-                                <div className="artist">{track.artist}</div>
-                              </div>
-                              <button onClick={(e) => handleLike(e, { ...track, mood: mood, index: index })} className={cn('like-btn', { 'liked': isLiked(track) })}>
-                                <Heart size={18} />
-                              </button>
-                            </div>
+                  <nav className="hidden md:flex">
+                    <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="nav-btn">
+                      <HomeIcon size={20} />
+                    </a>
+                    <a href="https://github.com/bourojuakshay/studio" target="_blank" rel="noopener noreferrer" className="nav-btn">
+                      <Github size={20} />
+                    </a>
+                  </nav>
+                  <div className="md:hidden">
+                    <Sheet open={isMenuSheetOpen} onOpenChange={setIsMenuSheetOpen}>
+                      <SheetTrigger asChild>
+                         <button className="nav-btn">
+                          <Menu size={20} />
+                        </button>
+                      </SheetTrigger>
+                      <SheetContent side="left" className="main-menu-sheet sheet-content">
+                        <SheetHeader>
+                           <SheetTitle className="sr-only">Main Menu</SheetTitle>
+                          <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">MoodyO</a>
+                        </SheetHeader>
+                        <div className="flex flex-col py-4">
+                           <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }}>Home</a>
+                          {Object.keys(allMoods).map(mood => (
+                            <a key={mood} href="#" onClick={(e) => { e.preventDefault(); openPage(mood); }}>
+                              {allMoods[mood].title.split('—')[0]}
+                            </a>
                           ))}
                         </div>
-                      </ScrollArea>
+                         <div className="p-4 border-t border-glass-border">
+                           <NavMenu />
+                         </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
+              </div>
+            </header>
+
+            <main>
+              <section id="home" className={cn('page', {active: activePage === 'home'})} ref={homePageRef}>
+                  <div className="home-section">
+                      <h1 className="home-title">How are you feeling today?</h1>
+                      <p className="home-subtitle">Tap a mood to explore curated songs and vibes. Each page has its own theme ✨</p>
+                  
+                    <div className="home-mood-selector">
+                      {Object.entries(allMoods).map(([key, { emoji, title }]) => (
+                        <div key={key} className={cn('emotion-card-new', key)} onClick={() => openPage(key)}>
+                          <div className="card-content">
+                            <div className="emoji">{emoji}</div>
+                            <div className="title">{title.split('—')[0]}</div>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="emotion-card-new create-mood-card" onClick={() => setIsCustomMoodDialogOpen(true)}>
+                        <div className="card-content">
+                          <div className="emoji"><Wand2 size={72} /></div>
+                          <div className="title">Create Your Own</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
               </section>
-            )})}
-          </main>
-          
-          <footer style={{marginTop: "auto", paddingTop: "28px", textAlign: "center", opacity: 0.8}}>
-             <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in" style={{textDecoration: "underline"}}>23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
-          </footer>
 
-          {nowPlaying && currentTrack && (
-            <div className="player-dialog-overlay" style={{display:'none'}}>
-                <div className="player-dialog glass">
-                    <button onClick={closePlayer} className="player-close-btn"><X size={24} /></button>
-                    <Image className="player-cover" src={currentTrack.cover} alt={currentTrack.title} width={400} height={400} data-ai-hint="song cover" unoptimized={currentTrack.cover.startsWith('data:')} />
-                    <div className="player-info">
-                        <h3>{currentTrack.title}</h3>
-                        <p>{currentTrack.artist}</p>
-                    </div>
-                      <div className="player-controls">
-                        <button onClick={handlePrev}><SkipBack /></button>
-                        <button onClick={handlePlayPause} className="play-main-btn">
-                            {isPlaying ? <Pause size={32} /> : <Play size={32} />}
-                        </button>
-                        <button onClick={handleNext}><SkipForward /></button>
-                    </div>
-                      <div className="player-actions">
-                        <button onClick={(e) => handleLike(e, { ...currentTrack, mood: nowPlaying.mood, index: nowPlaying.index })} className={cn('like-btn', { 'liked': isLiked(currentTrack) })}>
-                            <Heart size={24} />
-                        </button>
-                         <div className="volume-control">
-                           <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
-                             {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24} />}
-                           </button>
-                           {isVolumeOpen && (
-                             <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider"/>
-                           )}
-                         </div>
-                    </div>
-                </div>
-            </div>
-          )}
-          <audio ref={audioRef} onEnded={handleSongEnd} />
+              {Object.entries(allMoods).map(([mood, def]) => {
+                const playlist = tracks[mood];
+                const trackPlaying = nowPlaying?.mood === mood ? currentTrack : null;
+                const displayTrack = trackPlaying || playlist?.[0];
 
-          <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
-            <DialogContent className="sheet-content glass">
-              <DialogHeader>
-                <DialogTitle>Create a Custom Mood</DialogTitle>
-                <DialogDescription>
-                  Describe the vibe, and AI will generate a unique mood page for you.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleGenerateMood} className="flex flex-col gap-4">
-                <Input 
-                  name="name" 
-                  placeholder="Mood Name (e.g., Cosmic Jazz)" 
-                  required 
-                  value={customMoodFormData.name}
-                  onChange={(e) => setCustomMoodFormData({...customMoodFormData, name: e.target.value })}
-                />
-                  <div>
-                  <div className="emoji-picker">
-                    {['🎷', '📚', '🌧️', '🌲', '🚀', '👾'].map(emoji => (
-                      <span 
-                        key={emoji}
-                        className={cn('emoji-option', { selected: customMoodFormData.emoji === emoji })}
-                        onClick={() => setCustomMoodFormData({...customMoodFormData, emoji })}
-                      >
-                        {emoji}
-                      </span>
-                    ))}
+                return (
+                <section key={mood} id={mood} className={cn('page', { active: activePage === mood })}>
+                  <div className="glass">
+                    <div className="mood-page-layout">
+                      <div className="mood-hero">
+                        {displayTrack ? (
+                          <div className="now-playing-card">
+                            <Image className="player-cover" src={displayTrack.cover} alt={displayTrack.title} width={400} height={400} data-ai-hint="song cover" unoptimized={displayTrack.cover.startsWith('data:')} />
+                            <div className="player-info">
+                                <h3>{displayTrack.title}</h3>
+                                <p>{displayTrack.artist}</p>
+                            </div>
+                            <div className="player-controls">
+                                <button onClick={handlePrev}><SkipBack /></button>
+                                <button onClick={handlePlayPause} className="play-main-btn">
+                                    {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={32} /> : <Play size={32} />}
+                                </button>
+                                <button onClick={handleNext}><SkipForward /></button>
+                            </div>
+                            <div className="player-actions">
+                                <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
+                                    <Heart size={24} />
+                                </button>
+                                 <div className="volume-control">
+                                   <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
+                                    {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24}/>}
+                                   </button>
+                                  {isVolumeOpen && (
+                                    <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
+                                  )}
+                                 </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="emoji">{def.emoji}</div>
+                            <h2>{def.title}</h2>
+                            <p>{def.subtitle}</p>
+                          </>
+                        )}
+                      </div>
+                      <div className="playlist-view">
+                        <div className="playlist-header">
+                          <h3>Playlist</h3>
+                        </div>
+                        <ScrollArea className="playlist-scroll-area">
+                          <div className="playlist-list">
+                            {playlist && playlist.map((track, index) => (
+                              <div key={index} className={cn('playlist-list-item', { active: trackPlaying?.src === track.src })} onClick={() => openPlayer(mood, index)}>
+                                 <Image className="playlist-list-item-cover" src={track.cover} alt={`${track.title} cover`} width={48} height={48} data-ai-hint="song cover" unoptimized={track.cover.startsWith('data:')} />
+                                <div className="playlist-list-item-info">
+                                  <div className="title">{track.title}</div>
+                                  <div className="artist">{track.artist}</div>
+                                </div>
+                                <button onClick={(e) => handleLike(e, { ...track, mood: mood, index: index })} className={cn('like-btn', { 'liked': isLiked(track) })}>
+                                  <Heart size={18} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )})}
+            </main>
+            
+            <footer>
+              <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
+            </footer>
+
+            {nowPlaying && currentTrack && (
+              <div className="player-dialog-overlay" style={{display:'none'}}>
+                  <div className="player-dialog glass">
+                      <button onClick={closePlayer} className="player-close-btn"><X size={24} /></button>
+                      <Image className="player-cover" src={currentTrack.cover} alt={currentTrack.title} width={400} height={400} data-ai-hint="song cover" unoptimized={currentTrack.cover.startsWith('data:')} />
+                      <div className="player-info">
+                          <h3>{currentTrack.title}</h3>
+                          <p>{currentTrack.artist}</p>
+                      </div>
+                        <div className="player-controls">
+                          <button onClick={handlePrev}><SkipBack /></button>
+                          <button onClick={handlePlayPause} className="play-main-btn">
+                              {isPlaying ? <Pause size={32} /> : <Play size={32} />}
+                          </button>
+                          <button onClick={handleNext}><SkipForward /></button>
+                      </div>
+                        <div className="player-actions">
+                          <button onClick={(e) => handleLike(e, { ...currentTrack, mood: nowPlaying.mood, index: nowPlaying.index })} className={cn('like-btn', { 'liked': isLiked(currentTrack) })}>
+                              <Heart size={24} />
+                          </button>
+                           <div className="volume-control">
+                             <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
+                               {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24} />}
+                             </button>
+                             {isVolumeOpen && (
+                               <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider"/>
+                             )}
+                           </div>
+                      </div>
+                  </div>
+              </div>
+            )}
+            <audio ref={audioRef} onEnded={handleSongEnd} />
+
+            <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
+              <DialogContent className="sheet-content glass">
+                <DialogHeader>
+                  <DialogTitle>Create a Custom Mood</DialogTitle>
+                  <DialogDescription>
+                    Describe the vibe, and AI will generate a unique mood page for you.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleGenerateMood} className="flex flex-col gap-4">
+                  <Input 
+                    name="name" 
+                    placeholder="Mood Name (e.g., Cosmic Jazz)" 
+                    required 
+                    value={customMoodFormData.name}
+                    onChange={(e) => setCustomMoodFormData({...customMoodFormData, name: e.target.value })}
+                  />
+                    <div>
+                    <div className="emoji-picker">
+                      {['🎷', '📚', '🌧️', '🌲', '🚀', '👾'].map(emoji => (
+                        <span 
+                          key={emoji}
+                          className={cn('emoji-option', { selected: customMoodFormData.emoji === emoji })}
+                          onClick={() => setCustomMoodFormData({...customMoodFormData, emoji })}
+                        >
+                          {emoji}
+                        </span>
+                      ))}
+                    </div>
+                    <Input 
+                      name="emoji" 
+                      placeholder="Select an emoji from above or type one" 
+                      required 
+                      maxLength={2} 
+                      value={customMoodFormData.emoji}
+                      onChange={(e) => setCustomMoodFormData({...customMoodFormData, emoji: e.target.value })}
+                    />
                   </div>
                   <Input 
-                    name="emoji" 
-                    placeholder="Select an emoji from above or type one" 
-                    required 
-                    maxLength={2} 
-                    value={customMoodFormData.emoji}
-                    onChange={(e) => setCustomMoodFormData({...customMoodFormData, emoji: e.target.value })}
+                    name="description" 
+                    placeholder="Description (e.g., Late night jazz in a space lounge)" 
+                    required
+                    value={customMoodFormData.description}
+                    onChange={(e) => setCustomMoodFormData({...customMoodFormData, description: e.target.value })}
                   />
-                </div>
-                <Input 
-                  name="description" 
-                  placeholder="Description (e.g., Late night jazz in a space lounge)" 
-                  required
-                  value={customMoodFormData.description}
-                  onChange={(e) => setCustomMoodFormData({...customMoodFormData, description: e.target.value })}
-                />
-                <Button type="submit" disabled={isGenerating || !isFormValid}>
-                  {isGenerating ? <><Loader className="animate-spin mr-2" size={16}/> Generating...</> : "Generate Mood"}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+                  <Button type="submit" disabled={isGenerating || !isFormValid}>
+                    {isGenerating ? <><Loader className="animate-spin mr-2" size={16}/> Generating...</> : "Generate Mood"}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

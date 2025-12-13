@@ -124,9 +124,44 @@ nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .nav-btn{background:transparent;border:1px solid transparent;padding:10px;border-radius:14px;cursor:pointer;font-weight:600;transition: all 0.3s ease;color:inherit}
 .nav-btn:hover{background: var(--glass-bg)}
 
+/* Intro screen */
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #0f1724;
+  color: #e6eef8;
+}
+.intro-title {
+  font-size: clamp(2.5rem, 10vw, 5rem);
+  font-weight: 800;
+}
+.intro-subtitle {
+  font-size: clamp(1rem, 4vw, 1.25rem);
+  opacity: 0.8;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+.intro-enter-btn {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  color: var(--text);
+  font-weight: 600;
+  transition: all .3s ease;
+}
+.intro-enter-btn:hover {
+  background: var(--page-accent);
+  color: #111;
+  transform: scale(1.05);
+}
 
-/* glass card */
-.glass{background:var(--glass-bg);border-radius:var(--radius);padding:24px;border:1px solid var(--glass-border);box-shadow:var(--glass-shadow);backdrop-filter: blur(10px) saturate(150%)}
 
 /* home */
 .home-section {
@@ -620,6 +655,11 @@ footer {
   padding-top: 28px;
   text-align: center;
   opacity: .8;
+}
+
+footer small {
+  display: inline-block;
+  width: 100%;
 }
 
 footer a {
