@@ -1140,22 +1140,19 @@ body.custom-theme-active body {
 .w-2 {
   width: 0.5em;
 }
-.dash {
-  animation: dashArray 2s ease-in-out infinite,
-    dashOffset 2s linear infinite;
-}
-.spin {
-  animation: dashArray 2s ease-in-out;
-  transform-origin: center;
-}
-@keyframes dashArray {
-  0% { stroke-dasharray: 0 1 359 0; }
-  50% { stroke-dasharray: 0 359 1 0; }
-  100% { stroke-dasharray: 359 1 0 0; }
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 360;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
-@keyframes dashOffset {
-  0% { stroke-dashoffset: 365; }
-  100% { stroke-dashoffset: 5; }
+.draw {
+  stroke-dasharray: 360;
+  animation: draw 2s ease-in-out;
 }
     
+
