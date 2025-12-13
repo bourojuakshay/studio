@@ -36,6 +36,7 @@ export const dynamic = 'force-dynamic';
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   const logoText = "MoodyO".split("");
+  const taglineText = "MOOD-DRIVEN AUDIO EXPERIENCE".split(" ");
 
   const containerVariants = {
     enter: {
@@ -80,11 +81,27 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
     },
   };
   
-  const taglineVariants = {
-    initial: { opacity: 0 },
-    enter: { opacity: 1, transition: { delay: 0.5, duration: 0.5 } },
-    exit: { opacity: 0, transition: { duration: 0.3 } }
+  const taglineContainerVariants = {
+    enter: {
+      transition: {
+        delayChildren: 0.3, // Delay start of tagline animation
+        staggerChildren: 0.08,
+      }
+    },
+    exit: {
+      transition: {
+        staggerChildren: 0.08,
+        staggerDirection: -1,
+      }
+    }
+  };
+
+  const taglineWordVariants = {
+    initial: { opacity: 0, y: 10 },
+    enter: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+    exit: { opacity: 0, y: 10, transition: { duration: 0.3, ease: 'easeIn' } },
   }
+
 
   return (
     <motion.div
@@ -102,9 +119,13 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
           </motion.span>
         ))}
       </motion.div>
-      <motion.p className="intro-tagline" variants={taglineVariants}>
-        MOOD-DRIVEN AUDIO EXPERIENCE
-      </motion.p>
+      <motion.div className="intro-tagline" variants={taglineContainerVariants}>
+        {taglineText.map((word, index) => (
+           <motion.span key={index} variants={taglineWordVariants} style={{ display: 'inline-block', marginRight: '0.5em' }}>
+            {word}
+          </motion.span>
+        ))}
+      </motion.div>
     </motion.div>
   );
 };
