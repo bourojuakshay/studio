@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -28,7 +27,7 @@ import { useSongs } from '@/hooks/use-songs';
 import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { setUserSongPreference, type Song } from '@/firebase/firestore';
 import { useAuth, useFirestore, useUser } from '@/firebase';
-import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
+import { initiateAnonymousSignIn, initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
 import { MOOD_DEFS, type MoodDefinition, type Track } from '@/app/lib/mood-definitions';
 import { useToast } from '@/hooks/use-toast';
 
@@ -212,7 +211,10 @@ export default function Home() {
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    if (!isUserLoading && !user) {
+      initiateAnonymousSignIn(auth);
+    }
+  }, [isUserLoading, user, auth]);
 
   // Custom Cursor Animation
   useEffect(() => {
@@ -335,7 +337,7 @@ export default function Home() {
     return likedSongPrefs.some(pref => pref.songId === track.id && pref.liked);
   }
 
-  const handleLike = (e: React.MouseEvent, track: Track) => {
+  const handleLike = (e: React.MouseEvent | PanInfo, track: Track) => {
     e.stopPropagation();
     if (!user) {
         setIsAuthSheetOpen(true);
@@ -347,8 +349,10 @@ export default function Home() {
     }
     if (!track.id) return;
 
-    gsap.fromTo(e.currentTarget, { scale: 1 }, { scale: 1.3, duration: 0.2, ease: 'back.out(1.7)', yoyo: true, repeat: 1 });
-
+    if ('currentTarget' in e) {
+      gsap.fromTo(e.currentTarget, { scale: 1 }, { scale: 1.3, duration: 0.2, ease: 'back.out(1.7)', yoyo: true, repeat: 1 });
+    }
+    
     const currentlyLiked = isLiked(track);
     setUserSongPreference(firestore, user.uid, track.id, !currentlyLiked);
   }
@@ -495,6 +499,7 @@ export default function Home() {
   }
 
   const isAuthFormValid = authForm.email && authForm.password;
+  const isFormValid = customMoodFormData.name && customMoodFormData.emoji && customMoodFormData.description;
 
   return (
     <>
@@ -787,3 +792,5 @@ export default function Home() {
     </>
   );
 }
+
+    
