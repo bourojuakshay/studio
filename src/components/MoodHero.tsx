@@ -75,8 +75,6 @@ export function MoodHero({
                                     {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={24} /> : <Play size={24} />}
                                 </button>
                                 <button onClick={handleNext} className="control-btn"><SkipForward size={20}/></button>
-                            </div>
-                            <div className="player-actions">
                                 <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn control-btn', { 'liked': isLiked(displayTrack) })}>
                                     <Heart size={20} />
                                 </button>

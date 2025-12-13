@@ -476,12 +476,6 @@ body.home-active .nav-btn {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-}
-.player-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.25rem;
   width: 100%;
 }
 
@@ -1334,3 +1328,4 @@ body.custom-theme-active body {
     
 
     
+
