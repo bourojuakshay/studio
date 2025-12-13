@@ -369,7 +369,7 @@ body.home-active .nav-btn {
 }
 
 .now-playing-card:hover {
-  transform: translateY(-5px) perspective(1000px) rotateX(var(--rotate-x, 0)) rotateY(var(--rotate-y, 0));
+  transform: translateY(-5px);
   box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
   border-color: hsla(var(--primary), 0.3);
 }
@@ -1203,7 +1203,7 @@ body.custom-theme-active body {
     }
 }
 
-.persistent-player-card .one .bar button {
+.persistent-player-card .one button {
   background: none;
   border: none;
   padding: 0;

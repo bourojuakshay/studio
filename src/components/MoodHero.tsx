@@ -55,20 +55,6 @@ export function MoodHero({
     const trackPlaying = nowPlaying?.mood === mood ? currentTrack : null;
     const displayTrack = trackPlaying || tracks?.[0];
 
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        const { clientX, clientY, currentTarget } = e;
-        const { left, top, width, height } = currentTarget.getBoundingClientRect();
-        const x = (clientX - left) / width - 0.5;
-        const y = (clientY - top) / height - 0.5;
-        currentTarget.style.setProperty('--rotate-x', `${-y * 15}deg`);
-        currentTarget.style.setProperty('--rotate-y', `${x * 15}deg`);
-    };
-
-    const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-        e.currentTarget.style.setProperty('--rotate-x', '0deg');
-        e.currentTarget.style.setProperty('--rotate-y', '0deg');
-    };
-
     const heroVariants = {
       hidden: { opacity: 0, x: -50 },
       visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: 'easeOut' } }
@@ -95,8 +81,6 @@ export function MoodHero({
                 <div 
                     ref={cardRef}
                     className={cn("now-playing-card", { "is-playing": isPlaying && nowPlaying?.mood === mood })}
-                    onMouseMove={handleMouseMove}
-                    onMouseLeave={handleMouseLeave}
                 >
                     <div className="card__shine"></div>
                     <div className="card__glow"></div>
