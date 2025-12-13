@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { SkipBack, SkipForward, Play, Pause, Heart, Volume1, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { MoodDefinition, Track } from '@/app/page';
+import { MoodDefinition, Track } from '@/app/lib/mood-definitions';
 
 type MoodHeroProps = {
     definition: MoodDefinition;

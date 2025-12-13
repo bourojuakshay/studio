@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { addSong } from '@/firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { Loader } from 'lucide-react';
-import { MOOD_DEFS } from '../page';
+import { MOOD_DEFS } from '../lib/mood-definitions';
 import {
   Select,
   SelectContent,

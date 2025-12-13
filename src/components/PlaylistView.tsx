@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Track } from '@/app/page';
+import { Track } from '@/app/lib/mood-definitions';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 type PlaylistViewProps = {

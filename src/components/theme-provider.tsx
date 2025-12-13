@@ -2,24 +2,7 @@
 'use client';
 
 import { useEffect } from 'react';
-
-type MoodDefinition = {
-  title: string;
-  subtitle: string;
-  accent: string;
-  bg: string;
-  emoji: string;
-  themeClass: string;
-};
-
-type Track = {
-  title: string;
-  artist: string;
-  src: string;
-  cover: string;
-  mood?: string;
-  index?: number;
-};
+import type { MoodDefinition, Track } from '@/app/lib/mood-definitions';
 
 type ThemeProviderProps = {
     activePage: string;

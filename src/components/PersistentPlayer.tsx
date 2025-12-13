@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ListMusic, Heart, SkipBack, Play, Pause, SkipForward } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import type { Track } from '@/app/page';
+import type { Track } from '@/app/lib/mood-definitions';
 
 type PersistentPlayerProps = {
     track: Track;

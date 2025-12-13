@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MoodDefinition, Track } from '@/app/page';
+import { MoodDefinition, Track } from '@/app/lib/mood-definitions';
 import { MoodHero } from './MoodHero';
 import { PlaylistView } from './PlaylistView';
 

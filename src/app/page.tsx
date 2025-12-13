@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,65 +24,11 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { PersistentPlayer } from '@/components/PersistentPlayer';
 import { MoodPage } from '@/components/MoodPage';
 import { useSongs } from '@/hooks/use-songs';
-import { Song } from '@/firebase/firestore';
+import type { Song } from '@/firebase/firestore';
+import { MOOD_DEFS, type MoodDefinition, type Track } from '@/app/lib/mood-definitions';
 
 
 export const dynamic = 'force-dynamic';
-
-// --- Data Definitions ---
-export type MoodDefinition = {
-  title: string;
-  subtitle: string;
-  accent: string;
-  bg: string;
-  emoji: string;
-  themeClass: string;
-};
-
-export const MOOD_DEFS: { [key: string]: MoodDefinition } = {
-  happy: {
-    title: 'Happy',
-    subtitle: 'Feel-good tracks with a deep groove',
-    accent: 'hsl(var(--primary))',
-    bg: 'linear-gradient(43deg, hsl(var(--primary)) 0%, #4c1d95 100%)',
-    emoji: '😄',
-    themeClass: 'happy-active',
-  },
-  joyful: {
-    title: 'Joyful',
-    subtitle: 'High-energy songs — perfect for smiles and movement',
-    accent: 'hsl(var(--primary))',
-    bg: 'linear-gradient(43deg, hsl(var(--primary)) 0%, #4c1d95 100%)',
-    emoji: '🥳',
-    themeClass: 'joyful-active',
-  },
-  sad: {
-    title: 'Sad',
-    subtitle: 'Slow, emotional tracks to reflect',
-    accent: 'hsl(var(--primary))',
-    bg: 'linear-gradient(43deg, hsl(var(--primary)) 0%, #4c1d95 100%)',
-    emoji: '😢',
-    themeClass: 'sad-active',
-  },
-  depression: {
-    title: 'Depression',
-    subtitle: 'Ambient textures and slow soundscapes',
-    accent: 'hsl(var(--primary))',
-    bg: 'linear-gradient(43deg, hsl(var(--primary)) 0%, #4c1d95 100%)',
-    emoji: '😔',
-    themeClass: 'depression-active',
-  }
-};
-
-export type Track = {
-  title: string;
-  artist: string;
-  src: string;
-  cover: string;
-  mood?: string;
-  index?: number;
-};
-
 
 const SAMPLE_TRACKS = (baseIdx = 1): Track[] => Array.from({ length: 10 }, (_, i) => ({
   title: ['Sunny Days', 'Golden Hour', 'Sparkle', 'Warm Breeze', 'Lemonade', 'Candy Skies', 'Bloom', 'Brightside', 'Hummingbird', 'Radiant'][i],
@@ -171,7 +117,7 @@ const MoodyOLoader = () => {
 }
   
 
-const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }) => {
+const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void, style?: React.CSSProperties }) => {
   return (
     <div className="interactive-card-container noselect" onClick={onClick}>
       <div className="canvas">
@@ -209,7 +155,7 @@ export default function Home() {
   const homePageRef = useRef<HTMLElement>(null);
   const mainAppRef = useRef<HTMLDivElement>(null);
 
-  const { songs: firestoreSongs, loading, error } = useSongs();
+  const { songs: firestoreSongs } = useSongs();
   const [tracks, setTracks] = useState<Record<string, Track[]>>(STATIC_TRACKS);
 
   useEffect(() => {
@@ -444,7 +390,7 @@ export default function Home() {
             <ul className="mobile-menu-items">
               {likedSongs.map((track, index) => (
                 <li key={index}>
-                  <a href="#" className="playlist-item" onClick={(e) => { e.preventDefault(); openPlayer(track.mood!, track.index!) }}>
+                  <a href="#" className="playlist-item" onClick={(e) => { e.preventDefault(); if (track.mood && track.index !== undefined) openPlayer(track.mood, track.index) }}>
                     <Image src={track.cover} alt={track.title} width={40} height={40} className="playlist-item-cover" data-ai-hint="song cover" />
                     <span>{track.title}</span>
                   </a>
@@ -691,5 +637,3 @@ export default function Home() {
     </>
   );
 }
-
-    
