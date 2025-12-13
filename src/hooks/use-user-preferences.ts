@@ -14,7 +14,8 @@ export function useUserPreferences(userId?: string) {
   useEffect(() => {
     if (!firestore || !userId) {
       setPreferences([]);
-      setLoading(false);
+      // We don't set loading to false here to avoid UI flicker if userId is just temporarily unavailable.
+      // If no userId is ever provided, loading will remain true, which is acceptable.
       return;
     }
 

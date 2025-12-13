@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
 import { getSongs, type Song } from '@/firebase/firestore';
 
 export function useSongs() {
@@ -10,9 +10,15 @@ export function useSongs() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const firestore = useFirestore();
+  const { user } = useUser(); // Get the user object
 
   useEffect(() => {
-    if (!firestore) return;
+    // Wait for both firestore and an authenticated user
+    if (!firestore || !user) {
+      // If there's no user yet, we are in a loading state until anonymous auth completes.
+      // We don't set loading to false here, to prevent a flicker of "no songs".
+      return;
+    }
 
     setLoading(true);
     const unsubscribe = getSongs(
@@ -29,7 +35,7 @@ export function useSongs() {
     );
 
     return () => unsubscribe();
-  }, [firestore]);
+  }, [firestore, user]); // Add user to the dependency array
 
   return { songs, loading, error };
 }
