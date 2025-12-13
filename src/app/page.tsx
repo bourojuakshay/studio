@@ -35,68 +35,52 @@ import { useToast } from '@/hooks/use-toast';
 export const dynamic = 'force-dynamic';
 
 const MoodyOLoader = ({ isExiting }: { isExiting: boolean }) => {
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) return null;
-
-  return (
-    <div className="moody-loader-container">
-      <div className={cn("loader items-center", { 'exit-animation': isExiting })}>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="80" width="80" className="inline-block">
-          <defs className="s-xJBuHA073rTt" xmlns="http://www.w3.org/2000/svg">
-            <linearGradient className="s-xJBuHA073rTt" gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="b">
-              <stop className="s-xJBuHA073rTt" stopColor="#973BED"></stop>
-              <stop className="s-xJBuHA073rTt" stopColor="#007CFF" offset="1"></stop>
-            </linearGradient>
-            <linearGradient className="s-xJBuHA073rTt" gradientUnits="userSpaceOnUse" y2="0" x2="0" y1="64" x1="0" id="c">
-              <stop className="s-xJBuHA073rTt" stopColor="#FFC800"></stop>
-              <stop className="s-xJBuHA073rTt" stopColor="#F0F" offset="1"></stop>
-              <animateTransform repeatCount="indefinite" keySplines=".42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1" keyTimes="0; 0.125; 0.25; 0.375; 0.5; 0.625; 0.75; 0.875; 1" dur="8s" values="0 32 32;-270 32 32;-270 32 32;-540 32 32;-540 32 32;-810 32 32;-810 32 32;-1080 32 32;-1080 32 32" type="rotate" attributeName="gradientTransform"></animateTransform>
-            </linearGradient>
-            <linearGradient className="s-xJBuHA073rTt" gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="d">
-              <stop className="s-xJBuHA0T3rTt" stopColor="#00E0ED"></stop>
-              <stop className="s-xJBuHA073rTt" stopColor="#00DA72" offset="1"></stop>
-            </linearGradient>
-          </defs>
-        </svg>
-        {/* M */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="80" width="80" className="inline-block">
-          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 54 V 10 L 32 32 L 54 10 V 54" className="draw" pathLength="360"></path>
-        </svg>
-        {/* O */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw" pathLength="360"></path>
-        </svg>
-        {/* O */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw" pathLength="360"></path>
-        </svg>
-        {/* d */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M 54 54 V 10 M 54 32 a 22,22 0 1,1 -44,0 a 22,22 0 1,1 44,0" className="draw" pathLength="360"></path>
-        </svg>
-        {/* Y */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
-          <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 10 l 22 22 l 22 -22 M 32 32 V 54" className="draw" pathLength="360"></path>
-        </svg>
-        {/* O */}
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="80" width="80" className="inline-block">
-            <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44" className="draw" id="o" pathLength="360"></path>
-        </svg>
-      </div>
-      <motion.p
-        className="intro-subtitle moody-loader-text"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { duration: 0.8, delay: 0.8 } }}
-      >
-        Mood Based Audio
-      </motion.p>
-    </div>
-  );
-}
+    return (
+        <motion.div 
+            className="intro-content"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
+            <div className="intro-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="80" width="80" className="inline-block">
+                    <defs>
+                        <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="b">
+                            <stop stopColor="#973BED"></stop>
+                            <stop stopColor="#007CFF" offset="1"></stop>
+                        </linearGradient>
+                        <linearGradient gradientUnits="userSpaceOnUse" y2="0" x2="0" y1="64" x1="0" id="c">
+                            <stop stopColor="#FFC800"></stop>
+                            <stop stopColor="#F0F" offset="1"></stop>
+                        </linearGradient>
+                        <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="d">
+                            <stop stopColor="#00E0ED"></stop>
+                            <stop stopColor="#00DA72" offset="1"></stop>
+                        </linearGradient>
+                    </defs>
+                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 54 V 10 L 32 32 L 54 10 V 54"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
+                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
+                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
+                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#d)" d="M 54 54 V 10 M 54 32 a 22,22 0 1,1 -44,0 a 22,22 0 1,1 44,0"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64" height="48" width="48" className="inline-block">
+                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#b)" d="M 10 10 l 22 22 l 22 -22 M 32 32 V 54"></path>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" style={{'--rotation-duration': '0ms', '--rotation-direction': 'normal'} as React.CSSProperties} viewBox="0 0 64 64" height="80" width="80" className="inline-block">
+                    <path strokeLinejoin="round" strokeLinecap="round" strokeWidth="10" stroke="url(#c)" d="M 32 32 m 0, -22 a 22,22 0 1,1 0,44 a 22,22 0 1,1 0,-44"></path>
+                </svg>
+            </div>
+            <p className="intro-subtitle">MOOD-DRIVEN AUDIO EXPERIENCE</p>
+        </motion.div>
+    );
+};
   
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void, style?: React.CSSProperties }) => {
@@ -462,13 +446,28 @@ export default function Home() {
 
     setTimeout(() => {
         setAppVisible(true);
-    }, 2000); // Match animation duration
+    }, 800); // Match animation duration
   };
 
   const handleSignOut = () => {
     auth.signOut();
     setIsMenuSheetOpen(false);
   }
+
+  useEffect(() => {
+    // Automatically transition after a delay
+    const timer = setTimeout(() => {
+        handleIntroClick();
+    }, 2500); // Auto-play after 2.5 seconds
+
+    // Also allow click to transition
+    window.addEventListener('click', handleIntroClick);
+
+    return () => {
+        clearTimeout(timer);
+        window.removeEventListener('click', handleIntroClick);
+    };
+  }, []);
 
   if (!isMounted) {
     return (
@@ -499,7 +498,6 @@ export default function Home() {
             className="intro-screen"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
-            onClick={handleIntroClick}
           >
             <MoodyOLoader isExiting={isExiting} />
           </motion.div>
@@ -772,7 +770,3 @@ export default function Home() {
     </>
   );
 }
-
-    
-
-    
