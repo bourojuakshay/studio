@@ -867,7 +867,7 @@ body.custom-theme-active body {
 .tr-18:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-10deg) rotateY(0deg) rotateZ(0deg); }
 .tr-19:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-10deg) rotateY(5deg) rotateZ(0deg); }
 .tr-20:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-10deg) rotateY(10deg) rotateZ(0deg); }
-.tr-21:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(-10deg) rotateZ(0deg); }
+.tr-21:hover ~ .interactivecard { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(-10deg) rotateZ(0deg); }
 .tr-22:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(-5deg) rotateZ(0deg); }
 .tr-23:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(0deg) rotateZ(0deg); }
 .tr-24:hover ~ .interactive-card { transition: 125ms ease-in-out; transform: rotateX(-20deg) rotateY(5deg) rotateZ(0deg); }
@@ -1145,9 +1145,7 @@ body.custom-theme-active body {
     dashOffset 2s linear infinite;
 }
 .spin {
-  animation: spinDashArray 2s ease-in-out,
-    spin 12s ease-in-out,
-    dashOffset 2s linear infinite;
+  animation: dashArray 2s ease-in-out;
   transform-origin: center;
 }
 @keyframes dashArray {
@@ -1155,24 +1153,9 @@ body.custom-theme-active body {
   50% { stroke-dasharray: 0 359 1 0; }
   100% { stroke-dasharray: 359 1 0 0; }
 }
-@keyframes spinDashArray {
-  0% { stroke-dasharray: 270 90; }
-  50% { stroke-dasharray: 0 360; }
-  100% { stroke-dasharray: 270 90; }
-}
+
 @keyframes dashOffset {
   0% { stroke-dashoffset: 365; }
   100% { stroke-dashoffset: 5; }
 }
-@keyframes spin {
-  0% { rotate: 0deg; }
-  10% { rotate: 0deg; } /* Start pause at beginning */
-  22.5% { rotate: 360deg; } /* End first rotation */
-  60% { rotate: 360deg; } /* 3 second pause (37.5% of 8s is 3s) */
-  72.5% { rotate: 720deg; } /* End second rotation */
-  85% { rotate: 1080deg; } /* End third rotation */
-  97.5%, 100% { rotate: 1440deg; } /* End final rotation */
-}
-    
-
     
