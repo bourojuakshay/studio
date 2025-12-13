@@ -259,7 +259,7 @@ nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .intro-bg-element {
     position: absolute;
     border-radius: 50%;
-    background: radial-gradient(circle, var(--orb-color, var(--page-accent)), transparent 60%);
+    background: radial-gradient(circle, var(--orb-color, hsl(var(--primary))), transparent 60%);
     opacity: 0.15;
     filter: blur(40px);
 }
@@ -368,7 +368,6 @@ body.home-active .nav-btn {
   box-shadow: var(--card-shadow);
   border: 1px solid var(--glass-border);
   font-family: var(--font-sans);
-  transform-style: preserve-3d;
 }
 
 .now-playing-card:hover {
@@ -454,10 +453,9 @@ body.home-active .nav-btn {
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
-  transform: translateZ(20px);
 }
 .now-playing-card:hover .card__image {
-  transform: translateY(-5px) scale(1.03) translateZ(40px);
+  transform: translateY(-5px) scale(1.03);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 .card__image > img {
@@ -473,7 +471,6 @@ body.home-active .nav-btn {
   flex-direction: column;
   gap: 0.25em;
   text-align: center;
-  transform: translateZ(10px);
 }
 
 .card__title {
@@ -500,7 +497,6 @@ body.home-active .nav-btn {
 
 .card__footer {
   margin-top: auto;
-  transform: translateZ(10px);
 }
 
 .progress-bar-container {
