@@ -68,24 +68,22 @@ export function MoodHero({
                             <h3 className="card__title">{displayTrack.title}</h3>
                             <p className="card__description">{displayTrack.artist}</p>
                         </div>
-                        <div className="card__footer">
-                            <div className="player-controls">
-                                <button onClick={handlePrev} className="control-btn"><SkipBack size={20} /></button>
-                                <button onClick={handlePlayPause} className="play-main-btn">
-                                    {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={24} /> : <Play size={24} />}
+                        <div className="player-controls">
+                            <button onClick={handlePrev} className="control-btn"><SkipBack size={20} /></button>
+                            <button onClick={handlePlayPause} className="play-main-btn">
+                                {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={24} /> : <Play size={24} />}
+                            </button>
+                            <button onClick={handleNext} className="control-btn"><SkipForward size={20}/></button>
+                            <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn control-btn', { 'liked': isLiked(displayTrack) })}>
+                                <Heart size={20} />
+                            </button>
+                            <div className="volume-control">
+                                <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn control-btn">
+                                    {volume > 0.5 ? <Volume2 size={20} /> : <Volume1 size={20} />}
                                 </button>
-                                <button onClick={handleNext} className="control-btn"><SkipForward size={20}/></button>
-                                <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn control-btn', { 'liked': isLiked(displayTrack) })}>
-                                    <Heart size={20} />
-                                </button>
-                                <div className="volume-control">
-                                    <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn control-btn">
-                                        {volume > 0.5 ? <Volume2 size={20} /> : <Volume1 size={20} />}
-                                    </button>
-                                    {isVolumeOpen && (
-                                        <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
-                                    )}
-                                </div>
+                                {isVolumeOpen && (
+                                    <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
+                                )}
                             </div>
                         </div>
                     </div>
