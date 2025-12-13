@@ -1,10 +1,10 @@
 
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { Menu, Wand2, Loader, Home as HomeIcon, Github, User, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -36,68 +36,86 @@ export const dynamic = 'force-dynamic';
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
     const [isExiting, setIsExiting] = useState(false);
-  
+
+    const handleExit = useCallback(() => {
+        if (isExiting) return;
+        setIsExiting(true);
+        setTimeout(onExit, 1000); // Wait for exit animation to complete
+    }, [isExiting, onExit]);
+
+    // Automatically exit after a delay
     useEffect(() => {
-        const exitTimer = setTimeout(() => {
-            setIsExiting(true);
-        }, 4000); // Start exit animation after 4 seconds
-  
-        const cleanupTimer = setTimeout(() => {
-            onExit();
-        }, 6000); // Call onExit after exit animation completes
-  
-        return () => {
-            clearTimeout(exitTimer);
-            clearTimeout(cleanupTimer);
-        };
-    }, [onExit]);
-  
+        const exitTimer = setTimeout(handleExit, 4000);
+        return () => clearTimeout(exitTimer);
+    }, [handleExit]);
+
+    const containerVariants = {
+        enter: {
+            transition: {
+                staggerChildren: 0.05,
+                delayChildren: 0.2,
+            },
+        },
+        exit: {
+            transition: {
+                staggerChildren: 0.05,
+                staggerDirection: -1,
+            },
+        },
+    };
+
+    const letterVariants = {
+        enter: {
+            y: 0,
+            opacity: 1,
+            transition: { type: 'spring', stiffness: 100, damping: 12, duration: 0.3 }
+        },
+        initial: {
+            y: 20,
+            opacity: 0,
+        },
+        exit: {
+            y: -20,
+            opacity: 0,
+            transition: { duration: 0.3, ease: 'easeOut' }
+        },
+    };
+
+    const taglineVariants = {
+        enter: { opacity: 1, transition: { delay: 0.6, duration: 0.5 } },
+        initial: { opacity: 0 },
+        exit: { opacity: 0, transition: { duration: 0.2 } },
+    };
+
+
     return (
-        <div className={cn("intro-screen", { 'exit-animation': isExiting })}>
-            <svg
-                width="200"
-                height="200"
-                viewBox="-52 -52 104 104"
-                className="loader-logo"
-            >
-                <motion.circle
-                    cx="0"
-                    cy="0"
-                    r="45"
-                    stroke="hsla(var(--primary), 0.5)"
-                    strokeWidth="3"
-                    fill="transparent"
-                    className="draw"
-                />
-                 <text
-                    x="-32"
-                    y="10"
-                    fontFamily="Poppins, sans-serif"
-                    fontSize="32"
-                    fontWeight="bold"
-                    fill="hsl(var(--foreground))"
-                    >
-                    <motion.tspan
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1.5, duration: 0.5}}
-                    >
-                        M
-                    </motion.tspan>
-                     <motion.tspan
-                         initial={{ opacity: 0 }}
-                         animate={{ opacity: 1 }}
-                         transition={{ delay: 1.8, duration: 0.5}}
-                         dx="-2"
-                     >
-                        O
-                    </motion.tspan>
-                </text>
-            </svg>
-        </div>
+        <motion.div
+            className="intro-screen"
+            onClick={handleExit}
+            key="loader"
+            initial="initial"
+            animate="enter"
+            exit="exit"
+        >
+            <div className="intro-content-wrapper">
+                <motion.div
+                    className="intro-logo-text"
+                    variants={containerVariants}
+                    aria-label="MOODYO"
+                >
+                    {'MOODYO'.split('').map((char, index) => (
+                        <motion.span key={index} variants={letterVariants} style={{ display: 'inline-block' }}>
+                            {char}
+                        </motion.span>
+                    ))}
+                </motion.div>
+                <motion.p className="intro-tagline" variants={taglineVariants}>
+                    MOOD-DRIVEN AUDIO EXPERIENCE
+                </motion.p>
+            </div>
+        </motion.div>
     );
 };
-  
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void, style?: React.CSSProperties }) => {
   const cardStyle = {
@@ -451,21 +469,8 @@ export default function Home() {
     </Accordion>
   );
   
-  if (!isMounted || showIntro) {
-    return (
-      <AnimatePresence>
-        {isMounted && showIntro && (
-          <motion.div
-            key="intro"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, delay: 5.5 }}
-          >
-            <MoodyOLoader onExit={() => setShowIntro(false)} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    );
+  if (!isMounted) {
+    return <AnimatePresence>{showIntro && <MoodyOLoader onExit={() => setShowIntro(false)} />}</AnimatePresence>;
   }
 
   const isAuthFormValid = authForm.email && authForm.password;
@@ -473,6 +478,10 @@ export default function Home() {
 
   return (
     <>
+      <AnimatePresence>
+        {showIntro && <MoodyOLoader onExit={() => setShowIntro(false)} />}
+      </AnimatePresence>
+      
       <ThemeProvider 
         activePage={activePage} 
         customMoods={customMoods}
@@ -486,8 +495,8 @@ export default function Home() {
       <motion.div 
         className="app"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
+        animate={{ opacity: showIntro ? 0 : 1 }}
+        transition={{ duration: 0.8, delay: showIntro ? 0 : 0.2 }}
       >
         <header>
           <div className="header-inner">

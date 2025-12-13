@@ -196,16 +196,60 @@ nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 }
 
 
-/* Intro screen */
+/* NEW Intro screen V2 */
 .intro-screen {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: grid;
   place-items: center;
-  background: #000;
+  background: #0A0A0A;
   cursor: pointer;
+  overflow: hidden;
 }
+
+.intro-screen::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, hsla(var(--primary), 0.15) 0%, transparent 60%);
+  opacity: 0;
+  animation: intro-glow 8s infinite ease-in-out, intro-fade-in 1s 1.2s ease-out forwards;
+}
+
+@keyframes intro-glow {
+  0%, 100% { transform: scale(0.9); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes intro-fade-in {
+  to { opacity: 1; }
+}
+
+.intro-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.intro-logo-text {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(45deg, hsl(var(--primary)), #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex; /* To allow spans to be inline but animatable */
+}
+
+.intro-tagline {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: hsl(var(--foreground) / 0.5);
+}
+
 
 /* home */
 .home-section {
@@ -262,25 +306,30 @@ body.home-active .nav-btn {
 /* MOOD PAGE STYLES */
 .mood-page-layout {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: 1fr;
   gap: 24px;
   align-items: flex-start;
 }
 
 .mood-hero {
-  grid-column: span 12;
+  grid-column: span 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 1.5rem;
   text-align: left;
-  position: sticky;
-  top: 120px;
+  position: static;
+  top: auto;
 }
 
 @media (min-width: 801px) {
+  .mood-page-layout {
+    grid-template-columns: repeat(12, 1fr);
+  }
   .mood-hero {
     grid-column: span 5;
+    position: sticky;
+    top: 120px;
   }
 }
 
@@ -1182,5 +1231,7 @@ body.custom-theme-active body {
 
 
 
+
+    
 
     
