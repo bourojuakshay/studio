@@ -1,0 +1,204 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the MoodyO application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User's display name."
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "URL of the user's profile photo.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "email"
+      ]
+    },
+    "Playlist": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Playlist",
+      "type": "object",
+      "description": "Represents a user-created playlist.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Playlist entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Playlist)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the playlist."
+        },
+        "songIds": {
+          "type": "array",
+          "description": "References to Songs in this playlist. (Relationship: Playlist N:N Song)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name"
+      ]
+    },
+    "Song": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Song",
+      "type": "object",
+      "description": "Represents a song in the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Song entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the song."
+        },
+        "artist": {
+          "type": "string",
+          "description": "Artist of the song."
+        },
+        "audioURL": {
+          "type": "string",
+          "description": "URL of the audio file.",
+          "format": "uri"
+        },
+        "moods": {
+          "type": "array",
+          "description": "Array of moods associated with the song.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "artist",
+        "audioURL"
+      ]
+    },
+    "UserSongPreference": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserSongPreference",
+      "type": "object",
+      "description": "Represents a user's preference for a particular song.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserSongPreference entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N UserSongPreference)"
+        },
+        "songId": {
+          "type": "string",
+          "description": "Reference to Song. (Relationship: Song 1:N UserSongPreference)"
+        },
+        "like": {
+          "type": "boolean",
+          "description": "Whether the user likes the song."
+        },
+        "mood": {
+          "type": "string",
+          "description": "The mood associated with the user's preference for the song."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "songId"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. User data is private; only the authenticated user can access their own profile.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/playlists/{playlistId}",
+        "definition": {
+          "entityName": "Playlist",
+          "schema": {
+            "$ref": "#/backend/entities/Playlist"
+          },
+          "description": "Stores playlists created by each user. Playlists are private; only the owning user can manage them.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the playlist."
+            },
+            {
+              "name": "playlistId",
+              "description": "The unique identifier of the playlist."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/song_preferences/{songPreferenceId}",
+        "definition": {
+          "entityName": "UserSongPreference",
+          "schema": {
+            "$ref": "#/backend/entities/UserSongPreference"
+          },
+          "description": "Stores user's song preferences (likes, moods). Preferences are private; only the owning user can manage them.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the song preference."
+            },
+            {
+              "name": "songPreferenceId",
+              "description": "The unique identifier of the song preference."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to provide a secure and scalable solution for MoodyO, focusing on user-owned data and personalized experiences. By adhering to the principle of Authorization Independence, we avoid hierarchical authorization dependencies, enabling atomic operations and simplifying security rules. The structure facilitates clear authorization intent and supports secure list operations.\n\n1.  **User Data:** User profiles are stored in `/users/{userId}`.  This path-based ownership ensures only the authenticated user can access their own data.  No denormalization is needed here because access control is simply based on the `userId`.\n2.  **Playlists:** Playlists are stored in `/users/{userId}/playlists/{playlistId}`.  This hierarchical structure clearly establishes the relationship between users and their playlists, providing a secure and easily understandable ownership model.\n3. **User Song Preferences:** User Song Preferences are stored in `/users/{userId}/song_preferences/{songPreferenceId}`.  This path-based ownership ensures only the authenticated user can access their preferences. No denormalization is needed here because access control is simply based on the `userId`.\n\nThis design allows straightforward security rules: users can only read/write data under their own `userId` path.  The hierarchical structure clearly defines ownership, enabling secure `list` operations (QAPs) by preventing unauthorized access to other users' data.  Authorization Independence is achieved via path-based ownership, eliminating the need for `get()` calls in security rules. No membership maps or role collections are needed."
+  }
+}

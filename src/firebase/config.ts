@@ -1,11 +1,8 @@
-
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 export const firebaseConfig = {
-  apiKey: "AIzaSyDKtD3sT6aL-_WMETvNO-OMeS1A3k-OLcY",
-  authDomain: "moodyo-b0249.firebaseapp.com",
-  projectId: "moodyo-b0249",
-  storageBucket: "moodyo-b0249.appspot.com",
-  messagingSenderId: "307875176182",
-  appId: "1:307875176182:web:7aef3386ea255363d5d6d7",
-  measurementId: "G-16YSSWPJH0"
+  "projectId": "moodyo",
+  "appId": "1:25663379664:web:2fd279c118b15d65cda6d5",
+  "apiKey": "AIzaSyCt17ZBCc1eCJG400_P7Y1rKFkpDFuDOVE",
+  "authDomain": "moodyo.firebaseapp.com",
+  "measurementId": "",
+  "messagingSenderId": "25663379664"
 };
