@@ -99,7 +99,7 @@ happyTracks[0] = {
   cover: `https://picsum.photos/seed/h-local/600/600`
 };
 
-const STATIC_TRACKS = {
+const STATIC_TRACKS: Record<string, Track[]> = {
   happy: happyTracks,
   joyful: SAMPLE_TRACKS(4),
   sad: SAMPLE_TRACKS(8),
@@ -210,24 +210,25 @@ export default function Home() {
   const mainAppRef = useRef<HTMLDivElement>(null);
 
   const { songs: firestoreSongs, loading, error } = useSongs();
+  const [tracks, setTracks] = useState<Record<string, Track[]>>(STATIC_TRACKS);
 
-  const tracks = useMemo(() => {
-    const combinedTracks: Record<string, Track[]> = { ...STATIC_TRACKS };
-
+  useEffect(() => {
     if (firestoreSongs) {
-      firestoreSongs.forEach(song => {
-        if (song.mood) {
-          if (!combinedTracks[song.mood]) {
-            combinedTracks[song.mood] = [];
+      setTracks(prevTracks => {
+        const newTracks = { ...prevTracks };
+        firestoreSongs.forEach(song => {
+          if (song.mood) {
+            if (!newTracks[song.mood]) {
+              newTracks[song.mood] = [];
+            }
+            if (!newTracks[song.mood].some(t => t.src === song.src)) {
+              newTracks[song.mood].push(song as Track);
+            }
           }
-          // Avoid duplicates
-          if (!combinedTracks[song.mood].some(t => t.src === song.src)) {
-            combinedTracks[song.mood].push(song as Track);
-          }
-        }
+        });
+        return newTracks;
       });
     }
-    return combinedTracks;
   }, [firestoreSongs]);
 
 
@@ -265,7 +266,6 @@ export default function Home() {
     const audio = audioRef.current;
     if (!audio) return;
   
-    // Only update src if we have a valid track with a src
     if (currentTrack && currentTrack.src) {
       const newSrc = currentTrack.src.startsWith('http') ? currentTrack.src : window.location.origin + currentTrack.src;
       if (audio.src !== newSrc) {
@@ -395,9 +395,6 @@ export default function Home() {
         mood: moodId,
       }));
       
-      const newTracks = { ...tracks, [moodId]: initialTracks };
-
-      // Manually set tracks state to include the new mood's empty playlist
       setTracks(prev => ({ ...prev, [moodId]: initialTracks }));
 
       openPage(moodId);
@@ -694,3 +691,5 @@ export default function Home() {
     </>
   );
 }
+
+    
