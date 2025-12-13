@@ -51,7 +51,6 @@ export function MoodHero({
     handleSeek,
 }: MoodHeroProps) {
     const [isVolumeOpen, setIsVolumeOpen] = useState(false);
-    const cardRef = useRef<HTMLDivElement>(null);
     const trackPlaying = nowPlaying?.mood === mood ? currentTrack : null;
     const displayTrack = trackPlaying || tracks?.[0];
 
@@ -79,7 +78,6 @@ export function MoodHero({
             </div>
             {displayTrack ? (
                 <div 
-                    ref={cardRef}
                     className={cn("now-playing-card", { "is-playing": isPlaying && nowPlaying?.mood === mood })}
                 >
                     <div className="card__shine"></div>

@@ -627,15 +627,13 @@ body.home-active .nav-btn {
   border: 1px solid var(--glass-border);
   border-radius: 20px;
   padding: 1.5rem;
-  height: 65vh;
-  max-height: 65vh;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 @media (min-width: 801px) {
   .playlist-view {
       grid-column: span 7;
+      height: 65vh;
+      max-height: 65vh;
   }
 }
 
@@ -1245,4 +1243,5 @@ body.custom-theme-active body {
     
 
     
+
 

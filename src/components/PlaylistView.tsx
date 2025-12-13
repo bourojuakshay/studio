@@ -89,3 +89,4 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
         </div>
     );
 }
+
