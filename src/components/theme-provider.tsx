@@ -34,9 +34,9 @@ export function ThemeProvider({ activePage, customMoods, tracks, nowPlaying, all
     const moodDef = allMoods[activePage as keyof typeof allMoods];
 
     // Reset classes and styles on body
-    document.body.className = '';
+    document.body.className = 'dark';
     document.body.style.background = '';
-    document.documentElement.style.setProperty('--page-accent', '#60a5fa');
+    document.documentElement.style.setProperty('--page-accent', 'hsl(var(--primary))');
     
     // Reset background image on all pages
     const pages = document.querySelectorAll('.page');
@@ -60,10 +60,9 @@ export function ThemeProvider({ activePage, customMoods, tracks, nowPlaying, all
 
         let classes = `${activePage}-active `;
         classes += moodDef.themeClass || 'custom-theme-active ';
-        if (['happy', 'joyful', 'sad'].includes(activePage) || (customMoods[activePage] && !moodDef.themeClass.includes('depression'))) {
-            classes += 'theme-active ';
-        }
-        document.body.className = classes.trim();
+        classes += 'theme-active ';
+        
+        document.body.className = document.body.className + ' ' + classes.trim();
     }
   }, [activePage, customMoods, tracks, nowPlaying, allMoods]);
 

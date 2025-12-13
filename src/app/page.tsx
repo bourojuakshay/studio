@@ -39,34 +39,34 @@ type MoodDefinition = {
 
 const MOOD_DEFS: { [key: string]: MoodDefinition } = {
   happy: {
-    title: 'Happy — Vibrant Beats',
+    title: 'Happy',
     subtitle: 'Feel-good tracks with a deep groove',
-    accent: '#FFB347',
-    bg: 'linear-gradient(43deg, rgb(65, 88, 208) 0%, rgb(200, 80, 192) 46%, rgb(255, 204, 112) 100%)',
+    accent: 'hsl(var(--primary))',
+    bg: 'linear-gradient(43deg, hsl(var(--primary)) 0%, #4c1d95 100%)',
     emoji: '😄',
     themeClass: 'happy-active',
   },
   joyful: {
-    title: 'Joyful — Energetic Beats',
+    title: 'Joyful',
     subtitle: 'High-energy songs — perfect for smiles and movement',
-    accent: '#FF4081',
-    bg: 'linear-gradient(43deg, rgb(65, 88, 208) 0%, rgb(200, 80, 192) 46%, rgb(255, 204, 112) 100%)',
+    accent: 'hsl(var(--primary))',
+    bg: 'linear-gradient(43deg, hsl(var(--primary)) 0%, #4c1d95 100%)',
     emoji: '🥳',
     themeClass: 'joyful-active',
   },
   sad: {
-    title: 'Sad — Melancholy',
+    title: 'Sad',
     subtitle: 'Slow, emotional tracks to reflect',
-    accent: '#2196F3',
-    bg: 'linear-gradient(43deg, rgb(65, 88, 208) 0%, rgb(200, 80, 192) 46%, rgb(255, 204, 112) 100%)',
+    accent: 'hsl(var(--primary))',
+    bg: 'linear-gradient(43deg, hsl(var(--primary)) 0%, #4c1d95 100%)',
     emoji: '😢',
     themeClass: 'sad-active',
   },
   depression: {
-    title: 'Depression — Ambient & Soothing',
+    title: 'Depression',
     subtitle: 'Ambient textures and slow soundscapes',
-    accent: '#5E3370',
-    bg: 'linear-gradient(43deg, rgb(65, 88, 208) 0%, rgb(200, 80, 192) 46%, rgb(255, 204, 112) 100%)',
+    accent: 'hsl(var(--primary))',
+    bg: 'linear-gradient(43deg, hsl(var(--primary)) 0%, #4c1d95 100%)',
     emoji: '😔',
     themeClass: 'depression-active',
   }
@@ -126,7 +126,6 @@ const AnimatedText = ({ text, el: Wrapper = 'h1', className }) => {
 };
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }) => {
-  const cardTitle = typeof title === 'string' ? title.split('—')[0] : '';
   return (
     <div className="interactive-card-container noselect" onClick={onClick}>
       <div className="canvas">
@@ -135,7 +134,7 @@ const InteractiveCard = ({ moodKey, emoji, title, onClick, style = {} }) => {
         ))}
         <div id="card" className="interactive-card" style={style}>
           <div className="card-emoji">{emoji}</div>
-          <div className="card-title">{cardTitle}</div>
+          <div className="card-title">{title}</div>
         </div>
       </div>
     </div>
@@ -270,10 +269,6 @@ export default function Home() {
     setIsPlaying(true);
   };
 
-  const closePlayer = () => {
-    setIsPlaying(false);
-  };
-
   const isLiked = (track: Track) => {
     return likedSongs.some(likedTrack => likedTrack.src === track.src);
   }
@@ -296,11 +291,6 @@ export default function Home() {
   const openPage = (id: string) => {
     setActivePage(id);
     setIsMenuSheetOpen(false);
-    if(id === 'home' || (nowPlaying && nowPlaying.mood !== id)) {
-        // Don't stop music when going home
-    } else if (!nowPlaying) {
-      setIsPlaying(false);
-    }
   };
 
   const handleGenerateMood = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -319,9 +309,9 @@ export default function Home() {
       setCustomMoods(prev => ({
         ...prev,
         [moodId]: {
-          title: `${result.title} — AI Generated`,
+          title: result.title,
           subtitle: result.subtitle,
-          accent: result.theme.accent,
+          accent: 'hsl(var(--primary))',
           bg: `linear-gradient(135deg, ${result.theme.start} 0%, ${result.theme.end} 100%)`,
           emoji: input.emoji,
           themeClass: 'custom-theme-active'
@@ -401,7 +391,6 @@ export default function Home() {
     </Accordion>
   );
 
-
   if (!isMounted) {
     return null;
   }
@@ -429,19 +418,19 @@ export default function Home() {
             <div className="intro-bg-elements">
                 <motion.div 
                     className="intro-bg-element" 
-                    style={{ top: '10%', left: '15%', width: '150px', height: '150px', '--orb-color': 'rgb(65, 88, 208)' } as React.CSSProperties}
+                    style={{ top: '10%', left: '15%', width: '150px', height: '150px', '--orb-color': 'hsl(var(--primary))' } as React.CSSProperties}
                     animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
                     transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <motion.div 
                     className="intro-bg-element" 
-                    style={{ top: '60%', left: '5%', width: '80px', height: '80px', '--orb-color': 'rgb(200, 80, 192)' } as React.CSSProperties}
+                    style={{ top: '60%', left: '5%', width: '80px', height: '80px', '--orb-color': '#22d3ee' } as React.CSSProperties}
                     animate={{ y: [0, 15, 0], x: [0, 10, 0] }}
                     transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
                 />
                 <motion.div 
                     className="intro-bg-element" 
-                    style={{ top: '25%', left: '80%', width: '120px', height: '120px', '--orb-color': 'rgb(255, 204, 112)' } as React.CSSProperties}
+                    style={{ top: '25%', left: '80%', width: '120px', height: '120px', '--orb-color': 'hsl(var(--primary))' } as React.CSSProperties}
                     animate={{ y: [0, -10, 0], x: [0, -15, 0] }}
                     transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
                 />
@@ -545,44 +534,44 @@ export default function Home() {
 
                 return (
                 <section key={mood} id={mood} className={cn('page', { active: activePage === mood })}>
-                  <div className="glass">
                     <div className="mood-page-layout">
                       <div className="mood-hero">
-                        {displayTrack ? (
-                          <div className="now-playing-card">
-                            <Image className="player-cover" src={displayTrack.cover} alt={displayTrack.title} width={400} height={400} data-ai-hint="song cover" unoptimized={displayTrack.cover.startsWith('data:')} />
-                            <div className="player-info">
-                                <h3>{displayTrack.title}</h3>
-                                <p>{displayTrack.artist}</p>
-                            </div>
-                            <div className="player-controls">
-                                <button onClick={handlePrev}><SkipBack /></button>
-                                <button onClick={handlePlayPause} className="play-main-btn">
-                                    {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={32} /> : <Play size={32} />}
-                                </button>
-                                <button onClick={handleNext}><SkipForward /></button>
-                            </div>
-                            <div className="player-actions">
-                                <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
-                                    <Heart size={24} />
-                                </button>
-                                 <div className="volume-control">
-                                   <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
-                                    {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24}/>}
-                                   </button>
-                                  {isVolumeOpen && (
-                                    <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
-                                  )}
-                                 </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="emoji">{def.emoji}</div>
-                            <h2>{def.title}</h2>
-                            <p>{def.subtitle}</p>
-                          </>
-                        )}
+                        <div className="emoji">{def.emoji}</div>
+                        <div>
+                          <h2>{def.title}</h2>
+                          <p>{def.subtitle}</p>
+                        </div>
+                         {displayTrack ? (
+                           <div className="now-playing-card">
+                             <Image className="player-cover" src={displayTrack.cover} alt={displayTrack.title} width={400} height={400} data-ai-hint="song cover" unoptimized={displayTrack.cover.startsWith('data:')} />
+                             <div className="w-full">
+                              <div className="player-info">
+                                  <h3>{displayTrack.title}</h3>
+                                  <p>{displayTrack.artist}</p>
+                              </div>
+                              <div className="player-controls">
+                                  <button onClick={handlePrev}><SkipBack /></button>
+                                  <button onClick={handlePlayPause} className="play-main-btn">
+                                      {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={32} /> : <Play size={32} />}
+                                  </button>
+                                  <button onClick={handleNext}><SkipForward /></button>
+                              </div>
+                              <div className="player-actions">
+                                  <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn', { 'liked': isLiked(displayTrack) })}>
+                                      <Heart size={24} />
+                                  </button>
+                                   <div className="volume-control">
+                                     <button onClick={() => setIsVolumeOpen(!isVolumeOpen)} className="volume-btn">
+                                      {volume > 0.5 ? <Volume2 size={24} /> : <Volume1 size={24}/>}
+                                     </button>
+                                    {isVolumeOpen && (
+                                      <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
+                                    )}
+                                   </div>
+                              </div>
+                              </div>
+                           </div>
+                         ) : <div></div>}
                       </div>
                       <div className="playlist-view">
                         <div className="playlist-header">
@@ -606,7 +595,6 @@ export default function Home() {
                         </ScrollArea>
                       </div>
                     </div>
-                  </div>
                 </section>
               )})}
             </main>
@@ -637,7 +625,7 @@ export default function Home() {
             <audio ref={audioRef} onEnded={handleSongEnd} />
 
             <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
-              <DialogContent className="sheet-content glass">
+              <DialogContent className="sheet-content">
                 <DialogHeader>
                   <DialogTitle>Create a Custom Mood</DialogTitle>
                   <DialogDescription>
