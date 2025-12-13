@@ -173,17 +173,32 @@ export default function Home() {
   useEffect(() => {
     if (firestoreSongs) {
       setTracks(prevTracks => {
-        const newTracks = { ...prevTracks };
+        // Start with a fresh copy of the static tracks
+        const newTracks = JSON.parse(JSON.stringify(STATIC_TRACKS));
+        
+        // Group firestore songs by mood
+        const firestoreSongsByMood: Record<string, Song[]> = {};
         firestoreSongs.forEach(song => {
-          if (song.mood) {
-            if (!newTracks[song.mood]) {
-              newTracks[song.mood] = [];
-            }
-            if (!newTracks[song.mood].some(t => t.src === song.src)) {
-              newTracks[song.mood].push(song as Track);
-            }
+          if (!firestoreSongsByMood[song.mood]) {
+            firestoreSongsByMood[song.mood] = [];
           }
+          firestoreSongsByMood[song.mood].push(song);
         });
+
+        // Prepend firestore songs to the appropriate mood playlist
+        for (const mood in firestoreSongsByMood) {
+          if (newTracks[mood]) {
+            const existingSrcs = new Set(newTracks[mood].map((t: Track) => t.src));
+            const songsToAdd = firestoreSongsByMood[mood]
+              .filter(song => !existingSrcs.has(song.src))
+              .map(song => song as Track);
+            
+            newTracks[mood].unshift(...songsToAdd);
+          } else {
+            newTracks[mood] = firestoreSongsByMood[mood].map(song => song as Track);
+          }
+        }
+        
         return newTracks;
       });
     }
@@ -648,5 +663,3 @@ export default function Home() {
     </>
   );
 }
-
-    
