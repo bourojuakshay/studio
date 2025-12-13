@@ -50,7 +50,6 @@ export function MoodHero({
     
     return (
         <motion.div className="mood-hero" variants={heroVariants}>
-            <div className="emoji">{definition.emoji}</div>
             <div>
                 <h2>{definition.title}</h2>
                 <p>{definition.subtitle}</p>
