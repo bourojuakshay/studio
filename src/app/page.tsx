@@ -34,6 +34,58 @@ import { useToast } from '@/hooks/use-toast';
 
 export const dynamic = 'force-dynamic';
 
+const pathVariants = {
+  hidden: (i: number) => ({
+    pathLength: 0,
+    pathOffset: 1,
+    opacity: 0,
+  }),
+  visible: (i: number) => ({
+    pathLength: 1,
+    pathOffset: 0,
+    opacity: 1,
+    transition: {
+      pathLength: { delay: i * 0.2, type: 'spring', duration: 1.5, bounce: 0 },
+      pathOffset: { delay: i * 0.2, type: 'spring', duration: 1.5, bounce: 0 },
+      opacity: { delay: i * 0.2, duration: 0.01 }
+    }
+  }),
+  exit: (i: number) => ({
+    pathLength: 0,
+    pathOffset: 1,
+    opacity: 0,
+    transition: {
+      pathLength: { delay: (6 - i) * 0.1, ease: 'easeOut', duration: 0.5 },
+      pathOffset: { delay: (6 - i) * 0.1, ease: 'easeOut', duration: 0.5 },
+      opacity: { delay: (6 - i) * 0.1, duration: 0.01 }
+    }
+  })
+};
+
+const letterPaths = [
+  // M
+  "M2.7,48.2V2.3h10.3l7,19.3l7-19.3h10.3v45.9h-8.1V12.6L22.1,32L15,12.6v35.6H2.7z",
+  // o
+  "M61.1,25.2c0-11,8.3-19.7,20.1-19.7c11.8,0,20.1,8.7,20.1,19.7c0,11-8.3,19.7-20.1,19.7C69.4,44.9,61.1,36.2,61.1,25.2z M93.4,25.2 c0-7.3-5.2-12.7-12.2-12.7s-12.2,5.5-12.2,12.7c0,7.3,5.2,12.7,12.2,12.7S93.4,32.5,93.4,25.2z",
+  // o
+  "M112.5,25.2c0-11,8.3-19.7,20.1-19.7c11.8,0,20.1,8.7,20.1,19.7c0,11-8.3,19.7-20.1,19.7C120.8,44.9,112.5,36.2,112.5,25.2z M144.8,25.2c0-7.3-5.2-12.7-12.2-12.7s-12.2,5.5-12.2,12.7c0,7.3,5.2,12.7,12.2,12.7S144.8,32.5,144.8,25.2z",
+  // d
+  "M180.2,48.2V2.3h7.9c11.2,0,18.5,7.5,18.5,18.1c0,8.7-4.9,14.5-12.2,16.8l13.2,11H197l-12.3-10.7h-4.5v10.7H180.2z M188.3,30.4h7.1c7,0,11.2-4.1,11.2-10c0-6-4.2-9.9-11-9.9h-7.3V30.4z",
+  // y
+  "M237.4,31.5l-12-30.2h9l7.5,19.3l7.5-19.3h9l-12,30.2v16.7h-8.1V31.5z",
+  // o
+  "M264.4,25.2c0-11,8.3-19.7,20.1-19.7c11.8,0,20.1,8.7,20.1,19.7c0,11-8.3,19.7-20.1,19.7C272.7,44.9,264.4,36.2,264.4,25.2z M296.7,25.2c0-7.3-5.2-12.7-12.2-12.7c0,0,0,0,0,0c-7,0-12.2,5.5-12.2,12.7c0,7.3,5.2,12.7,12.2,12.7C291.5,37.9,296.7,32.5,296.7,25.2z"
+];
+
+const dotPaths = [
+  "M20,25 m-1,0 a1,1 0 1,0 2,0 a1,1 0 1,0 -2,0",
+  "M81,25 m-1,0 a1,1 0 1,0 2,0 a1,1 0 1,0 -2,0",
+  "M132,25 m-1,0 a1,1 0 1,0 2,0 a1,1 0 1,0 -2,0",
+  "M195,25 m-1,0 a1,1 0 1,0-2,0 a1,1 0 1,0 2,0",
+  "M232,25 m-1,0 a1,1 0 1,0 2,0 a1,1 0 1,0-2,0",
+  "M284,25 m-1,0 a1,1 0 1,0 2,0 a1,1 0 1,0-2,0"
+];
+
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   const [exitState, setExitState] = useState<'enter' | 'exit'>('enter');
   const [showHint, setShowHint] = useState(false);
@@ -52,37 +104,21 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   const containerVariants = {
     enter: {
       transition: {
-        staggerChildren: 0.06,
+        staggerChildren: 0.1,
         delayChildren: 0.2,
       },
     },
     exit: {
       transition: {
-        staggerChildren: 0.06,
+        staggerChildren: 0.1,
         staggerDirection: -1,
       },
     },
   };
-
-  const letterVariants = {
-    initial: { opacity: 0, y: 24, rotate: -6, scale: 0.94 },
-    enter: {
-      opacity: 1,
-      y: 0,
-      rotate: 0,
-      scale: 1,
-      transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
-    },
-    exit: {
-      opacity: 0,
-      y: -20,
-      transition: { duration: 0.3, ease: 'easeOut' },
-    },
-  };
-
+  
   const taglineVariants = {
     initial: { opacity: 0, y: 10 },
-    enter: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut', delay: 0.8 } },
+    enter: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut', delay: 1.2 } },
     exit: { opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeIn' } },
   };
 
@@ -91,9 +127,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
     animate: { opacity: 1, transition: { duration: 0.8 } },
     exit: { opacity: 0, transition: { duration: 0.3 } },
   };
-  
 
-  const logoText = "Moodyo";
   const taglineText = "MOOD-DRIVEN AUDIO EXPERIENCE".split(' ');
 
   return (
@@ -104,7 +138,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
       initial="initial"
       animate="enter"
       exit="exit"
-      variants={{}} // Parent variant for AnimatePresence
+      variants={containerVariants}
     >
       <div className="animated-hero-background">
           <div className="wave-layer-1"></div>
@@ -116,21 +150,36 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
           <div className="wave-layer-7"></div>
           <div className="wave-layer-8"></div>
           <div className="wave-layer-9"></div>
-          <div className="wave-layer-10"></div>
-          <div className="wave-layer-11"></div>
-          <div className="wave-layer-12"></div>
       </div>
-      <motion.div
-        className="intro-logo-text"
+      <motion.svg 
+        className="intro-svg-logo" 
+        viewBox="0 0 308 50"
+        initial="hidden"
+        animate="visible"
+        exit="exit"
         variants={containerVariants}
-        aria-label={logoText}
       >
-        {logoText.split('').map((char, index) => (
-          <motion.span key={index} variants={letterVariants}>
-            {char}
-          </motion.span>
+        <defs>
+            <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#4f46e5" />
+                <stop offset="20%" stopColor="#c026d3" />
+                <stop offset="40%" stopColor="#db2777" />
+                <stop offset="60%" stopColor="#f97316" />
+                <stop offset="80%" stopColor="#84cc16" />
+                <stop offset="100%" stopColor="#22d3ee" />
+            </linearGradient>
+        </defs>
+        {letterPaths.map((path, i) => (
+            <motion.path
+                key={i}
+                d={path}
+                initial={{ d: dotPaths[i], opacity: 0 }}
+                animate={{ d: path, opacity: 1, transition: { d: { delay: i * 0.2 + 0.5, type: 'spring', duration: 2, bounce: 0.3 }, opacity: { delay: i * 0.2 + 0.5, duration: 0.1 } } }}
+                exit={{ d: dotPaths[i], opacity: 0, transition: { d: { delay: (letterPaths.length - i) * 0.1, ease: "easeOut", duration: 0.5 }, opacity: { delay: (letterPaths.length - i) * 0.1, duration: 0.1 } } }}
+            />
         ))}
-      </motion.div>
+    </motion.svg>
+
       <motion.div
         className="intro-tagline"
         variants={containerVariants}
