@@ -37,28 +37,16 @@ export const dynamic = 'force-dynamic';
 const pathVariants = {
   hidden: {
     pathLength: 0,
-    pathOffset: 1,
     opacity: 0,
   },
   visible: (i: number) => ({
     pathLength: 1,
-    pathOffset: 0,
     opacity: 1,
     transition: {
-      pathLength: { delay: i * 0.1, duration: 1, ease: "easeOut" },
-      pathOffset: { delay: i * 0.1, duration: 1, ease: "easeOut" },
+      pathLength: { delay: i * 0.1, duration: 1.2, ease: "easeOut" },
       opacity: { delay: i * 0.1, duration: 0.01 }
     }
   }),
-  exit: (i: number) => ({
-    pathLength: 1,
-    pathOffset: 0,
-    opacity: 0,
-    transition: {
-      duration: 0.3,
-      delay: (6 - i) * 0.05
-    }
-  })
 };
 
 const letterPaths = [
@@ -69,7 +57,7 @@ const letterPaths = [
     // o
     "M134.85,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C126.55,5.5,134.85,14.2,134.85,25.2z M126.95,25.2c0-6.6-5-12.7-12.2-12.7c-7.2,0-12.2,6-12.2,12.7c0,6.6,5,12.7,12.2,12.7C121.95,37.9,126.95,31.8,126.95,25.2z",
     // d
-    "M193.25,48.2V2.3h8.1v36.9c7.2-5.1,15-8.5,22.1-8.5c11.8,0,20.1,8.7,20.1,19.7c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7V48.2z M215.35,44.9c0,6.6,5,12.7,12.2,12.7c7.2,0,12.2-6,12.2-12.7c0-6.6-5-12.7-12.2-12.7C220.35,32.2,215.35,38.3,215.35,44.9z",
+    "M182.2,25.3c0-11,8.3-19.7,20.1-19.7s20.1,8.7,20.1,19.7v22.9h-8.1V25.3c0-6.6-5-12.7-12.1-12.7s-12.1,6-12.1,12.7v22.9h-8.1V25.3z",
     // y
     "M255.95,2.3h8.1v17.5l14.4-17.5h10.4l-12.8,15.7l14,30h-9.5l-9.6-21.4l-5.5,6.5v14.9h-8.1V2.3z",
     // O
@@ -87,27 +75,27 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   };
 
   const containerVariants = {
-    enter: { },
-    exit: { opacity: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+    enter: { opacity: 1 },
+    exit: { opacity: 0, transition: { duration: 0.5, ease: 'easeOut' } },
   };
   
   const taglineVariants = {
     initial: { opacity: 0 },
-    enter: { opacity: 1, transition: { duration: 0.5, ease: 'easeOut', delay: 1 } },
+    enter: { opacity: 1, transition: { duration: 0.8, ease: 'easeOut', delay: 1.2 } },
     exit: { opacity: 0, transition: { duration: 0.3, ease: 'easeIn' } },
   };
 
   const bottomItemsVariants = {
-    initial: { opacity: 0 },
-    enter: { opacity: 1, transition: { duration: 0.5, ease: 'easeOut', delay: 1.2 } },
-    exit: { opacity: 0, transition: { duration: 0.3, ease: 'easeIn' } },
+    initial: { opacity: 0, y: 20 },
+    enter: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut', delay: 1.4 } },
+    exit: { opacity: 0, y: 10, transition: { duration: 0.3, ease: 'easeIn' } },
   };
 
   return (
     <motion.div
       className="intro-screen-v2"
       onClick={handleExit}
-      initial="initial"
+      initial="exit"
       animate="enter"
       exit="exit"
       variants={containerVariants}
@@ -118,16 +106,11 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
           viewBox="0 0 341 51"
           initial="hidden"
           animate="visible"
-          exit="exit"
         >
           <defs>
               <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#4f46e5" />
-                  <stop offset="20%" stopColor="#c026d3" />
-                  <stop offset="40%" stopColor="#db2777" />
-                  <stop offset="60%" stopColor="#f97316" />
-                  <stop offset="80%" stopColor="#84cc16" />
-                  <stop offset="100%" stopColor="#22d3ee" />
+                  <stop offset="0%" stopColor="#818cf8" />
+                  <stop offset="100%" stopColor="#3b82f6" />
               </linearGradient>
           </defs>
           {letterPaths.map((path, i) => (
