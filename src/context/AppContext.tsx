@@ -97,34 +97,50 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
 
 // --- Provider Component ---
 export function AppProvider({ children }: { children: ReactNode }) {
-    const { volume, audioRef, playlist } = useAppContext();
-    const { nowPlayingId, setCurrentTrack, isPlaying } = usePlaybackState();
+    // Correctly subscribe to the stores to get their state for effects.
+    const { volume, audioRef, playlist } = useAppContext.getState();
+    const { nowPlayingId, setCurrentTrack, isPlaying } = usePlaybackState.getState();
+    
+    // Using useEffect to listen to state changes from the store
+    useEffect(() => {
+        return usePlaybackState.subscribe(
+            (state) => {
+                const audio = audioRef.current;
+                if (!audio || !state.currentTrack) return;
+                
+                if (state.isPlaying) {
+                    audio.play().catch(e => console.error("Audio play error:", e));
+                } else {
+                    audio.pause();
+                }
+            },
+            (state) => state.isPlaying
+        );
+    }, [audioRef]);
 
+    useEffect(() => {
+        return useAppContext.subscribe(
+            (state) => {
+                 const audio = audioRef.current;
+                if (audio) {
+                    audio.volume = state.volume;
+                }
+            },
+            (state) => state.volume
+        )
+    }, [audioRef]);
+    
     // Effect to find and set the current track object when ID changes
     useEffect(() => {
-        const track = playlist.find(t => t.id === nowPlayingId) || null;
-        setCurrentTrack(track);
-    }, [nowPlayingId, playlist, setCurrentTrack]);
-
-    // Effect to control audio playback (play/pause)
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio || !usePlaybackState.getState().currentTrack) return;
-        
-        if (isPlaying) {
-            audio.play().catch(e => console.error("Audio play error:", e));
-        } else {
-            audio.pause();
-        }
-    }, [isPlaying, audioRef]);
-    
-    // Effect to control audio volume
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (audio) {
-            audio.volume = volume;
-        }
-    }, [volume, audioRef]);
+      const unsubscribe = usePlaybackState.subscribe(
+        (state) => {
+          const track = useAppContext.getState().playlist.find(t => t.id === state.nowPlayingId) || null;
+          setCurrentTrack(track);
+        },
+        (state) => state.nowPlayingId
+      );
+      return unsubscribe;
+    }, [setCurrentTrack]);
     
     return <>{children}</>;
 }
