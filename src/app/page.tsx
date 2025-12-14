@@ -94,6 +94,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   
 
   const logoText = "Moodyo";
+  const taglineText = "MOOD-DRIVEN AUDIO EXPERIENCE".split(' ');
 
   return (
     <motion.div
@@ -105,6 +106,20 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
       exit="exit"
       variants={{}} // Parent variant for AnimatePresence
     >
+      <div className="animated-hero-background">
+          <div className="wave-layer-1"></div>
+          <div className="wave-layer-2"></div>
+          <div className="wave-layer-3"></div>
+          <div className="wave-layer-4"></div>
+          <div className="wave-layer-5"></div>
+          <div className="wave-layer-6"></div>
+          <div className="wave-layer-7"></div>
+          <div className="wave-layer-8"></div>
+          <div className="wave-layer-9"></div>
+          <div className="wave-layer-10"></div>
+          <div className="wave-layer-11"></div>
+          <div className="wave-layer-12"></div>
+      </div>
       <motion.div
         className="intro-logo-text"
         variants={containerVariants}
@@ -118,9 +133,13 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
       </motion.div>
       <motion.div
         className="intro-tagline"
-        variants={taglineVariants}
+        variants={containerVariants}
       >
-        MOOD-DRIVEN AUDIO EXPERIENCE
+        {taglineText.map((word, index) => (
+            <motion.span key={index} variants={taglineVariants}>
+              {word}
+            </motion.span>
+        ))}
       </motion.div>
       <AnimatePresence>
         {showHint && (
