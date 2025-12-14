@@ -337,7 +337,7 @@ body.home-active .nav-btn {
 .mood-page-layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: 3rem; /* Increased gap */
   align-items: flex-start;
 }
 
@@ -355,6 +355,7 @@ body.home-active .nav-btn {
 @media (min-width: 801px) {
   .mood-page-layout {
     grid-template-columns: repeat(12, 1fr);
+     gap: 4rem; /* Further increased gap for desktop */
   }
   .mood-hero {
     grid-column: span 5;
@@ -375,67 +376,24 @@ body.home-active .nav-btn {
 
 /* New Player Card Design */
 .now-playing-card {
-  --card-bg: var(--glass-bg);
   --card-accent: var(--page-accent);
   --card-text: var(--text);
-  --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 380px;
-  background: var(--card-bg);
+  background: hsl(var(--card)); /* Solid card background */
   border-radius: 20px;
   position: relative;
   overflow: hidden;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--card-shadow);
-  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+  border: 1px solid hsl(var(--border));
   font-family: var(--font-sans);
 }
 
 .now-playing-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
   border-color: hsla(var(--primary), 0.3);
-}
-
-.now-playing-card.is-playing .card__glow {
-  opacity: 1;
-  animation: pulse-glow 3s infinite ease-in-out;
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    transform: scale(0.95);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-}
-
-.card__shine {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 60%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-.now-playing-card:hover .card__shine {
-  opacity: 1;
-  animation: shine 3s infinite;
-}
-
-.card__glow {
-  position: absolute;
-  inset: -20px;
-  background: radial-gradient(circle at 50% 0%, hsla(var(--primary), 0.3) 0%, hsla(var(--primary), 0) 70%);
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-}
-.now-playing-card:hover .card__glow {
-  opacity: 0; /* Disabled glow */
 }
 
 .card__content {
@@ -621,21 +579,6 @@ body.home-active .nav-btn {
     fill: var(--card-accent);
 }
 
-@keyframes shine {
-  0% { background-position: -100% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-
-.now-playing-card:hover .play-main-btn svg {
-  animation: none; /* disabled pulse */
-}
-
 .playlist-view {
   grid-column: span 12;
   display: flex;
@@ -681,38 +624,34 @@ body.home-active .nav-btn {
   overflow: hidden;
 }
 
+/* Removed swipe background styles */
 .playlist-swipe-background {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-left: 20px;
-  background-color: hsla(var(--primary), 0.2);
-  color: hsla(var(--primary), 1);
-  z-index: 1;
+  display: none;
 }
 
 .playlist-list-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px;
+  padding: 12px; /* Increased padding */
   transition: background-color .2s ease;
   cursor: pointer;
   position: relative;
   z-index: 2;
   background-color: transparent;
-  border-radius: 8px;
+  border-radius: 12px; /* Increased border radius */
   touch-action: pan-y;
+  border: 1px solid transparent;
 }
 
 .playlist-list-item:hover {
     background-color: hsl(var(--accent));
+    border-color: hsl(var(--border));
 }
 
 .playlist-list-item.active {
   background-color: hsl(var(--accent));
+  border-color: hsl(var(--primary) / 0.5);
 }
 .playlist-list-item.active .title,
 .playlist-list-item.active .artist {
@@ -720,9 +659,9 @@ body.home-active .nav-btn {
 }
 
 .playlist-list-item-cover {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
+  width: 48px; /* Increased size */
+  height: 48px; /* Increased size */
+  border-radius: 8px; /* Increased radius */
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -731,15 +670,15 @@ body.home-active .nav-btn {
   min-width: 0;
 }
 .playlist-list-item-info .title {
-  font-weight: 500;
-  font-size: 0.95rem;
+  font-weight: 600; /* Bolder font */
+  font-size: 1rem; /* Larger font size */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   color: hsl(var(--foreground));
 }
 .playlist-list-item-info .artist {
-  font-size: 0.8rem;
+  font-size: 0.85rem; /* Slightly larger */
   color: hsl(var(--muted-foreground));
   white-space: nowrap;
   overflow: hidden;
@@ -800,10 +739,10 @@ section.page.active::before {
   transform: translateX(-50%);
   width: 100px;
   accent-color: var(--page-accent);
-  background: var(--glass-bg);
+  background: hsl(var(--card));
   padding: 8px;
   border-radius: 8px;
-  border: 1px solid var(--glass-border);
+  border: 1px solid hsl(var(--border));
   z-index: 10;
 }
 

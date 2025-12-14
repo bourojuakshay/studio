@@ -80,8 +80,6 @@ export function MoodHero({
                 <div 
                     className={cn("now-playing-card", { "is-playing": isPlaying && nowPlaying?.mood === mood })}
                 >
-                    <div className="card__shine"></div>
-                    <div className="card__glow"></div>
                     <div className="card__content">
                         <div className="card__badge">NOW PLAYING</div>
                         <div className="card__image">
