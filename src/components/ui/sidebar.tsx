@@ -21,7 +21,7 @@ const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "5rem"
+const SIDEBAR_WIDTH_ICON = "3.5rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContext = {
@@ -130,7 +130,7 @@ const SidebarProvider = React.forwardRef<
               } as React.CSSProperties
             }
             className={cn(
-              "group/sidebar-wrapper flex min-h-svh w-full",
+              "group/sidebar-wrapper flex min-h-screen w-full",
               className
             )}
             ref={ref}
@@ -169,9 +169,10 @@ const Sidebar = React.forwardRef<
       return (
         <aside
           className={cn(
-            "flex h-full w-[--sidebar-width] flex-col bg-background",
+            "flex h-screen flex-col bg-card",
             className
           )}
+          style={{ width: 'var(--sidebar-width)'}}
           ref={ref}
           {...props}
         >
@@ -203,8 +204,8 @@ const Sidebar = React.forwardRef<
     return (
       <aside
         ref={ref}
-        className={cn("group peer hidden md:block text-card-foreground",
-          "w-[var(--sidebar-width-icon)] group-data-[state=expanded]:w-[var(--sidebar-width)] transition-[width] duration-300 ease-in-out",
+        className={cn("group peer hidden md:flex h-screen flex-col text-card-foreground bg-background p-2 gap-2",
+          "w-[var(--sidebar-width-icon)] data-[state=expanded]:w-[var(--sidebar-width)] transition-[width] duration-300 ease-in-out",
            className
         )}
         data-state={state}
@@ -213,14 +214,7 @@ const Sidebar = React.forwardRef<
         data-side={side}
         {...props}
       >
-        <div className="h-full w-full p-2">
-            <div
-                data-sidebar="sidebar"
-                className="flex h-full w-full flex-col gap-2"
-            >
-                {children}
-            </div>
-        </div>
+        {children}
       </aside>
     )
   }
@@ -239,7 +233,7 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn("h-8 w-8", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
@@ -262,7 +256,7 @@ const SidebarInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        "relative flex h-screen flex-1 flex-col overflow-y-auto bg-background",
+        "flex h-screen flex-1 flex-col",
         className
       )}
       {...props}
@@ -276,11 +270,14 @@ const SidebarHeader = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(function SidebarHeader({ className, ...props }, ref) {
+  const { state } = useSidebar();
   return (
     <div
       ref={ref}
       data-sidebar="header"
-      className={cn("flex flex-col gap-2 rounded-lg bg-card p-4 group-data-[state=collapsed]:p-2", className)}
+      className={cn("flex items-center",
+       state === 'expanded' ? 'justify-between' : 'justify-center',
+       className)}
       {...props}
     />
   )
@@ -295,7 +292,7 @@ const SidebarFooter = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-2 mt-auto", className)}
+      className={cn("flex flex-col gap-2 mt-auto", className)}
       {...props}
     />
   )
@@ -322,15 +319,22 @@ SidebarContent.displayName = "SidebarContent"
 
 const SidebarGroup = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div">
->(function SidebarGroup({ className, ...props }, ref) {
+  React.ComponentProps<"div"> & { heading?: React.ReactNode }
+>(function SidebarGroup({ className, heading, children, ...props }, ref) {
+  const { state } = useSidebar();
+
   return (
     <div
       ref={ref}
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col rounded-lg bg-card", className)}
+      className={cn("relative flex w-full min-w-0 flex-col rounded-lg bg-card p-2 text-card-foreground", className)}
       {...props}
-    />
+    >
+        {heading && state === 'expanded' && (
+            <div className="text-sm font-semibold text-muted-foreground px-2 py-1 mb-1">{heading}</div>
+        )}
+        {children}
+    </div>
   )
 })
 SidebarGroup.displayName = "SidebarGroup"
@@ -343,7 +347,7 @@ const SidebarMenu = React.forwardRef<
     <ul
       ref={ref}
       data-sidebar="menu"
-      className={cn("flex w-full min-w-0 flex-col gap-1 p-2", className)}
+      className={cn("flex w-full min-w-0 flex-col gap-1", className)}
       {...props}
     />
   )
@@ -366,7 +370,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-md p-2 text-left text-sm font-medium outline-none ring-sidebar-ring transition-all hover:bg-accent focus-visible:ring-2 active:bg-accent disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-accent data-[active=true]:text-accent-foreground data-[state=open]:hover:bg-accent group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:px-0 group-data-[state=collapsed]:py-2 [&>span]:group-data-[state=collapsed]:hidden [&>svg]:size-5 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-md p-2 text-left text-sm font-medium outline-none ring-sidebar-ring transition-all hover:bg-accent focus-visible:ring-2 active:bg-accent disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-accent data-[active=true]:text-accent-foreground data-[state=open]:hover:bg-accent group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:px-2 group-data-[state=collapsed]:py-2 [&>span]:group-data-[state=collapsed]:hidden [&>small]:group-data-[state=collapsed]:hidden [&>svg]:size-5 [&>svg]:shrink-0",
   {
     variants: {
       variant: {

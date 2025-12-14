@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { AnimatePresence } from 'framer-motion';
-import { Bell, Play, Search, Heart } from 'lucide-react';
+import { Bell, Play, Search, Heart, PanelLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -273,7 +273,6 @@ export default function Home() {
   };
   
   const allMoods = { ...MOOD_DEFS };
-  const likedSongs = firestoreSongs.filter(isLiked);
 
   if (!isMounted) {
     return <AnimatePresence>{showIntro && <MoodyOLoader onExit={handleExitIntro} />}</AnimatePresence>;
