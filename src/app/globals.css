@@ -161,8 +161,6 @@ body.custom-theme-active {
   line-height: 1;
   display: flex;
   color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
 }
 
 .intro-logo-gsap span {

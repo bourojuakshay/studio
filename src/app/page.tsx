@@ -61,13 +61,13 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
       });
 
       tl.to(letters, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        filter: 'blur(0px)',
-        duration: 0.35,
-        ease: 'power3.out',
-        stagger: 0.06,
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          filter: 'blur(0px)',
+          duration: 0.35,
+          ease: 'power3.out',
+          stagger: 0.06,
       })
       .to([tagline, bottomItems], {
         opacity: 1,
