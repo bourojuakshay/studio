@@ -133,10 +133,11 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   
   const { activePage, setActivePage, setPlaylist } = useAppContext();
-  // IMPORTANT: Do NOT subscribe to usePlaybackState here. It causes full-page re-renders on song progress.
-  // Playback actions are called directly from the store.
+  const { nowPlayingId } = useAppContext(); // Get nowPlayingId from low-frequency store
+  
+  // Directly call actions from the store without subscribing the whole component
   const { setNowPlayingId, handlePlayPause } = usePlaybackState.getState();
-  const { currentTrack, nowPlayingId } = useAppContext(); // Get nowPlayingId from low-frequency store
+
 
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -189,13 +190,11 @@ export default function Home() {
 
   const playSong = (songId: string) => {
     setNowPlayingId(songId);
-    handlePlayPause();
   };
   
   const openPlayer = (songId: string, contextMood: string) => {
     setActivePage(contextMood);
     setNowPlayingId(songId);
-    handlePlayPause();
   };
 
   const isLiked = (songId: string) => {

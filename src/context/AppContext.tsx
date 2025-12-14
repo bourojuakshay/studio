@@ -59,7 +59,6 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
         const { playlist, audioRef } = useAppContext.getState();
         const track = playlist.find(t => t.id === songId) || null;
         
-        // Update both low-frequency and high-frequency stores
         useAppContext.setState({ nowPlayingId: songId, currentTrack: track });
 
         const audio = audioRef.current;
@@ -69,6 +68,9 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
                     audio.src = track.src;
                     audio.load();
                 }
+                // Always play the new track
+                audio.play().catch(e => console.error("Audio play error:", e));
+                set({ isPlaying: true });
             } else {
                 audio.pause();
                 set({ isPlaying: false });
@@ -100,12 +102,6 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
         if (currentIndex === -1) return;
         const nextIndex = (currentIndex + 1) % playlist.length;
         get().setNowPlayingId(playlist[nextIndex].id!);
-        // After setting the new track, ensure it plays
-        const audio = useAppContext.getState().audioRef.current;
-        if (audio) {
-          audio.play().catch(e => console.error("Audio play error:", e));
-          set({ isPlaying: true });
-        }
     },
     handlePrev: () => {
         const { playlist, nowPlayingId } = useAppContext.getState();
@@ -114,12 +110,6 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
         if (currentIndex === -1) return;
         const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
         get().setNowPlayingId(playlist[prevIndex].id!);
-        // After setting the new track, ensure it plays
-        const audio = useAppContext.getState().audioRef.current;
-        if (audio) {
-          audio.play().catch(e => console.error("Audio play error:", e));
-          set({ isPlaying: true });
-        }
     },
     handleSeek: (time: number) => {
         const { audioRef } = useAppContext.getState();
