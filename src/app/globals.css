@@ -4,40 +4,40 @@
 @tailwind utilities;
 
 :root{
-  --background: 240 5% 10%; /* Very Dark Gray */
-  --foreground: 210 40% 98%;
+  --background: 215 25% 15%; /* Deep Charcoal */
+  --foreground: 216 33% 95%; /* Soft White */
 
-  --card: 240 5% 15%;
-  --card-foreground: 210 40% 98%;
+  --card: 218 29% 20%; /* Lighter Charcoal */
+  --card-foreground: 216 33% 95%;
 
-  --popover: 240 5% 15%;
-  --popover-foreground: 210 40% 98%;
+  --popover: 218 29% 20%;
+  --popover-foreground: 216 33% 95%;
 
-  --primary: 274 60% 60%; 
-  --primary-foreground: 210 40% 98%;
+  --primary: 220 100% 68%; /* Soft Blue Accent: #5B8CFF */
+  --primary-foreground: 215 25% 15%;
 
-  --secondary: 258 60% 70%; /* Vibrant Purple */
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 218 29% 25%;
+  --secondary-foreground: 216 33% 95%;
 
-  --muted: 240 5% 20%;
-  --muted-foreground: 215 20% 65%;
+  --muted: 218 29% 25%;
+  --muted-foreground: 220 14% 65%; /* Muted Gray for secondary text */
 
-  --accent: 240 5% 25%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 218 29% 28%;
+  --accent-foreground: 216 33% 95%;
 
   --destructive: 0 63% 31%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 240 5% 25%;
-  --input: 240 5% 20%;
-  --ring: 274 60% 60%; 
+  --border: 218 29% 28%;
+  --input: 218 29% 25%;
+  --ring: 220 100% 68%; 
 
   --radius: 0.8rem;
   --font-sans: 'Poppins', sans-serif;
 
-  --glass-bg: rgba(255, 255, 255, 0.06);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  --glass-bg: rgba(26, 32, 48, 0.7);
+  --glass-border: hsla(218, 29%, 35%, 0.5);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   
   --page-accent: hsl(var(--primary));
   --text: hsl(var(--foreground));
@@ -47,33 +47,33 @@
 }
 
 .dark {
-  --background: 240 5% 10%;
-  --foreground: 210 40% 98%;
+  --background: 215 25% 15%;
+  --foreground: 216 33% 95%;
 
-  --card: 240 5% 15%;
-  --card-foreground: 210 40% 98%;
+  --card: 218 29% 20%;
+  --card-foreground: 216 33% 95%;
 
-  --popover: 240 5% 15%;
-  --popover-foreground: 210 40% 98%;
+  --popover: 218 29% 20%;
+  --popover-foreground: 216 33% 95%;
 
-  --primary: 274 60% 60%;
-  --primary-foreground: 210 40% 98%;
+  --primary: 220 100% 68%;
+  --primary-foreground: 215 25% 15%;
 
-  --secondary: 258 60% 70%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 218 29% 25%;
+  --secondary-foreground: 216 33% 95%;
 
-  --muted: 240 5% 20%;
-  --muted-foreground: 215 20% 65%;
+  --muted: 218 29% 25%;
+  --muted-foreground: 220 14% 65%;
 
-  --accent: 240 5% 25%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 218 29% 28%;
+  --accent-foreground: 216 33% 95%;
 
   --destructive: 0 63% 31%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 240 5% 25%;
-  --input: 240 5% 20%;
-  --ring: 274 60% 60%;
+  --border: 218 29% 28%;
+  --input: 218 29% 25%;
+  --ring: 220 100% 68%;
 }
 
 *{box-sizing:border-box}
@@ -137,7 +137,7 @@ body.custom-theme-active {
     position: fixed;
     inset: 0;
     z-index: 10000;
-    background: radial-gradient(circle at 50% 100%, #00202e, #0A0A0A 60%);
+    background: radial-gradient(circle at 50% 100%, hsl(215, 30%, 18%) 0%, hsl(var(--background)) 60%);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -165,14 +165,7 @@ body.custom-theme-active {
 
 .intro-logo-gsap span {
   display: inline-block;
-  /* Fallback color */
-  color: #ffffff;
-  /* Gradient text */
-  background: linear-gradient(135deg, #818cf8 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  /* Make text transparent to show the gradient */
-  -webkit-text-fill-color: transparent;
+  color: hsl(var(--primary));
   will-change: transform, opacity, filter;
 }
 
@@ -185,7 +178,7 @@ body.custom-theme-active {
 .intro-tagline {
     font-size: 0.8rem;
     letter-spacing: 0.1em;
-    color: hsl(var(--foreground) / 0.5);
+    color: hsl(var(--muted-foreground));
     text-transform: uppercase;
     text-align: center;
 }
@@ -200,7 +193,7 @@ body.custom-theme-active {
     justify-content: space-between;
     align-items: center;
     padding: 0 2rem;
-    color: hsl(var(--foreground) / 0.4);
+    color: hsl(var(--muted-foreground) / 0.7);
 }
 
 .intro-hint {
@@ -211,7 +204,7 @@ body.custom-theme-active {
 .intro-icon {
     width: 24px;
     height: 24px;
-    border: 1.5px solid hsl(var(--foreground) / 0.4);
+    border: 1.5px solid hsl(var(--muted-foreground) / 0.7);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -442,7 +435,7 @@ body.home-active .nav-btn {
   pointer-events: none;
 }
 .now-playing-card:hover .card__glow {
-  opacity: 1;
+  opacity: 0; /* Disabled glow */
 }
 
 .card__content {
@@ -460,7 +453,7 @@ body.home-active .nav-btn {
   top: 1rem;
   right: 1rem;
   background: var(--card-accent);
-  color: hsl(var(--background));
+  color: hsl(var(--primary-foreground));
   padding: 0.25em 0.75em;
   border-radius: 999px;
   font-size: 0.8em;
@@ -513,10 +506,9 @@ body.home-active .nav-btn {
 }
 
 .card__description {
-  color: var(--card-text);
+  color: hsl(var(--muted-foreground));
   font-size: 0.9em;
   margin: 0;
-  opacity: 0.7;
   transition: all 0.3s ease;
 }
 .now-playing-card:hover .card__description {
@@ -529,7 +521,7 @@ body.home-active .nav-btn {
 
 .progress-bar-container {
     height: 4px;
-    background-color: hsla(var(--foreground), 0.3);
+    background-color: hsl(var(--input));
     border-radius: 2px;
     cursor: pointer;
     width: 100%;
@@ -565,7 +557,7 @@ body.home-active .nav-btn {
     display: flex;
     justify-content: space-between;
     font-size: 0.75rem;
-    opacity: 0.7;
+    color: hsl(var(--muted-foreground));
     margin-top: 0.25rem;
 }
 
@@ -588,9 +580,8 @@ body.home-active .nav-btn {
 .control-btn {
   background: none;
   border: none;
-  color: var(--text);
+  color: hsl(var(--muted-foreground));
   transition: transform .2s ease, color .2s ease, opacity .2s ease;
-  opacity: 0.7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -599,7 +590,6 @@ body.home-active .nav-btn {
 }
 .control-btn:hover {
   transform: scale(1.15);
-  opacity: 1;
   color: var(--card-accent);
 }
 
@@ -610,7 +600,7 @@ body.home-active .nav-btn {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: hsl(var(--background));
+  color: hsl(var(--primary-foreground));
   opacity: 1;
   border: none;
   cursor: pointer;
@@ -626,7 +616,6 @@ body.home-active .nav-btn {
 
 .like-btn.liked {
     color: var(--card-accent);
-    opacity: 1;
 }
 .like-btn.liked svg {
     fill: var(--card-accent);
@@ -644,7 +633,7 @@ body.home-active .nav-btn {
 }
 
 .now-playing-card:hover .play-main-btn svg {
-  animation: pulse 1.5s infinite;
+  animation: none; /* disabled pulse */
 }
 
 .playlist-view {
@@ -713,16 +702,21 @@ body.home-active .nav-btn {
   cursor: pointer;
   position: relative;
   z-index: 2;
-  background-color: transparent; /* Changed from rgba(255,255,255,0.1) on hover to transparent */
-  touch-action: pan-y; /* Allow vertical scrolling */
+  background-color: transparent;
+  border-radius: 8px;
+  touch-action: pan-y;
 }
 
-.playlist-list-item-wrapper:hover .playlist-list-item {
-    background-color: rgba(255,255,255,0.1);
+.playlist-list-item:hover {
+    background-color: hsl(var(--accent));
 }
 
 .playlist-list-item.active {
-  background-color: rgba(255,255,255,0.1);
+  background-color: hsl(var(--accent));
+}
+.playlist-list-item.active .title,
+.playlist-list-item.active .artist {
+    color: hsl(var(--primary));
 }
 
 .playlist-list-item-cover {
@@ -742,10 +736,11 @@ body.home-active .nav-btn {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: hsl(var(--foreground));
 }
 .playlist-list-item-info .artist {
   font-size: 0.8rem;
-  opacity: 0.7;
+  color: hsl(var(--muted-foreground));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -783,7 +778,7 @@ section.page::before {
   transition: opacity .8s ease-in-out;
 }
 section.page.active::before {
-  opacity: 0.4;
+  opacity: 0.2; /* reduced opacity */
 }
 
 .song-title-wrapper {
@@ -1010,7 +1005,7 @@ body.custom-theme-active body {
   position: relative;
   width: 220px;
   height: 220px;
-  background: var(--glass-bg);
+  background: hsl(var(--card));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1122,7 +1117,7 @@ body.custom-theme-active body {
   left: 0;
   right: 0;
   height: 90px;
-  background: rgba(12, 15, 22, 0.8);
+  background: hsla(215, 25%, 12%, 0.8);
   backdrop-filter: blur(10px) saturate(180%);
   -webkit-backdrop-filter: blur(10px) saturate(180%);
   border-top: 1px solid var(--glass-border);
@@ -1152,11 +1147,12 @@ body.custom-theme-active body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: hsl(var(--foreground));
 }
 
 .footer-player-info-text .artist {
   font-size: 12px;
-  opacity: 0.7;
+  color: hsl(var(--muted-foreground));
 }
 
 .footer-player-center {
@@ -1193,7 +1189,6 @@ body.custom-theme-active body {
 
 .footer-player-progress .time-display {
   font-size: 11px;
-  opacity: 0.7;
   min-width: 35px;
   text-align: center;
 }
@@ -1264,5 +1259,3 @@ body.custom-theme-active body {
 .w-2 {
   width: 0.5em;
 }
-
-    
