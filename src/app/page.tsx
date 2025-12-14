@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { AnimatePresence } from 'framer-motion';
-import { Bell, Home as HomeIcon, Library, ListMusic, LogOut, LogIn, Mic2, Plus, Search, User } from 'lucide-react';
+import { Bell, Home as HomeIcon, Library, ListMusic, LogOut, LogIn, Mic2, Plus, Search, User, Heart, Play } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -753,3 +753,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
