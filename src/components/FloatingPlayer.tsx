@@ -18,7 +18,7 @@ import {
     Minimize2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { usePlaybackState } from '@/context/AppContext';
+import { usePlaybackState, useAppContext } from '@/context/AppContext';
 import type { Song } from '@/firebase/firestore';
 import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { useUser, useFirestore } from '@/firebase';
@@ -29,7 +29,7 @@ import { Slider } from '@/components/ui/slider';
 
 
 export function FloatingPlayerWrapper() {
-    const { currentTrack } = usePlaybackState();
+    const { currentTrack } = useAppContext(); // Changed from usePlaybackState
     const { user } = useUser();
     const firestore = useFirestore();
     const router = useRouter();
@@ -116,7 +116,7 @@ export function FloatingPlayer({
     return (
         <motion.div
             className="player-card"
-            whileHover={{ scale: hasTrack ? 1.05 : 1 }}
+            whileHover={{ scale: 1.05 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             layout
         >
