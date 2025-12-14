@@ -64,17 +64,18 @@ const pathVariants = {
 const letterPaths = [
     // M
     "M4.25,48.2V2.3h10.3l7,19.3l7-19.3h10.3v45.9h-8.1V12.6L22.65,32L15.55,12.6v35.6H4.25z",
+    // o
+    "M83.45,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C75.15,5.5,83.45,14.2,83.45,25.2z M75.55,25.2c0-6.6-5-12.7-12.2-12.7c-7.2,0-12.2,6-12.2,12.7c0,6.6,5,12.7,12.2,12.7C70.55,37.9,75.55,31.8,75.55,25.2z",
+    // o
+    "M134.85,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C126.55,5.5,134.85,14.2,134.85,25.2z M126.95,25.2c0-6.6-5-12.7-12.2-12.7c-7.2,0-12.2,6-12.2,12.7c0,6.6,5,12.7,12.2,12.7C121.95,37.9,126.95,31.8,126.95,25.2z",
+    // d
+    "M193.25,48.2V2.3h8.1v36.9c7.2-5.1,15-8.5,22.1-8.5c11.8,0,20.1,8.7,20.1,19.7c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7V48.2z M215.35,44.9c0,6.6,5,12.7,12.2,12.7c7.2,0,12.2-6,12.2-12.7c0-6.6-5-12.7-12.2-12.7C220.35,32.2,215.35,38.3,215.35,44.9z",
+    // y
+    "M255.95,2.3h8.1v17.5l14.4-17.5h10.4l-12.8,15.7l14,30h-9.5l-9.6-21.4l-5.5,6.5v14.9h-8.1V2.3z",
     // O
-    "M83.45,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C75.15,5.5,83.45,14.2,83.45,25.2z",
-    // O
-    "M134.85,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C126.55,5.5,134.85,14.2,134.85,25.2z",
-    // P
-    "M154.25,48.2V2.3h15.2c13.2,0,21.5,8.1,21.5,19.6c0,11.5-8.3,19.7-21.5,19.7h-7.1v6.6H154.25z M162.35,37.3h7.1c8.1,0,13.8-5,13.8-12.7c0-7.7-5.7-12.8-13.8-12.8h-7.1V37.3z",
-    // M
-    "M218.45,48.2V2.3h10.3l7,19.3l7-19.3h10.3v45.9h-8.1V12.6L245.85,32l-7.1-19.4v35.6H218.45z",
-    // O
-    "M296.95,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C288.65,5.5,296.95,14.2,296.95,25.2z",
+    "M336.85,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C328.55,5.5,336.85,14.2,336.85,25.2z M328.95,25.2c0-6.6-5-12.7-12.2-12.7c-7.2,0-12.2,6-12.2,12.7c0,6.6,5,12.7,12.2,12.7C323.95,37.9,328.95,31.8,328.95,25.2z"
 ];
+
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   const [exitState, setExitState] = useState<'enter' | 'exit'>('enter');
@@ -114,7 +115,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
       <div className="intro-logo-container">
         <motion.svg 
           className="intro-svg-logo" 
-          viewBox="0 0 301 51"
+          viewBox="0 0 341 51"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -547,7 +548,7 @@ export default function Home() {
         <header>
           <div className="header-inner">
               <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">
-                MOOP MO
+                MoodyO
               </a>
               <nav className="hidden md:flex">
                 <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="nav-btn">
@@ -575,7 +576,7 @@ export default function Home() {
                   <SheetContent side="left" className="main-menu-sheet sheet-content">
                     <SheetHeader>
                        <SheetTitle className="sr-only">Main Menu</SheetTitle>
-                      <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">MOOP MO</a>
+                      <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">MoodyO</a>
                     </SheetHeader>
                     <div className="flex flex-col py-4">
                        <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }}>Home</a>
@@ -657,7 +658,7 @@ export default function Home() {
         </main>
         
         <footer>
-          <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • Moodyo Demo</small>
+          <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
         </footer>
         
         {isMounted && (
