@@ -3,23 +3,24 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MoodDefinition, Track } from '@/app/lib/mood-definitions';
+import type { MoodDefinition } from '@/app/lib/mood-definitions';
 import { MoodHero } from './MoodHero';
 import { PlaylistView } from './PlaylistView';
+import type { Song } from '@/firebase/firestore';
 
 type MoodPageProps = {
   mood: string;
   definition?: MoodDefinition;
-  tracks: Track[];
-  nowPlaying: { mood: string; index: number } | null;
+  tracks: Song[];
+  nowPlayingId: string | null;
   isPlaying: boolean;
-  currentTrack: Track | null;
+  currentTrack: Song | null;
   handlePlayPause: () => void;
   handleNext: () => void;
   handlePrev: () => void;
-  handleLike: (e: React.MouseEvent, track: Track) => void;
-  isLiked: (track: Track) => boolean;
-  openPlayer: (mood: string, index: number) => void;
+  handleLike: (e: React.MouseEvent, songId: string) => void;
+  isLiked: (songId: string) => boolean;
+  openPlayer: (songId: string, contextMood: string) => void;
   progress: { currentTime: number; duration: number; };
   handleSeek: (time: number) => void;
 };
@@ -28,7 +29,7 @@ export function MoodPage({
   mood,
   definition,
   tracks,
-  nowPlaying,
+  nowPlayingId,
   isPlaying,
   currentTrack,
   handlePlayPause,
@@ -71,7 +72,7 @@ export function MoodPage({
       <div className="mood-page-layout">
         <MoodHero
           definition={definition}
-          nowPlaying={nowPlaying}
+          nowPlayingId={nowPlayingId}
           isPlaying={isPlaying}
           currentTrack={currentTrack}
           tracks={tracks}

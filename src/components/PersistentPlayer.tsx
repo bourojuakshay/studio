@@ -6,19 +6,19 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, SkipBack, Play, Pause, SkipForward, Volume1, Volume2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Track } from '@/app/lib/mood-definitions';
 import { useAppContext } from '@/context/AppContext';
 import { Slider } from './ui/slider';
+import type { Song } from '@/firebase/firestore';
 
 type PersistentPlayerProps = {
-    track: Track;
+    track: Song;
     isPlaying: boolean;
     handlePlayPause: () => void;
     handleNext: () => void;
     handlePrev: () => void;
-    handleLike: (e: React.MouseEvent, track: Track) => void;
-    isLiked: (track: Track) => boolean;
-    setNowPlaying: (nowPlaying: { mood: string, index: number } | null) => void;
+    handleLike: (e: React.MouseEvent, songId: string) => void;
+    isLiked: (songId: string) => boolean;
+    setNowPlayingId: (songId: string | null) => void;
     progress: { currentTime: number; duration: number };
     handleSeek: (time: number) => void;
     volume: number;
@@ -40,7 +40,7 @@ export function PersistentPlayer({
     handlePrev, 
     handleLike, 
     isLiked, 
-    setNowPlaying,
+    setNowPlayingId,
     progress,
     handleSeek,
     volume,
@@ -68,7 +68,7 @@ export function PersistentPlayer({
                     <div className="title">{track.title}</div>
                     <div className="artist">{track.artist}</div>
                 </div>
-                 <button onClick={(e) => handleLike(e, track)} className={cn('like-btn control-btn', { 'liked': isLiked(track) })}>
+                 <button onClick={(e) => handleLike(e, track.id!)} className={cn('like-btn control-btn', { 'liked': isLiked(track.id!) })}>
                     <Heart size={18} />
                 </button>
             </div>
@@ -106,7 +106,7 @@ export function PersistentPlayer({
                         className="volume-slider" 
                     />
                 </div>
-                <button onClick={() => setNowPlaying(null)} className="control-btn close-btn">
+                <button onClick={() => setNowPlayingId(null)} className="control-btn close-btn">
                     <X size={20} />
                 </button>
             </div>

@@ -21,7 +21,7 @@ export default function SearchPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [results, setResults] = useState<Song[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const { setNowPlaying, setIsPlaying } = useAppContext();
+    const { setNowPlayingId, setIsPlaying } = useAppContext();
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     useEffect(() => {
@@ -46,9 +46,8 @@ export default function SearchPage() {
     }, [debouncedSearchTerm, handleSearch]);
 
     const playSong = (song: Song) => {
-        // This assumes your songs from useSongs() hook are indexed
-        // In a real app, you might need a more robust way to find the index
-        setNowPlaying({ mood: song.mood, index: song.id as any }); 
+        if (!song.id) return;
+        setNowPlayingId(song.id); 
         setIsPlaying(true);
     };
 

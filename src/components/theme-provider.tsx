@@ -2,17 +2,21 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { MoodDefinition, Track } from '@/app/lib/mood-definitions';
+import type { MoodDefinition } from '@/app/lib/mood-definitions';
+import { useAppContext } from '@/context/AppContext';
+import type { Song } from '@/firebase/firestore';
 
 type ThemeProviderProps = {
     activePage: string;
     customMoods: Record<string, MoodDefinition>;
-    tracks: Record<string, Track[]>;
-    nowPlaying: { mood: string; index: number } | null;
+    tracks: Record<string, Song[]>;
+    nowPlayingId: string | null;
     allMoods: Record<string, MoodDefinition>;
 };
 
-export function ThemeProvider({ activePage, customMoods, tracks, nowPlaying, allMoods }: ThemeProviderProps) {
+export function ThemeProvider({ activePage, customMoods, tracks, nowPlayingId, allMoods }: ThemeProviderProps) {
+  const { playlist } = useAppContext();
+
   useEffect(() => {
     const moodDef = allMoods[activePage as keyof typeof allMoods];
 
@@ -37,7 +41,7 @@ export function ThemeProvider({ activePage, customMoods, tracks, nowPlaying, all
         const activePageElement = document.getElementById(activePage);
         const activePlaylist = tracks[activePage as keyof typeof tracks];
         if (activePageElement && activePlaylist && activePlaylist.length > 0) {
-            const currentTrack = nowPlaying && nowPlaying.mood === activePage ? tracks[nowPlaying.mood][nowPlaying.index] : activePlaylist[0];
+            const currentTrack = nowPlayingId ? playlist.find(t => t.id === nowPlayingId) : activePlaylist[0];
             if (currentTrack) {
               activePageElement.style.setProperty('--bg-image', `url(${currentTrack.cover})`);
             }
@@ -49,7 +53,7 @@ export function ThemeProvider({ activePage, customMoods, tracks, nowPlaying, all
         
         document.body.className = document.body.className + ' ' + classes.trim();
     }
-  }, [activePage, customMoods, tracks, nowPlaying, allMoods]);
+  }, [activePage, customMoods, tracks, nowPlayingId, allMoods, playlist]);
 
   return null; // This component does not render anything
 }

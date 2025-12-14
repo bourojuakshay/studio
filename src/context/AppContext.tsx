@@ -1,16 +1,16 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
-import { Track } from '@/app/lib/mood-definitions';
-import { useSongs } from '@/hooks/use-songs';
+import React, { ReactNode, useEffect } from 'react';
 import { create } from 'zustand';
+import { useSongs } from '@/hooks/use-songs';
+import type { Song } from '@/firebase/firestore';
 
 interface AppState {
     activePage: string;
     setActivePage: (page: string) => void;
-    nowPlaying: { mood: string; index: number } | null;
-    setNowPlaying: (playing: { mood: string; index: number } | null) => void;
+    nowPlayingId: string | null;
+    setNowPlayingId: (songId: string | null) => void;
     isPlaying: boolean;
     setIsPlaying: (playing: boolean) => void;
     volume: number;
@@ -18,13 +18,17 @@ interface AppState {
     progress: { currentTime: number; duration: number };
     setProgress: (progress: { currentTime: number; duration: number }) => void;
     audioRef: React.RefObject<HTMLAudioElement>;
+    playlist: Song[];
+    setPlaylist: (playlist: Song[]) => void;
+    currentTrack: Song | null;
+    setCurrentTrack: (track: Song | null) => void;
 }
 
 export const useAppContext = create<AppState>((set) => ({
     activePage: 'home',
     setActivePage: (page) => set({ activePage: page }),
-    nowPlaying: null,
-    setNowPlaying: (playing) => set({ nowPlaying: playing }),
+    nowPlayingId: null,
+    setNowPlayingId: (songId) => set({ nowPlayingId: songId }),
     isPlaying: false,
     setIsPlaying: (playing) => set({ isPlaying: playing }),
     volume: 0.75,
@@ -32,13 +36,29 @@ export const useAppContext = create<AppState>((set) => ({
     progress: { currentTime: 0, duration: 0 },
     setProgress: (progress) => set({ progress }),
     audioRef: React.createRef<HTMLAudioElement>(),
+    playlist: [],
+    setPlaylist: (playlist) => set({ playlist }),
+    currentTrack: null,
+    setCurrentTrack: (track) => set({ currentTrack: track }),
 }));
 
 export function AppProvider({ children }: { children: ReactNode }) {
-    const { isPlaying, setProgress, volume, nowPlaying } = useAppContext();
-    const { songs } = useSongs();
+    const { 
+        isPlaying, 
+        volume, 
+        nowPlayingId,
+        setCurrentTrack,
+        playlist,
+    } = useAppContext();
+    
     const audioRef = useAppContext((state) => state.audioRef);
-    const currentTrack = nowPlaying ? songs.find(s => s.id === (songs.find(s => s.index === nowPlaying.index)?.id)) : null;
+    const currentTrack = useAppContext((state) => state.currentTrack);
+
+    useEffect(() => {
+        const track = playlist.find(t => t.id === nowPlayingId) || null;
+        setCurrentTrack(track);
+    }, [nowPlayingId, playlist, setCurrentTrack]);
+
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -54,6 +74,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
             } else {
                 audio.pause();
             }
+        } else if (!currentTrack) {
+             audio.pause();
+             audio.src = '';
         }
     }, [currentTrack, isPlaying, audioRef]);
 

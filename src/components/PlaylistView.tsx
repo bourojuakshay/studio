@@ -6,20 +6,20 @@ import Image from 'next/image';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Heart, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Track } from '@/app/lib/mood-definitions';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useVirtualizer } from '@/hooks/use-virtualizer';
+import type { Song } from '@/firebase/firestore';
 
 type PlaylistViewProps = {
-    tracks: Track[];
-    currentTrack: Track | null;
+    tracks: Song[];
+    currentTrack: Song | null;
     mood: string;
-    handleLike: (e: React.MouseEvent | PanInfo, track: Track) => void;
-    isLiked: (track: Track) => boolean;
-    openPlayer: (mood: string, index: number) => void;
+    handleLike: (e: React.MouseEvent | PanInfo, songId: string) => void;
+    isLiked: (songId: string) => boolean;
+    openPlayer: (songId: string, mood: string) => void;
 };
 
-const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike, isLiked, style }: { track: Track; index: number; style: React.CSSProperties } & Omit<PlaylistViewProps, 'tracks' | 'virtualizer'>) => {
+const PlaylistItem = ({ track, style, ...props }: { track: Song; style: React.CSSProperties } & Omit<PlaylistViewProps, 'tracks' | 'virtualizer'>) => {
     const x = useMotionValue(0);
     
     const backgroundScaleX = useTransform(x, [0, 100], [0, 1]);
@@ -28,11 +28,9 @@ const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike
 
     const onDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         if (info.offset.x > 100) {
-            handleLike(info, { ...track, mood, index });
+            props.handleLike(info, track.id!);
         }
     };
-    
-    const trackWithContext = { ...track, mood, index };
 
     return (
         <motion.div 
@@ -48,8 +46,8 @@ const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike
                 </motion.div>
             </motion.div>
             <motion.div
-                className={cn('playlist-list-item', { active: currentTrack?.src === track.src })}
-                onClick={() => openPlayer(mood, index)}
+                className={cn('playlist-list-item', { active: props.currentTrack?.id === track.id })}
+                onClick={() => props.openPlayer(track.id!, props.mood)}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragSnapToOrigin={true}
@@ -61,7 +59,7 @@ const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike
                 <div className="playlist-list-item-info">
                     <div className="song-title-wrapper">
                         <div className="title">{track.title}</div>
-                        <button onClick={(e) => handleLike(e, trackWithContext)} className={cn('like-btn control-btn !p-0 h-auto', { 'liked': isLiked(trackWithContext) })}>
+                        <button onClick={(e) => props.handleLike(e, track.id!)} className={cn('like-btn control-btn !p-0 h-auto', { 'liked': props.isLiked(track.id!) })}>
                             <Heart size={16} />
                         </button>
                     </div>
@@ -78,7 +76,7 @@ const PlaylistItem = ({ track, index, mood, currentTrack, openPlayer, handleLike
 };
 
 
-export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, openPlayer }: PlaylistViewProps) {
+export function PlaylistView({ tracks, ...rest }: PlaylistViewProps) {
     
     const scrollRef = useRef<HTMLDivElement>(null);
     const { virtualItems, totalHeight } = useVirtualizer({
@@ -132,12 +130,6 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
                            <PlaylistItem
                                 key={virtualItem.key}
                                 track={track}
-                                index={virtualItem.index}
-                                mood={mood}
-                                currentTrack={currentTrack}
-                                openPlayer={openPlayer}
-                                handleLike={handleLike}
-                                isLiked={isLiked}
                                 style={{
                                     position: 'absolute',
                                     top: 0,
@@ -146,6 +138,7 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
                                     height: `${virtualItem.size}px`,
                                     transform: `translateY(${virtualItem.start}px)`,
                                 }}
+                                {...rest}
                             />
                         )
                     })}

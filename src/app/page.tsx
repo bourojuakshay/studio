@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { AnimatePresence } from 'framer-motion';
-import { Bell, Play, Search, Heart, PanelLeft } from 'lucide-react';
+import { Bell, Play, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ import { useSongs } from '@/hooks/use-songs';
 import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { setUserSongPreference, type Song } from '@/firebase/firestore';
 import { useAuth, useFirestore, useUser } from '@/firebase';
-import { MOOD_DEFS, type MoodDefinition, type Track } from '@/app/lib/mood-definitions';
+import { MOOD_DEFS, type MoodDefinition } from '@/app/lib/mood-definitions';
 import { useToast } from '@/hooks/use-toast';
 import {
   Sidebar,
@@ -112,7 +112,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   );
 };
 
-const AlbumCard = ({ track, onClick }: { track: Track; onClick: () => void }) => (
+const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => (
     <div className="album-card" onClick={onClick}>
         <div className="album-card-image">
             <Image src={track.cover} alt={track.title} width={150} height={150} />
@@ -131,14 +131,17 @@ export default function Home() {
   const { 
     activePage, 
     setActivePage,
-    nowPlaying,
-    setNowPlaying,
+    nowPlayingId,
+    setNowPlayingId,
     isPlaying,
     setIsPlaying,
     volume,
     setVolume,
     progress,
-    audioRef
+    audioRef,
+    setPlaylist,
+    currentTrack,
+    playlist,
   } = useAppContext();
   
   const { user, isUserLoading } = useUser();
@@ -146,11 +149,11 @@ export default function Home() {
   const auth = useAuth();
   const { toast } = useToast();
   
-  const { preferences: likedSongPrefs } = useUserPreferences(user?.uid);
+  const { likedSongIds } = useUserPreferences(user?.uid);
   const { songs: firestoreSongs } = useSongs();
   
-  const [tracks, setTracks] = useState<Record<string, Track[]>>({});
-  const [filteredTracks, setFilteredTracks] = useState<Track[]>([]);
+  const [tracksByMood, setTracksByMood] = useState<Record<string, Song[]>>({});
+  const [filteredTracks, setFilteredTracks] = useState<Song[]>([]);
   const [selectedEmotion, setSelectedEmotion] = useState<string>('all');
   
   const [showIntro, setShowIntro] = useState(true);
@@ -162,10 +165,9 @@ export default function Home() {
 
   useEffect(() => {
     if (firestoreSongs) {
-      const allFirestoreTracks = firestoreSongs.map((s, i) => ({ ...s, index: i }));
-      setTracks({ all: allFirestoreTracks });
+      setPlaylist(firestoreSongs);
 
-      const newTracksByMood: Record<string, Track[]> = {};
+      const newTracksByMood: Record<string, Song[]> = {'all': firestoreSongs};
       firestoreSongs.forEach(song => {
         const moods = Array.isArray(song.emotions) ? song.emotions : [song.mood];
         moods.forEach(mood => {
@@ -175,57 +177,57 @@ export default function Home() {
             newTracksByMood[mood].push(song);
         });
       });
-      setTracks(prev => ({...prev, ...newTracksByMood}));
+      setTracksByMood(newTracksByMood);
     }
-  }, [firestoreSongs]);
+  }, [firestoreSongs, setPlaylist]);
 
   useEffect(() => {
     if (selectedEmotion === 'all') {
-      setFilteredTracks(tracks.all || []);
+      setFilteredTracks(tracksByMood.all || []);
     } else {
-      setFilteredTracks(tracks[selectedEmotion] || []);
+      setFilteredTracks(tracksByMood[selectedEmotion] || []);
     }
-  }, [selectedEmotion, tracks]);
+  }, [selectedEmotion, tracksByMood]);
 
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  const currentTrack = nowPlaying ? tracks[nowPlaying.mood as keyof typeof tracks]?.[nowPlaying.index] : null;
-
   const handlePlayPause = () => {
-    if (nowPlaying) {
+    if (nowPlayingId) {
       setIsPlaying(!isPlaying);
     } else {
-      const currentMood = activePage === 'home' ? 'all' : activePage;
-      if (tracks[currentMood as keyof typeof tracks]?.length > 0) {
-        setNowPlaying({ mood: currentMood, index: 0 });
+      const currentPlaylist = activePage === 'home' ? tracksByMood['all'] : tracksByMood[activePage];
+      if (currentPlaylist?.length > 0) {
+        setNowPlayingId(currentPlaylist[0].id!);
         setIsPlaying(true);
       }
     }
   };
 
-  const handleNext = () => {
-    if (!nowPlaying) return;
-    const { mood, index } = nowPlaying;
-    const playlist = tracks[mood as keyof typeof tracks];
-    if (!playlist) return;
-    const nextIndex = (index + 1) % playlist.length;
-    setNowPlaying({ mood, index: nextIndex });
+ const handleNext = () => {
+    if (!nowPlayingId) return;
+    const currentPlaylist = tracksByMood[activePage === 'home' ? 'all' : activePage] || playlist;
+    const currentIndex = currentPlaylist.findIndex(t => t.id === nowPlayingId);
+    if (currentIndex === -1 || currentPlaylist.length === 0) return;
+    
+    const nextIndex = (currentIndex + 1) % currentPlaylist.length;
+    setNowPlayingId(currentPlaylist[nextIndex].id!);
     setIsPlaying(true);
   };
 
   const handlePrev = () => {
-    if (!nowPlaying) return;
-    const { mood, index } = nowPlaying;
-    const playlist = tracks[mood as keyof typeof tracks];
-    if (!playlist) return;
-    const prevIndex = (index - 1 + playlist.length) % playlist.length;
-    setNowPlaying({ mood, index: prevIndex });
+    if (!nowPlayingId) return;
+    const currentPlaylist = tracksByMood[activePage === 'home' ? 'all' : activePage] || playlist;
+    const currentIndex = currentPlaylist.findIndex(t => t.id === nowPlayingId);
+    if (currentIndex === -1 || currentPlaylist.length === 0) return;
+
+    const prevIndex = (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+    setNowPlayingId(currentPlaylist[prevIndex].id!);
     setIsPlaying(true);
   };
-
+  
   const handleSeek = (newTime: number) => {
     const audio = audioRef.current;
     if (audio) {
@@ -233,26 +235,18 @@ export default function Home() {
     }
   };
   
-  const openPlayer = (mood: string, index: number) => {
-    const playlist = tracks[mood as keyof typeof tracks] || [];
-    const trackToPlay = playlist[index];
-    if(!trackToPlay) return;
-
-    // find the original index in the 'all' playlist if it exists
-    const originalIndex = tracks.all?.findIndex(t => t.id === trackToPlay.id) ?? index;
-    const originalMood = trackToPlay.mood || 'all';
-
-    setNowPlaying({ mood: originalMood, index: originalIndex });
-    setActivePage(originalMood);
+  const openPlayer = (songId: string, contextMood?: string) => {
+    setNowPlayingId(songId);
+    setActivePage(contextMood || 'home');
     setIsPlaying(true);
   };
 
-  const isLiked = (track: Track) => {
-    if (!track?.id) return false;
-    return likedSongPrefs.some(pref => pref.songId === track.id && pref.liked);
+  const isLiked = (songId: string) => {
+    if (!songId) return false;
+    return likedSongIds.includes(songId);
   }
 
-  const handleLike = (e: React.MouseEvent, track: Track) => {
+  const handleLike = (e: React.MouseEvent, songId: string) => {
     e.stopPropagation();
     if (!user) {
         router.push('/login');
@@ -262,10 +256,10 @@ export default function Home() {
         });
         return;
     }
-    if (!track?.id) return;
+    if (!songId) return;
     
-    const currentlyLiked = isLiked(track);
-    setUserSongPreference(firestore, user.uid, track.id, !currentlyLiked);
+    const currentlyLiked = isLiked(songId);
+    setUserSongPreference(firestore, user.uid, songId, !currentlyLiked);
   }
 
   const openPage = (id: string) => {
@@ -278,22 +272,21 @@ export default function Home() {
     return <AnimatePresence>{showIntro && <MoodyOLoader onExit={handleExitIntro} />}</AnimatePresence>;
   }
 
-
   const MainContent = () => (
     <>
         <div className="home-section-grid">
             <h2 className="section-title">Recently Played</h2>
             <div className="album-grid">
-                {(tracks.all || []).slice(0, 6).map((track, i) => (
-                    <AlbumCard key={i} track={track} onClick={() => openPlayer('all', i)} />
+                {(tracksByMood.all || []).slice(0, 6).map((track, i) => (
+                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, 'all')} />
                 ))}
             </div>
         </div>
         <div className="home-section-grid">
             <h2 className="section-title">Recommended Stations</h2>
              <div className="album-grid">
-                {(tracks.all || []).slice(6, 12).map((track, i) => (
-                    <AlbumCard key={i} track={track} onClick={() => openPlayer('all', i + 6)} />
+                {(tracksByMood.all || []).slice(6, 12).map((track, i) => (
+                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, 'all')} />
                 ))}
             </div>
         </div>
@@ -319,7 +312,7 @@ export default function Home() {
             <h2 className="section-title">{selectedEmotion === 'all' ? 'Popular Playlists' : `For Your ${selectedEmotion.charAt(0).toUpperCase() + selectedEmotion.slice(1)} Mood`}</h2>
             <div className="album-grid">
                 {filteredTracks.slice(0, 12).map((track, i) => (
-                    <AlbumCard key={i} track={track} onClick={() => openPlayer(selectedEmotion, i)} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, selectedEmotion)} />
                 ))}
             </div>
         </div>
@@ -335,8 +328,8 @@ export default function Home() {
       <ThemeProvider 
         activePage={activePage} 
         customMoods={{}}
-        tracks={tracks}
-        nowPlaying={nowPlaying}
+        tracks={tracksByMood}
+        nowPlayingId={nowPlayingId}
         allMoods={allMoods}
       />
       
@@ -379,8 +372,8 @@ export default function Home() {
                    <MoodPage
                       mood={activePage}
                       definition={allMoods[activePage]}
-                      tracks={tracks[activePage]}
-                      nowPlaying={nowPlaying}
+                      tracks={tracksByMood[activePage]}
+                      nowPlayingId={nowPlayingId}
                       isPlaying={isPlaying}
                       currentTrack={currentTrack}
                       handlePlayPause={handlePlayPause}
@@ -404,7 +397,7 @@ export default function Home() {
         
       {isMounted && (
         <AnimatePresence>
-            {nowPlaying && currentTrack && (
+            {nowPlayingId && currentTrack && (
                 <PersistentPlayer
                     track={currentTrack}
                     isPlaying={isPlaying}
@@ -413,7 +406,7 @@ export default function Home() {
                     handlePrev={handlePrev}
                     handleLike={handleLike}
                     isLiked={isLiked}
-                    setNowPlaying={setNowPlaying}
+                    setNowPlayingId={setNowPlayingId}
                     progress={progress}
                     handleSeek={handleSeek}
                     volume={volume}

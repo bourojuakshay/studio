@@ -6,22 +6,23 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { SkipBack, SkipForward, Play, Pause, Heart, Volume1, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { MoodDefinition, Track } from '@/app/lib/mood-definitions';
+import type { MoodDefinition } from '@/app/lib/mood-definitions';
 import { useAppContext } from '@/context/AppContext';
 import { Slider } from './ui/slider';
+import type { Song } from '@/firebase/firestore';
 
 type MoodHeroProps = {
     definition: MoodDefinition;
-    nowPlaying: { mood: string; index: number } | null;
+    nowPlayingId: string | null;
     isPlaying: boolean;
-    currentTrack: Track | null;
-    tracks: Track[];
+    currentTrack: Song | null;
+    tracks: Song[];
     mood: string;
     handlePlayPause: () => void;
     handleNext: () => void;
     handlePrev: () => void;
-    handleLike: (e: React.MouseEvent, track: Track) => void;
-    isLiked: (track: Track) => boolean;
+    handleLike: (e: React.MouseEvent, songId: string) => void;
+    isLiked: (songId: string) => boolean;
     progress: { currentTime: number; duration: number; };
     handleSeek: (time: number) => void;
 };
@@ -35,7 +36,6 @@ const formatTime = (seconds: number) => {
 
 export function MoodHero({
     definition,
-    nowPlaying,
     isPlaying,
     currentTrack,
     tracks,
@@ -50,8 +50,9 @@ export function MoodHero({
 }: MoodHeroProps) {
     const { volume, setVolume } = useAppContext();
     const [isVolumeOpen, setIsVolumeOpen] = React.useState(false);
-    const trackPlaying = nowPlaying?.mood === mood ? currentTrack : null;
-    const displayTrack = trackPlaying || tracks?.[0];
+    
+    const isPlayingThisMood = currentTrack && tracks.some(t => t.id === currentTrack.id);
+    const displayTrack = isPlayingThisMood ? currentTrack : tracks?.[0];
 
     const heroVariants = {
       hidden: { opacity: 0, x: -50 },
@@ -71,7 +72,7 @@ export function MoodHero({
             </div>
             {displayTrack ? (
                 <div 
-                    className={cn("now-playing-card", { "is-playing": isPlaying && nowPlaying?.mood === mood })}
+                    className={cn("now-playing-card", { "is-playing": isPlaying && isPlayingThisMood })}
                 >
                     <div className="card__content">
                         <div className="card__badge">NOW PLAYING</div>
@@ -96,12 +97,12 @@ export function MoodHero({
                                 <div className="main-controls">
                                     <button onClick={handlePrev} className="control-btn"><SkipBack size={20} /></button>
                                     <button onClick={handlePlayPause} className="play-main-btn">
-                                        {(isPlaying && nowPlaying?.mood === mood) ? <Pause size={24} /> : <Play size={24} />}
+                                        {(isPlaying && isPlayingThisMood) ? <Pause size={24} /> : <Play size={24} />}
                                     </button>
                                     <button onClick={handleNext} className="control-btn"><SkipForward size={20}/></button>
                                 </div>
                                 <div className="secondary-controls">
-                                    <button onClick={(e) => handleLike(e, { ...displayTrack, mood: mood, index: nowPlaying?.index ?? 0 })} className={cn('like-btn control-btn', { 'liked': isLiked(displayTrack) })}>
+                                    <button onClick={(e) => handleLike(e, displayTrack.id!)} className={cn('like-btn control-btn', { 'liked': isLiked(displayTrack.id!) })}>
                                         <Heart size={20} />
                                     </button>
                                     <div className="volume-control">
