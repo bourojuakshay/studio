@@ -63,7 +63,7 @@ export default function AuthButtons() {
                   <SidebarMenuButton>
                       <Library />
                       <span>Your Library</span>
-                      <button className="ml-auto opacity-70 hover:opacity-100"><Plus size={18} /></button>
+                      <Plus size={18} className="ml-auto opacity-70 hover:opacity-100" />
                   </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
