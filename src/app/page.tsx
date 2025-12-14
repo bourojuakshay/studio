@@ -4,17 +4,10 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { Menu, Wand2, Loader, Home as HomeIcon, Github, User, LogOut, Plus, ArrowRight } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { Bell, Home as HomeIcon, Library, ListMusic, LogOut, LogIn, Mic2, Plus, Search, User } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -30,19 +23,32 @@ import { useAuth, useFirestore, useUser } from '@/firebase';
 import { initiateAnonymousSignIn, initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
 import { MOOD_DEFS, type MoodDefinition, type Track } from '@/app/lib/mood-definitions';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarGroup,
+  SidebarInset,
+  SidebarFooter
+} from '@/components/ui/sidebar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 export const dynamic = 'force-dynamic';
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       const letters = gsap.utils.toArray('.intro-logo-gsap span');
       const tagline = gsap.utils.toArray('.intro-tagline');
-      const bottomItems = gsap.utils.toArray('.intro-bottom-container');
       
       gsap.set(letters, {
         opacity: 0,
@@ -50,7 +56,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
         scale: 0.95,
         filter: 'blur(2px)',
       });
-      gsap.set([tagline, bottomItems], { opacity: 0 });
+      gsap.set(tagline, { opacity: 0 });
 
       const tl = gsap.timeline({
         onComplete: () => {
@@ -62,7 +68,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
 
       tl.to(letters, {
           opacity: 1,
-          y: 0,
+          y: -5,
           scale: 1,
           filter: 'blur(0px)',
           duration: 0.35,
@@ -70,24 +76,15 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
           stagger: 0.06,
       })
       .to(letters, {
-        y: -5,
-        duration: 0.2,
-        ease: 'power2.out',
-        stagger: 0.06,
-      }, '-=0.35')
-      .to(letters, {
           y: 0,
           duration: 0.15,
           ease: 'power2.in',
-          stagger: 0.06,
-      }, '-=0.2')
-      .to([tagline, bottomItems], {
+      }, "-=0.2")
+      .to(tagline, {
         opacity: 1,
         duration: 0.8,
         ease: 'power2.out',
       }, '-=0.2');
-
-      timelineRef.current = tl;
 
     }, containerRef);
     
@@ -95,24 +92,19 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   }, []);
 
   const handleExit = () => {
-    if (!timelineRef.current) return;
-    
     gsap.to(containerRef.current, {
       opacity: 0,
       duration: 0.5,
       ease: 'power2.inOut',
       onComplete: onExit,
     });
-    timelineRef.current.reverse();
   };
 
-
   return (
-    <motion.div
+    <div
       className="intro-screen-v2"
       onClick={handleExit}
       ref={containerRef}
-      initial={{ opacity: 1 }}
     >
         <div className="intro-content-wrapper">
              <h1 className="intro-logo-gsap">
@@ -124,47 +116,22 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
                 <div className="intro-tagline">mood based audio</div>
             </div>
         </div>
-
-      <div className="intro-bottom-container">
-        <div className="intro-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-            </svg>
-        </div>
-        <div className="intro-hint">
-          Tap anywhere to continue
-        </div>
-        <div style={{width: '24px'}}></div>
-      </div>
-    </motion.div>
-  );
-};
-
-
-
-const InteractiveCard = ({ moodKey, emoji, title, onClick }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void }) => {
-
-  const cardClasses = cn(
-    'interactive-card',
-    { 'create-card': moodKey === 'create' }
-  );
-
-  return (
-    <div 
-      className={cardClasses}
-      onClick={onClick}
-      title={title}
-      style={{ '--page-accent': MOOD_DEFS[moodKey as keyof typeof MOOD_DEFS]?.accent || 'hsl(var(--primary))' } as React.CSSProperties}
-    >
-      <div className="card-content">
-          {emoji}
-      </div>
-       <div className="card-hover-content">
-          {title}
-       </div>
     </div>
   );
 };
+
+const AlbumCard = ({ track, onClick }: { track: Track; onClick: () => void }) => (
+    <div className="album-card" onClick={onClick}>
+        <div className="album-card-image">
+            <Image src={track.cover} alt={track.title} width={150} height={150} />
+            <Button size="icon" className="play-button"><Play /></Button>
+        </div>
+        <div className="album-card-info">
+            <p className="album-card-title">{track.title}</p>
+            <p className="album-card-artist">{track.artist}</p>
+        </div>
+    </div>
+);
 
 
 export default function Home() {
@@ -172,7 +139,6 @@ export default function Home() {
   const [activePage, setActivePage] = useState('home');
   const [nowPlaying, setNowPlaying] = useState<{ mood: string; index: number } | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMenuSheetOpen, setIsMenuSheetOpen] = useState(false);
   const [isAuthSheetOpen, setIsAuthSheetOpen] = useState(false);
   
   const { user, isUserLoading } = useUser();
@@ -184,6 +150,8 @@ export default function Home() {
   const { songs: firestoreSongs } = useSongs();
   
   const [tracks, setTracks] = useState<Record<string, Track[]>>({});
+  const [filteredTracks, setFilteredTracks] = useState<Track[]>([]);
+  const [selectedEmotion, setSelectedEmotion] = useState<string>('all');
   
   const [isCustomMoodDialogOpen, setIsCustomMoodDialogOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -197,7 +165,6 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorRingRef = useRef<HTMLDivElement>(null);
-  const homePageRef = useRef<HTMLElement>(null);
 
   const handleExitIntro = () => {
     setShowIntro(false);
@@ -205,28 +172,30 @@ export default function Home() {
 
   useEffect(() => {
     if (firestoreSongs) {
-      setTracks(prevTracks => {
-        const newTracks: Record<string, Track[]> = {};
-  
-        // Group firestore songs by mood
-        const firestoreSongsByMood: Record<string, Song[]> = {};
-        firestoreSongs.forEach(song => {
-          if (!firestoreSongsByMood[song.mood]) {
-            firestoreSongsByMood[song.mood] = [];
-          }
-          firestoreSongsByMood[song.mood].push(song);
+      const allFirestoreTracks = firestoreSongs.map((s, i) => ({ ...s, index: i }));
+      setTracks({ all: allFirestoreTracks });
+
+      const newTracksByMood: Record<string, Track[]> = {};
+      firestoreSongs.forEach(song => {
+        const moods = Array.isArray(song.emotions) ? song.emotions : [song.mood];
+        moods.forEach(mood => {
+            if (!newTracksByMood[mood]) {
+                newTracksByMood[mood] = [];
+            }
+            newTracksByMood[mood].push(song);
         });
-  
-        // Create playlists for all defined moods
-        Object.keys(MOOD_DEFS).forEach(moodKey => {
-          const firestoreSongsForMood = firestoreSongsByMood[moodKey] || [];
-          newTracks[moodKey] = firestoreSongsForMood;
-        });
-  
-        return newTracks;
       });
+      setTracks(prev => ({...prev, ...newTracksByMood}));
     }
   }, [firestoreSongs]);
+
+  useEffect(() => {
+    if (selectedEmotion === 'all') {
+      setFilteredTracks(tracks.all || []);
+    } else {
+      setFilteredTracks(tracks[selectedEmotion] || []);
+    }
+  }, [selectedEmotion, tracks]);
 
 
   useEffect(() => {
@@ -236,32 +205,8 @@ export default function Home() {
     }
   }, [isUserLoading, user, auth]);
 
-  // Custom Cursor Animation
-  useEffect(() => {
-    if (!isMounted) return;
-    const onMouseMove = (e: MouseEvent) => {
-      gsap.to(cursorDotRef.current, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.3,
-        ease: 'power3.out',
-      });
-      gsap.to(cursorRingRef.current, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.5,
-        ease: 'power3.out',
-      });
-    };
-    window.addEventListener('mousemove', onMouseMove);
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-    };
-  }, [isMounted]);
-
   const currentTrack = nowPlaying ? tracks[nowPlaying.mood as keyof typeof tracks]?.[nowPlaying.index] : null;
 
-  // Effect for loading the track
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -275,7 +220,6 @@ export default function Home() {
     }
   }, [currentTrack]);
   
-  // Effect for playing/pausing
   useEffect(() => {
       const audio = audioRef.current;
       if (!audio) return;
@@ -297,8 +241,8 @@ export default function Home() {
     if (nowPlaying) {
       setIsPlaying(!isPlaying);
     } else {
-      const currentMood = activePage;
-      if (currentMood !== 'home' && tracks[currentMood as keyof typeof tracks]?.length > 0) {
+      const currentMood = activePage === 'home' ? 'all' : activePage;
+      if (tracks[currentMood as keyof typeof tracks]?.length > 0) {
         setNowPlaying({ mood: currentMood, index: 0 });
         setIsPlaying(true);
       }
@@ -348,16 +292,25 @@ export default function Home() {
   };
   
   const openPlayer = (mood: string, index: number) => {
-    setNowPlaying({ mood, index });
+    const playlist = tracks[mood as keyof typeof tracks] || [];
+    const trackToPlay = playlist[index];
+    if(!trackToPlay) return;
+
+    // find the original index in the 'all' playlist if it exists
+    const originalIndex = tracks.all?.findIndex(t => t.id === trackToPlay.id) ?? index;
+    const originalMood = trackToPlay.mood || 'all';
+
+    setNowPlaying({ mood: originalMood, index: originalIndex });
+    setActivePage(originalMood);
     setIsPlaying(true);
   };
 
   const isLiked = (track: Track) => {
-    if (!track.id) return false;
+    if (!track?.id) return false;
     return likedSongPrefs.some(pref => pref.songId === track.id && pref.liked);
   }
 
-  const handleLike = (e: React.MouseEvent | PanInfo, track: Track) => {
+  const handleLike = (e: React.MouseEvent, track: Track) => {
     e.stopPropagation();
     if (!user) {
         setIsAuthSheetOpen(true);
@@ -367,11 +320,7 @@ export default function Home() {
         });
         return;
     }
-    if (!track.id) return;
-
-    if ('currentTarget' in e) {
-      gsap.fromTo(e.currentTarget, { scale: 1 }, { scale: 1.3, duration: 0.2, ease: 'back.out(1.7)', yoyo: true, repeat: 1 });
-    }
+    if (!track?.id) return;
     
     const currentlyLiked = isLiked(track);
     setUserSongPreference(firestore, user.uid, track.id, !currentlyLiked);
@@ -379,7 +328,6 @@ export default function Home() {
 
   const openPage = (id: string) => {
     setActivePage(id);
-    setIsMenuSheetOpen(false);
   };
 
   const handleGenerateMood = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -468,36 +416,6 @@ export default function Home() {
   const allMoods = { ...MOOD_DEFS, ...customMoods };
   const likedSongs = firestoreSongs.filter(isLiked);
 
-  const NavMenu = () => (
-    <Accordion type="single" collapsible className="w-full">
-      <AccordionItem value="item-1">
-        <AccordionTrigger className="accordion-trigger">My Playlist</AccordionTrigger>
-        <AccordionContent>
-          {!user ? (
-            <p className="px-1 text-sm opacity-80">Sign in to see your liked songs.</p>
-          ) : likedSongs.length > 0 ? (
-            <ul className="mobile-menu-items">
-              {likedSongs.map((track, index) => (
-                <li key={index}>
-                  <a href="#" className="playlist-item" onClick={(e) => { e.preventDefault(); if (track.mood && track.id) openPlayer(track.mood, tracks[track.mood]?.findIndex(t => t.id === track.id) ?? 0) }}>
-                    <Image src={track.cover} alt={track.title} width={40} height={40} className="playlist-item-cover" data-ai-hint="song cover" />
-                    <span>{track.title}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="px-1 text-sm opacity-80">Your liked songs will appear here.</p>
-          )}
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-  
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   if (!isMounted) {
     return <AnimatePresence>{showIntro && <MoodyOLoader onExit={handleExitIntro} />}</AnimatePresence>;
   }
@@ -505,8 +423,55 @@ export default function Home() {
   const isAuthFormValid = authForm.email && authForm.password;
   const isFormValid = customMoodFormData.name && customMoodFormData.emoji && customMoodFormData.description;
 
-  return (
+  const MainContent = () => (
     <>
+        <div className="home-section-grid">
+            <h2 className="section-title">Recently Played</h2>
+            <div className="album-grid">
+                {(tracks.all || []).slice(0, 6).map((track, i) => (
+                    <AlbumCard key={i} track={track} onClick={() => openPlayer('all', i)} />
+                ))}
+            </div>
+        </div>
+        <div className="home-section-grid">
+            <h2 className="section-title">Recommended Stations</h2>
+             <div className="album-grid">
+                {(tracks.all || []).slice(6, 12).map((track, i) => (
+                    <AlbumCard key={i} track={track} onClick={() => openPlayer('all', i + 6)} />
+                ))}
+            </div>
+        </div>
+        <div className="home-section-grid">
+            <div className="flex justify-between items-center">
+              <h2 className="section-title">How are you feeling today?</h2>
+              <Button variant="link" onClick={() => setSelectedEmotion('all')}>Show all</Button>
+            </div>
+            <div className="album-grid emotion-grid">
+              {Object.entries(allMoods).map(([key, { emoji, title }]) => (
+                <div 
+                  key={key} 
+                  className={cn("emotion-card", { active: selectedEmotion === key })}
+                  onClick={() => setSelectedEmotion(key)}
+                >
+                  <span>{emoji}</span>
+                  <p>{title}</p>
+                </div>
+              ))}
+            </div>
+        </div>
+        <div className="home-section-grid">
+            <h2 className="section-title">{selectedEmotion === 'all' ? 'Popular Playlists' : `For Your ${selectedEmotion.charAt(0).toUpperCase() + selectedEmotion.slice(1)} Mood`}</h2>
+            <div className="album-grid">
+                {filteredTracks.slice(0, 12).map((track, i) => (
+                    <AlbumCard key={i} track={track} onClick={() => openPlayer(selectedEmotion, i)} />
+                ))}
+            </div>
+        </div>
+    </>
+  );
+
+  return (
+    <SidebarProvider>
       <AnimatePresence>
         {showIntro && <MoodyOLoader onExit={handleExitIntro} />}
       </AnimatePresence>
@@ -521,105 +486,113 @@ export default function Home() {
       <div id="cursor-dot" ref={cursorDotRef} />
       <div id="cursor-ring" ref={cursorRingRef} />
       
-      <motion.div 
-        className="app"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: showIntro ? 0 : 1 }}
-        transition={{ duration: 0.8, delay: showIntro ? 0 : 0.2 }}
-      >
-        <header>
-          <div className="header-inner">
+      <Sidebar side="left" collapsible="icon" variant="sidebar">
+          <SidebarHeader>
               <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">
                 MoodyO
               </a>
-              <nav className="hidden md:flex">
-                <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="nav-btn">
-                  <HomeIcon size={20} />
-                </a>
-                <button onClick={() => setIsAuthSheetOpen(true)} className="nav-btn">
-                  <User size={20} />
-                </button>
-                {user && (
-                  <Link href="/admin" className="nav-btn">
-                    Admin
-                  </Link>
-                )}
-                <a href="https://github.com/bourojuakshay/studio" target="_blank" rel="noopener noreferrer" className="nav-btn">
-                  <Github size={20} />
-                </a>
-              </nav>
-              <div className="md:hidden">
-                <Sheet open={isMenuSheetOpen} onOpenChange={setIsMenuSheetOpen}>
-                  <SheetTrigger asChild>
-                     <button className="nav-btn">
-                      <Menu size={20} />
-                    </button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="main-menu-sheet sheet-content">
-                    <SheetHeader>
-                       <SheetTitle className="sr-only">Main Menu</SheetTitle>
-                      <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">MoodyO</a>
-                    </SheetHeader>
-                    <div className="flex flex-col py-4">
-                       <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }}>Home</a>
-                      {Object.keys(allMoods).map(mood => (
-                        <a key={mood} href="#" onClick={(e) => { e.preventDefault(); openPage(mood); }}>
-                          {allMoods[mood].title.split('—')[0]}
-                        </a>
-                      ))}
-                       <Link href="/admin" className="p-4 font-semibold">Admin</Link>
-                    </div>
-                     <div className="p-4 border-t border-glass-border">
-                       <NavMenu />
-                     </div>
-                     {user && (
-                      <div className="p-4 border-t border-glass-border">
-                        <button onClick={() => auth.signOut()} className="w-full text-left flex items-center gap-2 font-semibold">
-                          <LogOut size={16} />
-                          Sign Out
-                        </button>
-                      </div>
-                     )}
-                  </SheetContent>
-                </Sheet>
-              </div>
+          </SidebarHeader>
+          <SidebarContent>
+              <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton onClick={() => openPage('home')} isActive={activePage === 'home'}>
+                        <HomeIcon />
+                        <span>Home</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                   <SidebarMenuItem>
+                    <SidebarMenuButton>
+                        <Search />
+                        <span>Search</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton>
+                        <Library />
+                        <span>Your Library</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+              </SidebarMenu>
+              <SidebarGroup>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton onClick={() => setIsCustomMoodDialogOpen(true)}>
+                            <Plus />
+                            <span>Create Mood</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton>
+                            <div className="liked-songs-icon"><Heart /></div>
+                            <span>Liked Songs</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroup>
+
+              <ScrollArea className="flex-grow p-2">
+                <SidebarMenu>
+                    {likedSongs.slice(0, 10).map(song => (
+                        <SidebarMenuItem key={song.id}>
+                            <SidebarMenuButton className="h-auto py-1">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarImage src={song.cover} alt={song.title}/>
+                                    <AvatarFallback>{song.title.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col items-start">
+                                    <span>{song.title}</span>
+                                    <small className="text-xs text-muted-foreground">{song.artist}</small>
+                                </div>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    ))}
+                </SidebarMenu>
+              </ScrollArea>
+          </SidebarContent>
+          <SidebarFooter>
+            {user ? (
+                <SidebarMenuButton onClick={() => auth.signOut()}>
+                    <LogOut />
+                    <span>Sign Out</span>
+                </SidebarMenuButton>
+            ) : (
+                <SidebarMenuButton onClick={() => setIsAuthSheetOpen(true)}>
+                    <LogIn />
+                    <span>Sign In</span>
+                </SidebarMenuButton>
+            )}
+          </SidebarFooter>
+      </Sidebar>
+      
+      <SidebarInset>
+        <header className="app-header">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="md:hidden" />
+            <div className="relative w-full max-w-md hidden md:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input placeholder="What do you want to play?" className="pl-10" />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm">Premium</Button>
+            <Button variant="ghost" size="icon"><Bell /></Button>
+            <Avatar className="h-8 w-8 cursor-pointer" onClick={() => user && openPage('admin')}>
+              <AvatarImage src={user?.photoURL || ''} alt={user?.displayName || 'User'} />
+              <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
           </div>
         </header>
 
-        <main>
-          <section id="home" className={cn('page', {active: activePage === 'home'})} ref={homePageRef}>
-              <div className="home-section">
-                  <h1 className="home-title">How are you feeling today?</h1>
-                  <p className="home-subtitle">Each card has its own theme. Choose a vibe or create your own.</p>
-              
-                <div className="home-mood-selector">
-                  {Object.entries(allMoods).map(([key, { emoji, title }]) => (
-                    <InteractiveCard
-                      key={key}
-                      moodKey={key}
-                      emoji={<span>{emoji}</span>}
-                      title={title}
-                      onClick={() => openPage(key)}
-                    />
-                  ))}
-                  <InteractiveCard
-                    moodKey="create"
-                    emoji={<Plus size={48} />}
-                    title="Create Your Own"
-                    onClick={() => setIsCustomMoodDialogOpen(true)}
-                  />
-                </div>
-              </div>
-          </section>
-
-          {Object.entries(allMoods).map(([mood, def]) => {
-            return (
-              <AnimatePresence key={mood}>
-                {activePage === mood && (
+        <main className="app-main">
+          {activePage === 'home' ? (
+              <MainContent />
+          ) : (
+             <AnimatePresence>
+                {activePage !== 'home' && (
                    <MoodPage
-                      mood={mood}
-                      definition={def}
-                      tracks={tracks[mood]}
+                      mood={activePage}
+                      definition={allMoods[activePage]}
+                      tracks={tracks[activePage]}
                       nowPlaying={nowPlaying}
                       isPlaying={isPlaying}
                       currentTrack={currentTrack}
@@ -636,149 +609,147 @@ export default function Home() {
                    />
                 )}
               </AnimatePresence>
-          )})}
+          )}
         </main>
         
-        <footer>
+        <footer className="app-footer">
           <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
         </footer>
+      </SidebarInset>
         
-        {isMounted && (
-          <AnimatePresence>
-              {nowPlaying && currentTrack && (
-                  <PersistentPlayer
-                      track={currentTrack}
-                      isPlaying={isPlaying}
-                      handlePlayPause={handlePlayPause}
-                      handleNext={handleNext}
-                      handlePrev={handlePrev}
-                      handleLike={handleLike}
-                      isLiked={isLiked}
-                      setNowPlaying={setNowPlaying}
-                      progress={progress}
-                      handleSeek={handleSeek}
-                      volume={volume}
-                      setVolume={setVolume}
-                  />
-              )}
-          </AnimatePresence>
-        )}
-
-
-        <audio 
-          ref={audioRef} 
-          onEnded={handleSongEnd} 
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleTimeUpdate}
-          crossOrigin="anonymous"
-        />
-
-        <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
-          <DialogContent className="sheet-content">
-            <DialogHeader>
-              <DialogTitle>Create a Custom Mood</DialogTitle>
-              <DialogDescription>
-                Describe the vibe, and AI will generate a unique mood page for you.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleGenerateMood} className="flex flex-col gap-4">
-              <Input 
-                name="name" 
-                placeholder="Mood Name (e.g., Cosmic Jazz)" 
-                required 
-                value={customMoodFormData.name}
-                onChange={(e) => setCustomMoodFormData({...customMoodFormData, name: e.target.value })}
-              />
-                <div>
-                <div className="emoji-picker">
-                  {['🎷', '📚', '🌧️', '🌲', '🚀', '👾'].map(emoji => (
-                    <span 
-                      key={emoji}
-                      className={cn('emoji-option', { selected: customMoodFormData.emoji === emoji })}
-                      onClick={() => setCustomMoodFormData({...customMoodFormData, emoji })}
-                    >
-                      {emoji}
-                    </span>
-                  ))}
-                </div>
-                <Input 
-                  name="emoji" 
-                  placeholder="Select an emoji from above or type one" 
-                  required 
-                  maxLength={2} 
-                  value={customMoodFormData.emoji}
-                  onChange={(e) => setCustomMoodFormData({...customMoodFormData, emoji: e.target.value })}
+      {isMounted && (
+        <AnimatePresence>
+            {nowPlaying && currentTrack && (
+                <PersistentPlayer
+                    track={currentTrack}
+                    isPlaying={isPlaying}
+                    handlePlayPause={handlePlayPause}
+                    handleNext={handleNext}
+                    handlePrev={handlePrev}
+                    handleLike={handleLike}
+                    isLiked={isLiked}
+                    setNowPlaying={setNowPlaying}
+                    progress={progress}
+                    handleSeek={handleSeek}
+                    volume={volume}
+                    setVolume={setVolume}
                 />
+            )}
+        </AnimatePresence>
+      )}
+
+      <audio 
+        ref={audioRef} 
+        onEnded={handleSongEnd} 
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleTimeUpdate}
+        crossOrigin="anonymous"
+      />
+
+      <Dialog open={isCustomMoodDialogOpen} onOpenChange={setIsCustomMoodDialogOpen}>
+        <DialogContent className="sheet-content">
+          <DialogHeader>
+            <DialogTitle>Create a Custom Mood</DialogTitle>
+            <DialogDescription>
+              Describe the vibe, and AI will generate a unique mood page for you.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleGenerateMood} className="flex flex-col gap-4">
+            <Input 
+              name="name" 
+              placeholder="Mood Name (e.g., Cosmic Jazz)" 
+              required 
+              value={customMoodFormData.name}
+              onChange={(e) => setCustomMoodFormData({...customMoodFormData, name: e.target.value })}
+            />
+              <div>
+              <div className="emoji-picker">
+                {['🎷', '📚', '🌧️', '🌲', '🚀', '👾'].map(emoji => (
+                  <span 
+                    key={emoji}
+                    className={cn('emoji-option', { selected: customMoodFormData.emoji === emoji })}
+                    onClick={() => setCustomMoodFormData({...customMoodFormData, emoji })}
+                  >
+                    {emoji}
+                  </span>
+                ))}
               </div>
               <Input 
-                name="description" 
-                placeholder="Description (e.g., Late night jazz in a space lounge)" 
-                required
-                value={customMoodFormData.description}
-                onChange={(e) => setCustomMoodFormData({...customMoodFormData, description: e.target.value })}
+                name="emoji" 
+                placeholder="Select an emoji from above or type one" 
+                required 
+                maxLength={2} 
+                value={customMoodFormData.emoji}
+                onChange={(e) => setCustomMoodFormData({...customMoodFormData, emoji: e.target.value })}
               />
-              <Button type="submit" disabled={isGenerating || !isFormValid}>
-                {isGenerating ? <><Loader className="animate-spin mr-2" size={16}/> Generating...</> : "Generate Mood"}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-         <Sheet open={isAuthSheetOpen} onOpenChange={setIsAuthSheetOpen}>
-            <SheetContent side="right" className="main-menu-sheet sheet-content">
-                <SheetHeader>
-                    <SheetTitle className="text-2xl">
-                      {user ? `Welcome, ${user.displayName || user.email}`: 'Sign In or Sign Up'}
-                    </SheetTitle>
-                </SheetHeader>
-                {isUserLoading ? (
-                    <div className="flex justify-center items-center p-8">
-                        <Loader className="animate-spin" />
-                    </div>
-                ) : user ? (
-                    <div className="p-4 flex flex-col gap-4">
-                        <p>You are signed in as {user.email}.</p>
-                        <Link href="/admin" passHref>
-                           <Button variant="outline" onClick={() => setIsAuthSheetOpen(false)}>Go to Admin</Button>
-                        </Link>
-                        <Button onClick={() => auth.signOut()}>
-                            <LogOut className="mr-2" />
-                            Sign Out
-                        </Button>
-                    </div>
-                ) : (
-                    <div className="p-4">
-                        <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
-                            <div className="flex justify-center gap-2">
-                                <Button type="button" variant={authForm.mode === 'signin' ? 'default' : 'outline'} onClick={() => setAuthForm({...authForm, mode: 'signin'})}>Sign In</Button>
-                                <Button type="button" variant={authForm.mode === 'signup' ? 'default' : 'outline'} onClick={() => setAuthForm({...authForm, mode: 'signup'})}>Sign Up</Button>
-                            </div>
-                            <Input 
-                                type="email" 
-                                name="email" 
-                                placeholder="Email" 
-                                required
-                                value={authForm.email}
-                                onChange={(e) => setAuthForm({...authForm, email: e.target.value})} 
-                            />
-                            <Input 
-                                type="password" 
-                                name="password" 
-                                placeholder="Password" 
-                                required 
-                                value={authForm.password}
-                                onChange={(e) => setAuthForm({...authForm, password: e.target.value})}
-                            />
-                            <Button type="submit" disabled={!isAuthFormValid}>
-                                {authForm.mode === 'signin' ? 'Sign In' : 'Sign Up'}
-                            </Button>
-                        </form>
-                    </div>
-                )}
-            </SheetContent>
-        </Sheet>
-
-      </motion.div>
-    </>
+            </div>
+            <Input 
+              name="description" 
+              placeholder="Description (e.g., Late night jazz in a space lounge)" 
+              required
+              value={customMoodFormData.description}
+              onChange={(e) => setCustomMoodFormData({...customMoodFormData, description: e.target.value })}
+            />
+            <Button type="submit" disabled={isGenerating || !isFormValid}>
+              {isGenerating ? <>
+                <Mic2 className="animate-pulse mr-2" size={16}/> Generating...
+              </> : "Generate Mood"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isAuthSheetOpen} onOpenChange={setIsAuthSheetOpen}>
+        <DialogContent className="sheet-content">
+          <DialogHeader>
+            <DialogTitle>{user ? `Welcome, ${user.displayName || user.email}`: 'Sign In or Sign Up'}</DialogTitle>
+          </DialogHeader>
+          {isUserLoading ? (
+              <div className="flex justify-center items-center p-8">
+                  <Mic2 className="animate-pulse" />
+              </div>
+          ) : user ? (
+              <div className="p-4 flex flex-col gap-4">
+                  <p>You are signed in as {user.email}.</p>
+                  <Link href="/admin" passHref>
+                     <Button variant="outline" onClick={() => setIsAuthSheetOpen(false)}>Go to Admin</Button>
+                  </Link>
+                  <Button onClick={() => auth.signOut()}>
+                      <LogOut className="mr-2" />
+                      Sign Out
+                  </Button>
+              </div>
+          ) : (
+              <div className="p-4">
+                  <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
+                      <div className="flex justify-center gap-2">
+                          <Button type="button" variant={authForm.mode === 'signin' ? 'default' : 'outline'} onClick={() => setAuthForm({...authForm, mode: 'signin'})}>Sign In</Button>
+                          <Button type="button" variant={authForm.mode === 'signup' ? 'default' : 'outline'} onClick={() => setAuthForm({...authForm, mode: 'signup'})}>Sign Up</Button>
+                      </div>
+                      <Input 
+                          type="email" 
+                          name="email" 
+                          placeholder="Email" 
+                          required
+                          value={authForm.email}
+                          onChange={(e) => setAuthForm({...authForm, email: e.target.value})} 
+                      />
+                      <Input 
+                          type="password" 
+                          name="password" 
+                          placeholder="Password" 
+                          required 
+                          value={authForm.password}
+                          onChange={(e) => setAuthForm({...authForm, password: e.target.value})}
+                      />
+                      <Button type="submit" disabled={!isAuthFormValid}>
+                          {authForm.mode === 'signin' ? 'Sign In' : 'Sign Up'}
+                      </Button>
+                  </form>
+              </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </SidebarProvider>
   );
 }

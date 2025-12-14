@@ -12,6 +12,9 @@ export interface Song {
     src: string;
     cover: string;
     mood: string;
+    emotions: string[];
+    popularity?: number;
+    createdAt?: any;
 }
 
 export interface UserSongPreference {
@@ -19,10 +22,7 @@ export interface UserSongPreference {
     userId: string;
     songId: string;
     liked: boolean;
-    // You could add other preferences here, like custom moods, ratings, etc.
 }
-
-// Functions for the global 'songs' collection (Admin actions)
 
 export function addSong(firestore: Firestore, song: Omit<Song, 'id'>) {
     const songsCollection = collection(firestore, 'songs');
@@ -98,9 +98,6 @@ export function getSongs(
     return unsubscribe;
 }
 
-
-// Functions for user-specific song preferences
-
 export async function setUserSongPreference(firestore: Firestore, userId: string, songId: string, liked: boolean) {
     if (!userId || !songId) return;
 
@@ -110,7 +107,6 @@ export async function setUserSongPreference(firestore: Firestore, userId: string
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-        // No preference doc exists, so create a new one
         const newPrefRef = doc(preferenceCollection);
         const preferenceData: UserSongPreference = { id: newPrefRef.id, userId, songId, liked };
         
@@ -123,7 +119,6 @@ export async function setUserSongPreference(firestore: Firestore, userId: string
             errorEmitter.emit('permission-error', permissionError);
         });
     } else {
-        // Preference doc exists, so update it
         const docToUpdate = querySnapshot.docs[0];
         updateDoc(docToUpdate.ref, { liked }).catch((serverError) => {
             const permissionError = new FirestorePermissionError({
