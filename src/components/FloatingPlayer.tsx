@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -29,7 +29,7 @@ import { Slider } from '@/components/ui/slider';
 
 
 export function FloatingPlayerWrapper() {
-    const { currentTrack } = useAppContext(); // Changed from usePlaybackState
+    const { currentTrack } = useAppContext();
     const { user } = useUser();
     const firestore = useFirestore();
     const router = useRouter();
@@ -58,7 +58,7 @@ export function FloatingPlayerWrapper() {
         setUserSongPreference(firestore, user.uid, songId, !currentlyLiked);
     };
     
-    if (!isVisible) {
+    if (!currentTrack && !isVisible) { // Only render if there is a track or it's visibly open
         return null;
     }
 
@@ -73,6 +73,43 @@ export function FloatingPlayerWrapper() {
         </div>
     );
 }
+
+// Memoized component for high-frequency updates
+const MemoizedProgress = React.memo(function MemoizedProgress() {
+    const { progress, handleSeek } = usePlaybackState();
+
+    const formatTime = (seconds: number) => {
+        if (isNaN(seconds) || seconds < 0) return '0:00';
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
+
+    const onProgressBarChange = (value: number[]) => {
+        if (!progress.duration) return;
+        handleSeek(value[0]);
+    };
+
+    return (
+        <motion.div 
+            className="progress-container w-full"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto', transition: { delay: 0.2 } }}
+            exit={{ opacity: 0, height: 0 }}
+        >
+            <Slider 
+                value={[progress.currentTime]} 
+                max={progress.duration || 100}
+                onValueChange={onProgressBarChange}
+                id="player-progress-bar"
+            />
+            <div className="time-display">
+                <span>{formatTime(progress.currentTime)}</span>
+                <span>{formatTime(progress.duration)}</span>
+            </div>
+        </motion.div>
+    );
+});
 
 
 type FloatingPlayerProps = {
@@ -89,29 +126,19 @@ export function FloatingPlayer({
     isLiked,
     onClose
 }: FloatingPlayerProps) {
-    const { 
-        isPlaying,
-        progress,
-        handlePlayPause, 
-        handleNext, 
-        handlePrev,
-        handleSeek,
-    } = usePlaybackState();
+    // Only subscribe to low-frequency updates here
+    const { isPlaying, handlePlayPause, handleNext, handlePrev } = usePlaybackState(
+      (state) => ({
+        isPlaying: state.isPlaying,
+        handlePlayPause: state.handlePlayPause,
+        handleNext: state.handleNext,
+        handlePrev: state.handlePrev,
+      })
+    );
+
     const [isExpanded, setIsExpanded] = useState(false);
     
     const hasTrack = !!track;
-
-    const formatTime = (seconds: number) => {
-        if (isNaN(seconds) || seconds < 0) return '0:00';
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = Math.floor(seconds % 60);
-        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    };
-
-    const onProgressBarChange = (value: number[]) => {
-        if (!progress.duration) return;
-        handleSeek(value[0]);
-    };
 
     return (
         <motion.div
@@ -157,25 +184,7 @@ export function FloatingPlayer({
                 </motion.div>
 
                 <AnimatePresence>
-                {isExpanded && hasTrack && (
-                    <motion.div 
-                      className="progress-container w-full"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto', transition: { delay: 0.2 } }}
-                      exit={{ opacity: 0, height: 0 }}
-                    >
-                        <Slider 
-                            value={[progress.currentTime]} 
-                            max={progress.duration || 100}
-                            onValueChange={onProgressBarChange}
-                            id="player-progress-bar"
-                        />
-                        <div className="time-display">
-                            <span>{formatTime(progress.currentTime)}</span>
-                            <span>{formatTime(progress.duration)}</span>
-                        </div>
-                    </motion.div>
-                )}
+                    {isExpanded && hasTrack && <MemoizedProgress />}
                 </AnimatePresence>
                 
                 <motion.div className="main-controls" layout="position">

@@ -807,12 +807,9 @@ audio { display: none; }
 .player-card {
     position: relative;
     font-family: 'Poppins', sans-serif;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Removed transition and hover transform to let Framer Motion handle it */
 }
 
-.player-card:hover {
-    transform: scale(1.05);
-}
 
 .player-card-background {
     position: absolute;
@@ -1080,4 +1077,3 @@ audio { display: none; }
 .player-card-content .rc-slider {
     width: 100%;
 }
-
