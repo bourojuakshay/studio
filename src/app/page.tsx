@@ -35,82 +35,116 @@ import { useToast } from '@/hooks/use-toast';
 export const dynamic = 'force-dynamic';
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
-  const [isExiting, setIsExiting] = useState(false);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isExiting) {
-        handleExit();
-      }
-    }, 2500); // Auto-exit after 2.5s
-    return () => clearTimeout(timer);
-  }, [isExiting]);
+  const [exitState, setExitState] = useState<'enter' | 'exit'>('enter');
 
   const handleExit = () => {
-    setIsExiting(true);
-    setTimeout(onExit, 1000); // Duration of the exit animation
+    setExitState('exit');
+    setTimeout(onExit, 1500); // Wait for exit animation to complete
+  };
+  
+  // Auto-exit after a delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (exitState === 'enter') {
+        handleExit();
+      }
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [exitState]);
+
+  const containerVariants = {
+    enter: { 
+      transition: { 
+        staggerChildren: 0.06,
+      } 
+    },
+    exit: { 
+      transition: { 
+        staggerChildren: 0.06, 
+        staggerDirection: -1 
+      } 
+    },
+  };
+  
+  const letterVariants = {
+    initial: { opacity: 0, y: 20, rotate: -5, scale: 0.95 },
+    enter: { 
+      opacity: 1, 
+      y: 0, 
+      rotate: 0,
+      scale: 1,
+      transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } 
+    },
+    exit: { 
+      opacity: 0, 
+      y: 20, 
+      rotate: 5,
+      scale: 0.95,
+      transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] }
+    },
   };
 
+  const taglineContainerVariants = {
+    enter: {
+      transition: {
+        delayChildren: 0.4, // Delay for tagline after logo
+        staggerChildren: 0.08,
+      },
+    },
+    exit: {
+      transition: {
+        staggerChildren: 0.06,
+        staggerDirection: -1,
+      },
+    },
+  };
+
+  const taglineWordVariants = {
+    initial: { opacity: 0, y: 10 },
+    enter: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+    exit: { opacity: 0, y: 10, transition: { duration: 0.3, ease: 'easeIn' } },
+  };
+
+  const logoText = "MoodyO";
+  const taglineText = "MOOD-DRIVEN AUDIO EXPERIENCE".split(' ');
+
   return (
-    <div className={cn("intro-screen", isExiting && "exit-animation")} onClick={handleExit}>
-      <h1 className="sr-only">MoodyO</h1>
-      <svg className="w-48 h-48" viewBox="0 0 100 100">
-        <defs>
-          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style={{stopColor: 'hsl(var(--primary))', stopOpacity: 1}} />
-            <stop offset="100%" style={{stopColor: 'hsl(var(--secondary))', stopOpacity: 1}} />
-          </linearGradient>
-        </defs>
-        {/* M */}
-        <polyline className="draw" points="10,90 10,10 25,50 40,10 40,90" stroke="url(#grad)" strokeWidth="4" fill="none" />
-        {/* O */}
-        <circle className="draw" cx="55" cy="50" r="15" stroke="url(#grad)" strokeWidth="4" fill="none" />
-        {/* O */}
-        <circle className="draw" cx="55" cy="50" r="15" stroke="url(#grad)" strokeWidth="4" fill="none" transform="rotate(90 55 50)" />
-      </svg>
-    </div>
+    <motion.div 
+      className="intro-screen-v2"
+      data-state={exitState}
+      onClick={handleExit}
+      initial="initial"
+      animate="enter"
+      exit="exit"
+      variants={{}} // Parent variant for AnimatePresence
+    >
+      <motion.div
+        className="intro-logo-text"
+        variants={containerVariants}
+      >
+        {logoText.split('').map((char, index) => (
+          <motion.span key={index} variants={letterVariants}>
+            {char}
+          </motion.span>
+        ))}
+      </motion.div>
+      <motion.div 
+        className="intro-tagline"
+        variants={taglineContainerVariants}
+      >
+        {taglineText.map((word, index) => (
+          <motion.span key={index} variants={taglineWordVariants}>
+            {word}
+          </motion.span>
+        ))}
+      </motion.div>
+    </motion.div>
   );
 };
 
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-
-    const onMouseMove = (e: MouseEvent) => {
-      const { left, top, width, height } = card.getBoundingClientRect();
-      const x = (e.clientX - left - width / 2) / 15;
-      const y = (e.clientY - top - height / 2) / 15;
-      gsap.to(card, {
-        rotationY: x,
-        rotationX: -y,
-        transformPerspective: 500,
-        ease: 'power3.out',
-        duration: 0.8,
-      });
-    };
-
-    const onMouseLeave = () => {
-      gsap.to(card, {
-        rotationY: 0,
-        rotationX: 0,
-        ease: 'power3.out',
-        duration: 1,
-      });
-    };
-
-    card.addEventListener('mousemove', onMouseMove);
-    card.addEventListener('mouseleave', onMouseLeave);
-
-    return () => {
-      card.removeEventListener('mousemove', onMouseMove);
-      card.removeEventListener('mouseleave', onMouseLeave);
-    };
-  }, []);
 
   const cardClasses = cn(
     'interactive-card',
@@ -121,35 +155,18 @@ const InteractiveCard = ({ moodKey, emoji, title, onClick }: { moodKey: string, 
     <div 
       ref={cardRef} 
       className={cardClasses}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
       title={title}
     >
-      <AnimatePresence>
-        {!isHovered && (
-          <motion.div 
-            className="card-content"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-          >
-            {emoji}
-          </motion.div>
-        )}
-        {isHovered && (
-          <motion.div 
-            className="card-content"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-          >
-            {title.split('—')[0]}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <motion.div 
+          className="card-content"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+        >
+          {emoji}
+        </motion.div>
     </div>
   );
 };
@@ -585,7 +602,7 @@ export default function Home() {
                     <InteractiveCard
                       key={key}
                       moodKey={key}
-                      emoji={emoji}
+                      emoji={<span>{emoji}</span>}
                       title={title}
                       onClick={() => openPage(key)}
                     />

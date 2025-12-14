@@ -138,10 +138,13 @@ body.custom-theme-active {
   inset: 0;
   z-index: 10000;
   background-color: #0A0A0A;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   perspective: 800px;
+  gap: 8px;
 }
 
 .intro-screen-v2::before {
@@ -154,7 +157,6 @@ body.custom-theme-active {
   filter: blur(50px);
   animation: pulse-glow-intro 6s infinite ease-in-out;
   opacity: 0;
-  animation-delay: 0.5s; /* Delay glow until text animation is done */
 }
 
 @keyframes pulse-glow-intro {
@@ -162,10 +164,10 @@ body.custom-theme-active {
   50% { transform: scale(1.1); opacity: 1; }
 }
 
-[data-state="enter"] .intro-screen-v2::before {
+.intro-screen-v2[data-state="enter"]::before {
   animation-play-state: running;
+  animation-delay: 0.5s;
 }
-
 
 .intro-logo-text {
   display: flex;
@@ -177,16 +179,24 @@ body.custom-theme-active {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-fill-color: transparent;
+  will-change: transform, opacity;
+}
+
+.intro-logo-text span {
+  display: inline-block; /* Crucial for individual transforms */
 }
 
 .intro-tagline {
-  position: absolute;
-  top: calc(50% + 40px); /* Position below logo */
-  text-align: center;
+  display: flex;
   font-size: 0.75rem;
   letter-spacing: 0.2em;
   color: hsl(var(--foreground) / 0.5);
   text-transform: uppercase;
+  will-change: transform, opacity;
+}
+.intro-tagline span {
+  display: inline-block;
+  padding: 0 0.2em;
 }
 
 
@@ -249,21 +259,6 @@ nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .nav-btn > svg {
   width: 20px;
   height: 20px;
-}
-
-.intro-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background-color: #000;
-  display: grid;
-  place-items: center;
-  transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
-}
-
-.intro-screen.hidden {
-  opacity: 0;
-  visibility: hidden;
 }
 
 /* home */
@@ -1166,53 +1161,5 @@ body.custom-theme-active body {
 .w-2 {
   width: 0.5em;
 }
-
-@keyframes draw {
-  from {
-    stroke-dashoffset: 360;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.draw {
-  stroke-dasharray: 360;
-  animation: draw 2s ease-in-out;
-}
-    
-@keyframes draw-out {
-  from {
-    stroke-dashoffset: 0;
-  }
-  to {
-    stroke-dashoffset: 360;
-  }
-}
-
-.exit-animation .draw {
-  animation: draw-out 2s ease-in-out forwards;
-}
-    
-
-    
-
-    
-
-
-
-
-    
-
-    
-
-    
-
-    
-
-
-
-
-
 
     
