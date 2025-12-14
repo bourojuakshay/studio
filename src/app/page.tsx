@@ -41,7 +41,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   useEffect(() => {
     const ctx = gsap.context(() => {
       const letters = gsap.utils.toArray('.intro-logo-gsap span');
-      const tagline = gsap.utils.toArray('.intro-tagline-container');
+      const tagline = gsap.utils.toArray('.intro-tagline');
       const bottomItems = gsap.utils.toArray('.intro-bottom-container');
       
       gsap.set(letters, {
@@ -69,6 +69,18 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
           ease: 'power3.out',
           stagger: 0.06,
       })
+      .to(letters, {
+        y: -5,
+        duration: 0.2,
+        ease: 'power2.out',
+        stagger: 0.06,
+      }, '-=0.35')
+      .to(letters, {
+          y: 0,
+          duration: 0.15,
+          ease: 'power2.in',
+          stagger: 0.06,
+      }, '-=0.2')
       .to([tagline, bottomItems], {
         opacity: 1,
         duration: 0.8,
@@ -109,8 +121,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
                 ))}
             </h1>
             <div className="intro-tagline-container">
-                <div className="intro-tagline">MOOD-DRIVEN</div>
-                <div className="intro-tagline" style={{textAlign: 'right'}}>AUDIO EXPERIENCE</div>
+                <div className="intro-tagline">mood based audio</div>
             </div>
         </div>
 

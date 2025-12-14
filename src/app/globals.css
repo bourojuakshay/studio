@@ -164,27 +164,30 @@ body.custom-theme-active {
 }
 
 .intro-logo-gsap span {
-    display: inline-block;
-    color: #fff;
-    background: linear-gradient(135deg, #818cf8 0%, #3b82f6 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    will-change: transform, opacity, filter;
+  display: inline-block;
+  /* Fallback color */
+  color: #ffffff;
+  /* Gradient text */
+  background: linear-gradient(135deg, #818cf8 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* Make text transparent to show the gradient */
+  -webkit-text-fill-color: transparent;
+  will-change: transform, opacity, filter;
 }
 
 .intro-tagline-container {
     display: flex;
-    justify-content: space-between;
-    width: 90%;
-    max-width: 440px;
+    justify-content: center;
+    width: 100%;
 }
 
 .intro-tagline {
-    font-size: 0.6rem;
-    letter-spacing: 0.25em;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
     color: hsl(var(--foreground) / 0.5);
     text-transform: uppercase;
+    text-align: center;
 }
 
 
