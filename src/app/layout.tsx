@@ -1,10 +1,7 @@
-
-import type {Metadata} from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
-import { AppProvider, AudioPlayer } from '@/context/AppContext';
-import { FloatingPlayerWrapper } from '@/components/FloatingPlayer';
+import { RootProvider } from '@/components/RootProvider';
 
 export const metadata: Metadata = {
   title: 'MoodyO',
@@ -21,16 +18,15 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body>
-        <FirebaseClientProvider>
-          <AppProvider>
-            {children}
-            <FloatingPlayerWrapper />
-            <AudioPlayer />
-          </AppProvider>
-        </FirebaseClientProvider>
+        <RootProvider>
+          {children}
+        </RootProvider>
         <Toaster />
       </body>
     </html>
