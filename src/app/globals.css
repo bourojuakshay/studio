@@ -1009,7 +1009,7 @@ body.custom-theme-active body {
   font-weight: bold;
   background-color: var(--page-accent);
   transition: all 0.5s;
-  z-index: 2;
+  z-index: 1;
 }
 
 .interactive-card::before {
@@ -1034,7 +1034,7 @@ body.custom-theme-active body {
 
 .interactive-card .card-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   transition: opacity 0.5s ease;
 }
 

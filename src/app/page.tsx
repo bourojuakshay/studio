@@ -36,59 +36,24 @@ export const dynamic = 'force-dynamic';
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   const [exitState, setExitState] = useState<'enter' | 'exit'>('enter');
+  const [showHint, setShowHint] = useState(false);
 
   const handleExit = () => {
+    if (exitState === 'exit') return;
     setExitState('exit');
-    setTimeout(onExit, 1500); // Wait for exit animation to complete
+    setTimeout(onExit, 1000); // Wait for exit animation
   };
-  
-  // Auto-exit after a delay
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (exitState === 'enter') {
-        handleExit();
-      }
-    }, 4000);
+    const timer = setTimeout(() => setShowHint(true), 1500); // Show hint after intro animates
     return () => clearTimeout(timer);
-  }, [exitState]);
+  }, []);
 
   const containerVariants = {
-    enter: { 
-      transition: { 
-        staggerChildren: 0.06,
-      } 
-    },
-    exit: { 
-      transition: { 
-        staggerChildren: 0.06, 
-        staggerDirection: -1 
-      } 
-    },
-  };
-  
-  const letterVariants = {
-    initial: { opacity: 0, y: 24, rotate: -6, scale: 0.94 },
-    enter: { 
-      opacity: 1, 
-      y: 0, 
-      rotate: 0,
-      scale: 1,
-      transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } 
-    },
-    exit: { 
-      opacity: 0, 
-      y: 24, 
-      rotate: 6,
-      scale: 0.94,
-      transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
-    },
-  };
-
-  const taglineContainerVariants = {
     enter: {
       transition: {
-        delayChildren: 0.4, // Delay for tagline after logo
-        staggerChildren: 0.08,
+        staggerChildren: 0.06,
+        delayChildren: 0.2,
       },
     },
     exit: {
@@ -99,17 +64,39 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
     },
   };
 
-  const taglineWordVariants = {
-    initial: { opacity: 0, y: 10 },
-    enter: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-    exit: { opacity: 0, y: 10, transition: { duration: 0.3, ease: 'easeIn' } },
+  const letterVariants = {
+    initial: { opacity: 0, y: 24, rotate: -6, scale: 0.94 },
+    enter: {
+      opacity: 1,
+      y: 0,
+      rotate: 0,
+      scale: 1,
+      transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      transition: { duration: 0.3, ease: 'easeOut' },
+    },
   };
 
+  const taglineVariants = {
+    initial: { opacity: 0, y: 10 },
+    enter: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut', delay: 0.8 } },
+    exit: { opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeIn' } },
+  };
+
+  const hintVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { duration: 0.8 } },
+    exit: { opacity: 0, transition: { duration: 0.3 } },
+  };
+  
+
   const logoText = "Moodyo";
-  const taglineText = "MOOD-DRIVEN AUDIO EXPERIENCE".split(' ');
 
   return (
-    <motion.div 
+    <motion.div
       className="intro-screen-v2"
       data-state={exitState}
       onClick={handleExit}
@@ -121,6 +108,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
       <motion.div
         className="intro-logo-text"
         variants={containerVariants}
+        aria-label={logoText}
       >
         {logoText.split('').map((char, index) => (
           <motion.span key={index} variants={letterVariants}>
@@ -128,16 +116,25 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
           </motion.span>
         ))}
       </motion.div>
-      <motion.div 
+      <motion.div
         className="intro-tagline"
-        variants={taglineContainerVariants}
+        variants={taglineVariants}
       >
-        {taglineText.map((word, index) => (
-          <motion.span key={index} variants={taglineWordVariants}>
-            {word}
-          </motion.span>
-        ))}
+        MOOD-DRIVEN AUDIO EXPERIENCE
       </motion.div>
+      <AnimatePresence>
+        {showHint && (
+          <motion.div
+            className="absolute bottom-10 text-xs text-white/30"
+            variants={hintVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            Tap anywhere to continue
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
