@@ -142,7 +142,6 @@ body.custom-theme-active {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
     overflow: hidden;
 }
 
@@ -157,24 +156,22 @@ body.custom-theme-active {
 }
 
 .intro-logo-gsap {
-    font-size: 5rem;
-    font-weight: 800;
-    line-height: 1;
-    display: flex;
-    color: transparent;
-    background-image: linear-gradient(135deg, #818cf8 0%, #3b82f6 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-}
-
-@media (max-width: 640px) {
-    .intro-logo-gsap {
-        font-size: 3.5rem;
-    }
+  font-size: clamp(3.5rem, 8vw, 5rem);
+  font-weight: 800;
+  line-height: 1;
+  display: flex;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 .intro-logo-gsap span {
-    display: inline-block; /* Crucial for transforms */
+    display: inline-block;
+    color: #fff;
+    background: linear-gradient(135deg, #818cf8 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     will-change: transform, opacity, filter;
 }
 
@@ -183,7 +180,6 @@ body.custom-theme-active {
     justify-content: space-between;
     width: 90%;
     max-width: 440px;
-    will-change: opacity;
 }
 
 .intro-tagline {
@@ -204,7 +200,6 @@ body.custom-theme-active {
     align-items: center;
     padding: 0 2rem;
     color: hsl(var(--foreground) / 0.4);
-    will-change: opacity;
 }
 
 .intro-hint {

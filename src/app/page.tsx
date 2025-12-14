@@ -35,7 +35,6 @@ import { useToast } from '@/hooks/use-toast';
 export const dynamic = 'force-dynamic';
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
-  const [exitState, setExitState] = useState<'enter' | 'exit'>('enter');
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
@@ -44,7 +43,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
       const letters = gsap.utils.toArray('.intro-logo-gsap span');
       const tagline = gsap.utils.toArray('.intro-tagline-container');
       const bottomItems = gsap.utils.toArray('.intro-bottom-container');
-
+      
       gsap.set(letters, {
         opacity: 0,
         y: 18,
@@ -84,8 +83,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   }, []);
 
   const handleExit = () => {
-    if (exitState === 'exit' || !timelineRef.current) return;
-    setExitState('exit');
+    if (!timelineRef.current) return;
     
     gsap.to(containerRef.current, {
       opacity: 0,
