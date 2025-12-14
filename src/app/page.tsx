@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { AnimatePresence } from 'framer-motion';
-import { Bell, Search, Library, Plus } from 'lucide-react';
+import { Bell, Search, Library, Plus, Heart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,6 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Sidebar,
   SidebarContent,
-  SidebarHeader,
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
@@ -128,8 +127,8 @@ const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   
-  const { activePage, setActivePage, setPlaylist, playlist } = useAppContext();
-  const { setNowPlayingId, setIsPlaying, currentTrack } = usePlaybackState();
+  const { activePage, setActivePage, setPlaylist, audioRef } = useAppContext();
+  const { setNowPlayingId, handlePlayPause, currentTrack } = usePlaybackState();
 
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -182,13 +181,13 @@ export default function Home() {
 
   const playSong = (songId: string) => {
     setNowPlayingId(songId);
-    setIsPlaying(true);
+    handlePlayPause();
   };
   
   const openPlayer = (songId: string, contextMood: string) => {
     setActivePage(contextMood);
     setNowPlayingId(songId);
-    setIsPlaying(true);
+    handlePlayPause();
   };
 
   const isLiked = (songId: string) => {
@@ -389,3 +388,5 @@ const AudioPlayer = () => {
         />
     )
 }
+
+    
