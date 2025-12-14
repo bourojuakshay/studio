@@ -27,6 +27,7 @@ export function MoodPage({
   openPlayer,
 }: MoodPageProps) {
 
+  // This component subscribes to playback state because it needs to highlight the current track.
   const { currentTrack } = usePlaybackState();
 
   // Guard against rendering if the mood definition is missing.

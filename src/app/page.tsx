@@ -133,7 +133,10 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   
   const { activePage, setActivePage, setPlaylist } = useAppContext();
-  const { setNowPlayingId, handlePlayPause, currentTrack } = usePlaybackState();
+  // IMPORTANT: Do NOT subscribe to usePlaybackState here. It causes full-page re-renders on song progress.
+  // Playback actions are called directly from the store.
+  const { setNowPlayingId, handlePlayPause } = usePlaybackState.getState();
+  const { currentTrack, nowPlayingId } = useAppContext(); // Get nowPlayingId from low-frequency store
 
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -287,7 +290,7 @@ export default function Home() {
         activePage={activePage} 
         customMoods={{}}
         tracks={tracksByMood}
-        nowPlayingId={currentTrack?.id || null}
+        nowPlayingId={nowPlayingId}
         allMoods={allMoods}
       />
       
@@ -340,5 +343,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
