@@ -37,7 +37,6 @@ interface PlaybackState {
     progress: { currentTime: number; duration: number };
     
     setNowPlayingId: (songId: string | null) => void;
-    setCurrentTrack: (track: Song | null) => void;
     setProgress: (progress: { currentTime: number; duration: number }) => void;
     
     // Actions
@@ -53,8 +52,11 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
     isPlaying: false,
     progress: { currentTime: 0, duration: 0 },
 
-    setNowPlayingId: (songId) => set({ nowPlayingId: songId }),
-    setCurrentTrack: (track) => set({ currentTrack: track }),
+    setNowPlayingId: (songId) => {
+        const { playlist } = useAppContext.getState();
+        const track = playlist.find(t => t.id === songId) || null;
+        set({ nowPlayingId: songId, currentTrack: track });
+    },
     setProgress: (progress) => set({ progress }),
     
     handlePlayPause: () => {
@@ -71,7 +73,7 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
         const currentIndex = playlist.findIndex(t => t.id === nowPlayingId);
         if (currentIndex === -1) return;
         const nextIndex = (currentIndex + 1) % playlist.length;
-        set({ nowPlayingId: playlist[nextIndex].id });
+        get().setNowPlayingId(playlist[nextIndex].id!);
         useAppContext.getState().setIsPlaying(true);
         set({ isPlaying: true });
     },
@@ -82,7 +84,7 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
         const currentIndex = playlist.findIndex(t => t.id === nowPlayingId);
         if (currentIndex === -1) return;
         const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-        set({ nowPlayingId: playlist[prevIndex].id });
+        get().setNowPlayingId(playlist[prevIndex].id!);
         useAppContext.getState().setIsPlaying(true);
         set({ isPlaying: true });
     },
@@ -97,29 +99,26 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
 
 // --- Provider Component ---
 export function AppProvider({ children }: { children: ReactNode }) {
-    // Correctly subscribe to the stores to get their state for effects.
-    const { volume, audioRef, playlist } = useAppContext.getState();
-    const { nowPlayingId, setCurrentTrack, isPlaying } = usePlaybackState.getState();
+    const audioRef = useAppContext.getState().audioRef;
     
     // Using useEffect to listen to state changes from the store
     useEffect(() => {
-        return usePlaybackState.subscribe(
-            (state) => {
-                const audio = audioRef.current;
-                if (!audio || !state.currentTrack) return;
-                
-                if (state.isPlaying) {
-                    audio.play().catch(e => console.error("Audio play error:", e));
-                } else {
-                    audio.pause();
+        const unsubPlayback = usePlaybackState.subscribe(
+            (state, prevState) => {
+                if (state.isPlaying !== prevState.isPlaying || state.currentTrack?.id !== prevState.currentTrack?.id) {
+                    const audio = audioRef.current;
+                    if (!audio || !state.currentTrack) return;
+                    
+                    if (state.isPlaying) {
+                        audio.play().catch(e => console.error("Audio play error:", e));
+                    } else {
+                        audio.pause();
+                    }
                 }
-            },
-            (state) => state.isPlaying
+            }
         );
-    }, [audioRef]);
 
-    useEffect(() => {
-        return useAppContext.subscribe(
+        const unsubVolume = useAppContext.subscribe(
             (state) => {
                  const audio = audioRef.current;
                 if (audio) {
@@ -127,20 +126,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 }
             },
             (state) => state.volume
-        )
+        );
+
+        return () => {
+            unsubPlayback();
+            unsubVolume();
+        }
     }, [audioRef]);
-    
-    // Effect to find and set the current track object when ID changes
-    useEffect(() => {
-      const unsubscribe = usePlaybackState.subscribe(
-        (state) => {
-          const track = useAppContext.getState().playlist.find(t => t.id === state.nowPlayingId) || null;
-          setCurrentTrack(track);
-        },
-        (state) => state.nowPlayingId
-      );
-      return unsubscribe;
-    }, [setCurrentTrack]);
     
     return <>{children}</>;
 }
