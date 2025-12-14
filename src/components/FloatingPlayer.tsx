@@ -1,13 +1,12 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Heart, SkipBack, Play, Pause, SkipForward, X, Maximize, Minimize } from 'lucide-react';
+import { Heart, SkipBack, Play, Pause, SkipForward, Music, Shuffle, ListMusic, ArrowRight, Maximize2, Minimize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAppContext, usePlaybackState } from '@/context/AppContext';
-import { Slider } from './ui/slider';
+import { usePlaybackState } from '@/context/AppContext';
 import type { Song } from '@/firebase/firestore';
 import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { useUser, useFirestore } from '@/firebase';
@@ -47,13 +46,16 @@ export function FloatingPlayerWrapper() {
     if (!currentTrack) return null;
 
     return (
-        <FloatingPlayer
-            track={currentTrack}
-            handleLike={handleLike}
-            isLiked={isLiked}
-        />
+        <div className="floating-player-wrapper">
+            <FloatingPlayer
+                track={currentTrack}
+                handleLike={handleLike}
+                isLiked={isLiked}
+            />
+        </div>
     );
 }
+
 
 type FloatingPlayerProps = {
     track: Song;
@@ -61,12 +63,6 @@ type FloatingPlayerProps = {
     isLiked: (songId: string) => boolean;
 };
 
-const formatTime = (seconds: number) => {
-    if (isNaN(seconds) || seconds < 0) return '0:00';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-};
 
 export function FloatingPlayer({ 
     track, 
@@ -75,22 +71,12 @@ export function FloatingPlayer({
 }: FloatingPlayerProps) {
     const { 
         isPlaying, 
-        progress, 
         handlePlayPause, 
         handleNext, 
         handlePrev,
-        handleSeek,
-        setNowPlayingId
     } = usePlaybackState();
     
-    const [isExpanded, setIsExpanded] = useState(false);
-
     if (!track) return null;
-
-    const onProgressBarChange = (value: number[]) => {
-      if (!progress.duration) return;
-      handleSeek(value[0]);
-    };
 
     const playerVariants = {
         hidden: { opacity: 0, y: 100 },
@@ -100,59 +86,60 @@ export function FloatingPlayer({
     
     return (
         <motion.div 
-            className="floating-player"
-            data-expanded={isExpanded}
+            className="card"
             variants={playerVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
             transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-            layout
         >
-            <div className="floating-player-top-controls">
-                <button onClick={() => setIsExpanded(!isExpanded)} className="control-btn">
-                    {isExpanded ? <Minimize size={20} /> : <Maximize size={20} />}
-                </button>
-                <button onClick={() => setNowPlayingId(null)} className="control-btn">
-                    <X size={20} />
-                </button>
-            </div>
-
-            <motion.div className="floating-player-content" layout="position">
-                <motion.div className="floating-player-cover" layout="position">
-                    <Image src={track.cover} alt={track.title} layout="fill" unoptimized={track.cover.startsWith('data:')}/>
-                </motion.div>
+            <div className="one">
+                <span className="title">Music</span>
+                <div className="music">
+                    {track.cover ? (
+                        <Image src={track.cover} alt={track.title} layout="fill" objectFit="cover" unoptimized={track.cover.startsWith('data:')}/>
+                    ) : (
+                        <Music width="18" height="18" />
+                    )}
+                </div>
+                <span className="name">{track.title}</span>
+                <span className="name1">{track.artist}</span>
                 
-                <motion.div className="floating-player-details" layout="position">
-                    <div className="floating-player-info">
-                        <div className="title">{track.title}</div>
-                        <div className="artist">{track.artist}</div>
-                    </div>
+                <div className="bar">
+                    <button onClick={handlePrev}>
+                        <svg viewBox="0 0 16 16" className="color bi bi-fast-forward-fill" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg" style={{transform: 'rotate(180deg)'}}>
+                            <path d="M7.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C.713 12.69 0 12.345 0 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
+                            <path d="M15.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C8.713 12.69 8 12.345 8 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
+                        </svg>
+                    </button>
+                    <button onClick={handlePlayPause}>
+                        {isPlaying ? <Pause className="color" size={18} /> : <Play className="color" size={18} />}
+                    </button>
+                    <button onClick={handleNext}>
+                        <svg viewBox="0 0 16 16" className="color bi bi-fast-forward-fill" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C.713 12.69 0 12.345 0 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
+                            <path d="M15.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C8.713 12.69 8 12.345 8 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
+                        </svg>
+                    </button>
+                </div>
 
-                    <div className="floating-player-controls-wrapper">
-                        <div className="floating-player-progress">
-                            <span className="time-display">{formatTime(progress.currentTime)}</span>
-                            <Slider
-                              value={[progress.currentTime]}
-                              max={progress.duration || 100}
-                              onValueChange={onProgressBarChange}
-                              className="w-full"
-                            />
-                            <span className="time-display">{formatTime(progress.duration)}</span>
-                        </div>
-                        <div className="floating-player-controls">
-                            <button onClick={(e) => handleLike(e, track.id!)} className={cn('like-btn control-btn', { 'liked': isLiked(track.id!) })}>
-                                <Heart />
-                            </button>
-                            <button onClick={handlePrev} className="control-btn"><SkipBack /></button>
-                            <button onClick={handlePlayPause} className="play-main-btn control-btn">
-                                {isPlaying ? <Pause /> : <Play />}
-                            </button>
-                            <button onClick={handleNext} className="control-btn"><SkipForward /></button>
-                        </div>
-                    </div>
-                </motion.div>
-            </motion.div>
+                <div className="bar">
+                     <button>
+                        <Shuffle className="color1" size={14} />
+                    </button>
+                     <button>
+                        <ListMusic className="color1" size={14} />
+                    </button>
+                    <button onClick={(e) => handleLike(e, track.id!)} className={cn({ 'text-red-500': isLiked(track.id!) })}>
+                       <Heart className="color1" size={14} fill={isLiked(track.id!) ? 'rgba(29, 28, 28, 0.829)' : 'none'}/>
+                    </button>
+                     <button>
+                        <ArrowRight className="color1" size={14} />
+                    </button>
+                </div>
+            </div>
+            <div className="two"></div>
+            <div className="three"></div>
         </motion.div>
     );
 }
