@@ -981,34 +981,101 @@ body.custom-theme-active body {
 /* NEW INTERACTIVE CARD STYLES */
 .interactive-card {
   position: relative;
-  perspective: 1000px;
-  width: 150px;
-  height: 150px;
+  width: 220px;
+  height: 220px;
   background: var(--glass-bg);
-  color: var(--text);
-  display: grid;
-  place-items: center;
-  font-size: 1.2rem;
-  font-weight: 600;
-  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  font-weight: bold;
+  border-radius: 15px;
   cursor: pointer;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  border: 1px solid var(--glass-border);
-  will-change: transform;
+  color: var(--text);
+  overflow: hidden; /* Prevent pseudo-elements from spilling out */
 }
-.interactive-card:hover {
-  box-shadow: 0px 10px 30px -5px hsla(var(--primary), 0.2);
+
+.interactive-card::before,
+.interactive-card::after {
+  position: absolute;
+  content: "";
+  width: 20%;
+  height: 20%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  font-weight: bold;
+  background-color: var(--page-accent);
+  transition: all 0.5s;
+  z-index: 2;
 }
+
+.interactive-card::before {
+  top: 0;
+  right: 0;
+  border-radius: 0 15px 0 100%;
+}
+
+.interactive-card::after {
+  bottom: 0;
+  left: 0;
+  border-radius: 0 100% 0 15px;
+}
+
+.interactive-card:hover::before,
+.interactive-card:hover::after {
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+  transition: all 0.5s;
+}
+
+.interactive-card .card-content {
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.5s ease;
+}
+
+.interactive-card .card-hover-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: hsl(var(--primary-foreground));
+    font-size: 1.2rem;
+    font-weight: 600;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.5s ease 0.2s; /* delay opacity transition */
+}
+
+.interactive-card:hover .card-content {
+  opacity: 0;
+}
+.interactive-card:hover .card-hover-content {
+    opacity: 1;
+}
+
 .interactive-card.create-card {
   border-style: dashed;
+  border-color: var(--glass-border);
   color: hsl(var(--muted-foreground));
 }
 .interactive-card.create-card:hover {
-  border-color: hsl(var(--primary));
-  color: hsl(var(--primary));
+  border-color: var(--page-accent);
+  color: var(--page-accent);
 }
-.interactive-card .card-content {
-  transition: opacity 0.3s ease;
+.interactive-card.create-card::before,
+.interactive-card.create-card::after {
+    display: none;
+}
+.interactive-card.create-card:hover .card-hover-content {
+    opacity: 0;
+}
+.interactive-card.create-card:hover .card-content {
+    opacity: 1;
 }
 
 

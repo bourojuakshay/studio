@@ -144,7 +144,6 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
 
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
 
   const cardClasses = cn(
     'interactive-card',
@@ -153,20 +152,17 @@ const InteractiveCard = ({ moodKey, emoji, title, onClick }: { moodKey: string, 
 
   return (
     <div 
-      ref={cardRef} 
       className={cardClasses}
       onClick={onClick}
       title={title}
+      style={{ '--page-accent': MOOD_DEFS[moodKey as keyof typeof MOOD_DEFS]?.accent || 'hsl(var(--primary))' } as React.CSSProperties}
     >
-        <motion.div 
-          className="card-content"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
-        >
+      <div className="card-content">
           {emoji}
-        </motion.div>
+      </div>
+       <div className="card-hover-content">
+          {title}
+       </div>
     </div>
   );
 };
