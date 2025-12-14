@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { AnimatePresence } from 'framer-motion';
-import { Bell, Play, Search } from 'lucide-react';
+import { Bell, Play, Search, Heart, Library, Plus, LogIn, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -26,11 +26,16 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton
 } from '@/components/ui/sidebar';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppContext } from '@/context/AppContext';
 import AuthButtons from '@/components/AuthButtons';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const dynamic = 'force-dynamic';
 
@@ -198,7 +203,11 @@ export default function Home() {
     if (nowPlayingId) {
       setIsPlaying(!isPlaying);
     } else {
-      const currentPlaylist = activePage === 'home' ? tracksByMood['all'] : tracksByMood[activePage];
+      // If nothing is playing, play the first song from the current view
+      const currentPlaylist = activePage === 'home' 
+        ? tracksByMood['all'] 
+        : tracksByMood[activePage];
+      
       if (currentPlaylist?.length > 0) {
         setNowPlayingId(currentPlaylist[0].id!);
         setIsPlaying(true);
@@ -234,10 +243,23 @@ export default function Home() {
       audio.currentTime = newTime;
     }
   };
-  
-  const openPlayer = (songId: string, contextMood?: string) => {
+
+  /**
+   * Plays a song without navigating away from the current page.
+   * Used for home page cards.
+   */
+  const playSong = (songId: string) => {
     setNowPlayingId(songId);
-    setActivePage(contextMood || 'home');
+    setIsPlaying(true);
+  };
+  
+  /**
+   * Navigates to a mood page and starts playing a song.
+   * Used for mood-specific contexts.
+   */
+  const openPlayer = (songId: string, contextMood: string) => {
+    setNowPlayingId(songId);
+    setActivePage(contextMood);
     setIsPlaying(true);
   };
 
@@ -278,7 +300,7 @@ export default function Home() {
             <h2 className="section-title">Recently Played</h2>
             <div className="album-grid">
                 {(tracksByMood.all || []).slice(0, 6).map((track, i) => (
-                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, 'all')} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => playSong(track.id!)} />
                 ))}
             </div>
         </div>
@@ -286,7 +308,7 @@ export default function Home() {
             <h2 className="section-title">Recommended Stations</h2>
              <div className="album-grid">
                 {(tracksByMood.all || []).slice(6, 12).map((track, i) => (
-                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, 'all')} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => playSong(track.id!)} />
                 ))}
             </div>
         </div>
@@ -334,14 +356,9 @@ export default function Home() {
       />
       
       <Sidebar side="left">
-          <SidebarHeader>
-              <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo hidden group-data-[state=expanded]:block">
-                MoodyO
-              </a>
-          </SidebarHeader>
-          <SidebarContent>
-            <AuthButtons />
-          </SidebarContent>
+          <div className="flex h-full w-full flex-col gap-2 p-2">
+            <AuthButtons onNavigate={openPage} />
+          </div>
       </Sidebar>
       
       <SidebarInset>
@@ -432,3 +449,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    

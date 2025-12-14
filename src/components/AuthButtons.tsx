@@ -11,6 +11,8 @@ import {
   SidebarMenuButton,
   SidebarGroup,
   SidebarFooter,
+  SidebarHeader,
+  SidebarTrigger
 } from '@/components/ui/sidebar';
 import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -18,19 +20,22 @@ import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { useSongs } from '@/hooks/use-songs';
 import { useAppContext } from '@/context/AppContext';
 
-export default function AuthButtons() {
+export default function AuthButtons({ onNavigate }: { onNavigate: (page: string) => void }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
-  const { setActivePage } = useAppContext();
+  const { activePage } = useAppContext();
   const { likedSongIds } = useUserPreferences(user?.uid);
   const { songs } = useSongs();
 
   const likedSongs = songs.filter(song => likedSongIds.includes(song.id!));
 
-  const handleNavigation = (path: string) => {
-    // setActivePage('home'); // This might be causing unintended page switches
-    router.push(path);
+  const handleLocalNavigation = (path: string) => {
+    if (path.startsWith('/')) {
+        router.push(path);
+    } else {
+        onNavigate(path);
+    }
   };
   
   if (isUserLoading) {
@@ -39,16 +44,23 @@ export default function AuthButtons() {
 
   return (
     <>
+      <SidebarHeader>
+        <a href="#" onClick={(e) => { e.preventDefault(); handleLocalNavigation('home'); }} className="logo hidden group-data-[state=expanded]:block">
+            MoodyO
+        </a>
+        <SidebarTrigger />
+      </SidebarHeader>
+
       <SidebarGroup>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => handleNavigation('/')} isActive={router.pathname === '/'}>
+            <SidebarMenuButton onClick={() => handleLocalNavigation('home')} isActive={activePage === 'home'}>
               <Home />
               <span>Home</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => handleNavigation('/search')}>
+            <SidebarMenuButton onClick={() => handleLocalNavigation('/search')} isActive={router.pathname === '/search'}>
               <Search />
               <span>Search</span>
             </SidebarMenuButton>
@@ -113,3 +125,5 @@ export default function AuthButtons() {
     </>
   );
 }
+
+    
