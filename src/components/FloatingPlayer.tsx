@@ -42,9 +42,9 @@ export function FloatingPlayerWrapper() {
         const currentlyLiked = isLiked(songId);
         setUserSongPreference(firestore, user.uid, songId, !currentlyLiked);
     };
-
-    if (!currentTrack) return null;
-
+    
+    // The wrapper will now always render the player structure.
+    // The FloatingPlayer component inside will handle conditional content.
     return (
         <div className="floating-player-wrapper">
             <FloatingPlayer
@@ -58,7 +58,7 @@ export function FloatingPlayerWrapper() {
 
 
 type FloatingPlayerProps = {
-    track: Song;
+    track: Song | null; // Track can be null
     handleLike: (e: React.MouseEvent, songId: string) => void;
     isLiked: (songId: string) => boolean;
 };
@@ -76,13 +76,13 @@ export function FloatingPlayer({
         handlePrev,
     } = usePlaybackState();
     
-    if (!track) return null;
-
     const playerVariants = {
         hidden: { opacity: 0, y: 100 },
         visible: { opacity: 1, y: 0 },
         exit: { opacity: 0, y: 100 },
     };
+    
+    const hasTrack = !!track;
     
     return (
         <motion.div 
@@ -96,26 +96,30 @@ export function FloatingPlayer({
             <div className="one">
                 <span className="title">Music</span>
                 <div className="music">
-                    {track.cover ? (
+                    {hasTrack && track.cover ? (
                         <Image src={track.cover} alt={track.title} layout="fill" objectFit="cover" unoptimized={track.cover.startsWith('data:')}/>
                     ) : (
-                        <Music width="18" height="18" />
+                        <svg viewBox="0 0 16 16" className="note bi bi-music-note" fill="currentColor" height="18" width="18" xmlns="http://www.w3.org/2000/svg" >
+                            <path d="M9 13c0 1.105-1.12 2-2.5 2S4 14.105 4 13s1.12-2 2.5-2 2.5.895 2.5 2z"></path>
+                            <path d="M9 3v10H8V3h1z" fillRule="evenodd"></path>
+                            <path d="M8 2.82a1 1 0 0 1 .804-.98l3-.6A1 1 0 0 1 13 2.22V4L8 5V2.82z" ></path>
+                        </svg>
                     )}
                 </div>
-                <span className="name">{track.title}</span>
-                <span className="name1">{track.artist}</span>
+                <span className="name">{track?.title || 'MoodyO Player'}</span>
+                <span className="name1">{track?.artist || 'Select a song to play'}</span>
                 
                 <div className="bar">
-                    <button onClick={handlePrev}>
+                    <button onClick={handlePrev} disabled={!hasTrack}>
                         <svg viewBox="0 0 16 16" className="color bi bi-fast-forward-fill" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg" style={{transform: 'rotate(180deg)'}}>
                             <path d="M7.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C.713 12.69 0 12.345 0 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
                             <path d="M15.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C8.713 12.69 8 12.345 8 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
                         </svg>
                     </button>
-                    <button onClick={handlePlayPause}>
-                        {isPlaying ? <Pause className="color" size={18} /> : <Play className="color" size={18} />}
+                    <button onClick={handlePlayPause} disabled={!hasTrack}>
+                        {isPlaying && hasTrack ? <Pause className="color" size={18} /> : <Play className="color" size={18} />}
                     </button>
-                    <button onClick={handleNext}>
+                    <button onClick={handleNext} disabled={!hasTrack}>
                         <svg viewBox="0 0 16 16" className="color bi bi-fast-forward-fill" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
                             <path d="M7.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C.713 12.69 0 12.345 0 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
                             <path d="M15.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C8.713 12.69 8 12.345 8 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"></path>
@@ -130,8 +134,8 @@ export function FloatingPlayer({
                      <button>
                         <ListMusic className="color1" size={14} />
                     </button>
-                    <button onClick={(e) => handleLike(e, track.id!)} className={cn({ 'text-red-500': isLiked(track.id!) })}>
-                       <Heart className="color1" size={14} fill={isLiked(track.id!) ? 'rgba(29, 28, 28, 0.829)' : 'none'}/>
+                    <button onClick={(e) => hasTrack && handleLike(e, track.id!)} disabled={!hasTrack} className={cn({ 'text-red-500': hasTrack && isLiked(track.id!) })}>
+                       <Heart className="color1" size={14} fill={hasTrack && isLiked(track.id!) ? 'rgba(29, 28, 28, 0.829)' : 'none'}/>
                     </button>
                      <button>
                         <ArrowRight className="color1" size={14} />
