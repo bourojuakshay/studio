@@ -5,7 +5,7 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'MoodyO',
+  title: 'MOOP MO',
   description: 'An AI-powered, mood-based audio player experience.',
 };
 

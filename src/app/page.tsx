@@ -62,20 +62,19 @@ const pathVariants = {
 };
 
 const letterPaths = [
-  // M
-  "M4.25,48.2V2.3h10.3l7,19.3l7-19.3h10.3v45.9h-8.1V12.6L22.65,32L15.55,12.6v35.6H4.25z",
-  // O
-  "M83.45,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C75.15,5.5,83.45,14.2,83.45,25.2z",
-  // O
-  "M134.85,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C126.55,5.5,134.85,14.2,134.85,25.2z",
-  // D
-  "M154.25,48.2V2.3h15.2c13.2,0,21.5,8.1,21.5,19.6c0,11.5-8.3,19.7-21.5,19.7h-7.1v6.6H154.25z M162.35,37.3h12.1c8.1,0,13.8-5,13.8-12.7c0-7.7-5.7-12.8-13.8-12.8h-12.1V37.3z",
-  // Y
-  "M218.45,2.3l11.4,29.2l11.4-29.2h8.1v45.9h-7.7V17.1l-11.6,29.8h-7.1L218.05,17.1v31.1h-7.7V2.3H218.45z",
-  // O
-  "M296.95,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C288.65,5.5,296.95,14.2,296.95,25.2z",
+    // M
+    "M4.25,48.2V2.3h10.3l7,19.3l7-19.3h10.3v45.9h-8.1V12.6L22.65,32L15.55,12.6v35.6H4.25z",
+    // O
+    "M83.45,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C75.15,5.5,83.45,14.2,83.45,25.2z",
+    // O
+    "M134.85,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C126.55,5.5,134.85,14.2,134.85,25.2z",
+    // P
+    "M154.25,48.2V2.3h15.2c13.2,0,21.5,8.1,21.5,19.6c0,11.5-8.3,19.7-21.5,19.7h-7.1v6.6H154.25z M162.35,37.3h7.1c8.1,0,13.8-5,13.8-12.7c0-7.7-5.7-12.8-13.8-12.8h-7.1V37.3z",
+    // M
+    "M218.45,48.2V2.3h10.3l7,19.3l7-19.3h10.3v45.9h-8.1V12.6L245.85,32l-7.1-19.4v35.6H218.45z",
+    // O
+    "M296.95,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C288.65,5.5,296.95,14.2,296.95,25.2z",
 ];
-
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   const [exitState, setExitState] = useState<'enter' | 'exit'>('enter');
@@ -548,7 +547,7 @@ export default function Home() {
         <header>
           <div className="header-inner">
               <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">
-                MoodyO
+                MOOP MO
               </a>
               <nav className="hidden md:flex">
                 <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="nav-btn">
@@ -576,7 +575,7 @@ export default function Home() {
                   <SheetContent side="left" className="main-menu-sheet sheet-content">
                     <SheetHeader>
                        <SheetTitle className="sr-only">Main Menu</SheetTitle>
-                      <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">MoodyO</a>
+                      <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">MOOP MO</a>
                     </SheetHeader>
                     <div className="flex flex-col py-4">
                        <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }}>Home</a>
