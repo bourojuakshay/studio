@@ -17,7 +17,7 @@ interface AppState {
     setIsPlaying: (playing: boolean) => void; // Keep for audio element callbacks
 }
 
-export const useAppContext = create<AppState>((set) => ({
+export const useAppContext = create<AppState>((set, get) => ({
     activePage: 'home',
     setActivePage: (page) => set({ activePage: page }),
     playlist: [],
@@ -26,7 +26,7 @@ export const useAppContext = create<AppState>((set) => ({
     volume: 0.75,
     setVolume: (volume) => {
         set({ volume });
-        const audio = useAppContext.getState().audioRef.current;
+        const audio = get().audioRef.current;
         if (audio) {
             audio.volume = volume;
         }
@@ -59,8 +59,22 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
     progress: { currentTime: 0, duration: 0 },
 
     setNowPlayingId: (songId) => {
-        const { playlist } = useAppContext.getState();
+        const { playlist, audioRef } = useAppContext.getState();
         const track = playlist.find(t => t.id === songId) || null;
+        
+        const audio = audioRef.current;
+        if (audio) {
+            if (track) {
+                if (audio.src !== track.src) {
+                    audio.src = track.src;
+                    audio.load();
+                }
+            } else {
+                audio.pause();
+                audio.src = '';
+            }
+        }
+        
         set({ nowPlayingId: songId, currentTrack: track });
     },
     setProgress: (progress) => set({ progress }),
@@ -112,7 +126,6 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
 export function AppProvider({ children }: { children: ReactNode }) {
     const audioRef = useAppContext.getState().audioRef;
     
-    // Using useEffect to listen to state changes from the store
     useEffect(() => {
         const unsubPlayback = usePlaybackState.subscribe(
             (state, prevState) => {

@@ -25,8 +25,14 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
+  SidebarHeader,
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter
 } from '@/components/ui/sidebar';
-
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppContext, usePlaybackState } from '@/context/AppContext';
 import AuthButtons from '@/components/AuthButtons';
@@ -127,7 +133,7 @@ const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   
-  const { activePage, setActivePage, setPlaylist, audioRef } = useAppContext();
+  const { activePage, setActivePage, setPlaylist } = useAppContext();
   const { setNowPlayingId, handlePlayPause, currentTrack } = usePlaybackState();
 
   const { user, isUserLoading } = useUser();
@@ -212,7 +218,11 @@ export default function Home() {
   }
 
   const openPage = (id: string) => {
-    setActivePage(id);
+    if (id.startsWith('/')) {
+        router.push(id);
+    } else {
+        setActivePage(id);
+    }
   };
   
   const allMoods = { ...MOOD_DEFS };
@@ -348,27 +358,11 @@ export default function Home() {
 
 const AudioPlayer = () => {
     const { audioRef, setIsPlaying } = useAppContext();
-    const { currentTrack, setProgress } = usePlaybackState();
+    const { setProgress } = usePlaybackState();
 
     const handleNext = () => {
         // Implement next song logic here if needed, or handle in component
     };
-
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio) return;
-
-        if (currentTrack?.src) {
-            if (audio.src !== currentTrack.src) {
-                audio.src = currentTrack.src;
-                audio.load();
-            }
-            // `isPlaying` is managed in a separate effect in AppProvider
-        } else if (!currentTrack) {
-             audio.pause();
-             audio.src = '';
-        }
-    }, [currentTrack, audioRef]);
 
     return (
         <audio 
