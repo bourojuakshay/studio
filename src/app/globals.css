@@ -160,12 +160,11 @@ body.custom-theme-active {
   font-weight: 800;
   line-height: 1;
   display: flex;
-  color: transparent;
+  color: hsl(var(--primary));
 }
 
 .intro-logo-gsap span {
   display: inline-block;
-  color: hsl(var(--primary));
   will-change: transform, opacity, filter;
 }
 

@@ -84,8 +84,8 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
     const { virtualItems, totalHeight } = useVirtualizer({
       count: tracks?.length ?? 0,
       getScrollElement: () => scrollRef.current,
-      estimateSize: () => 64, // Estimate height of each item
-      overscan: 5, // Render 5 extra items above and below the visible area
+      estimateSize: () => 72, // Increased item height
+      overscan: 5,
     });
 
     const playlistVariants = {
@@ -154,4 +154,3 @@ export function PlaylistView({ tracks, currentTrack, mood, handleLike, isLiked, 
         </div>
     );
 }
-
