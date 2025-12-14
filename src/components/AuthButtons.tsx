@@ -22,7 +22,7 @@ export default function AuthButtons() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
-  const { setActivePage, activePage } = useAppContext();
+  const { setActivePage } = useAppContext();
   const { likedSongIds } = useUserPreferences(user?.uid);
   const { songs } = useSongs();
 
@@ -39,60 +39,63 @@ export default function AuthButtons() {
 
   return (
     <>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton onClick={() => handleNavigation('/')} isActive={router.pathname === '/'}>
-            <Home />
-            <span>Home</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton onClick={() => handleNavigation('/search')}>
-            <Search />
-            <span>Search</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton>
-            <Library />
-            <span>Your Library</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
+      <SidebarGroup>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => handleNavigation('/')} isActive={router.pathname === '/'}>
+              <Home />
+              <span>Home</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => handleNavigation('/search')}>
+              <Search />
+              <span>Search</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
 
       {user && (
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-                <SidebarMenuButton>
-                    <div className="liked-songs-icon"><Heart /></div>
-                    <span>Liked Songs</span>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+        <SidebarGroup className="flex-grow flex flex-col min-h-0">
+           <SidebarMenu>
+              <SidebarMenuItem>
+                  <SidebarMenuButton>
+                      <Library />
+                      <span>Your Library</span>
+                      <button className="ml-auto opacity-70 hover:opacity-100"><Plus size={18} /></button>
+                  </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                  <SidebarMenuButton>
+                      <div className="liked-songs-icon"><Heart /></div>
+                      <span>Liked Songs</span>
+                  </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          <ScrollArea className="flex-grow mt-4">
+            {likedSongs.length > 0 && (
+                <SidebarMenu>
+                    {likedSongs.slice(0, 10).map(song => (
+                        <SidebarMenuItem key={song.id}>
+                            <SidebarMenuButton className="h-auto py-1">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarImage src={song.cover} alt={song.title}/>
+                                    <AvatarFallback>{song.title.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col items-start">
+                                    <span>{song.title}</span>
+                                    <small className="text-xs text-muted-foreground">{song.artist}</small>
+                                </div>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    ))}
+                </SidebarMenu>
+            )}
+          </ScrollArea>
         </SidebarGroup>
       )}
 
-      <ScrollArea className="flex-grow p-2">
-        {user && likedSongs.length > 0 && (
-            <SidebarMenu>
-                {likedSongs.slice(0, 10).map(song => (
-                    <SidebarMenuItem key={song.id}>
-                        <SidebarMenuButton className="h-auto py-1">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage src={song.cover} alt={song.title}/>
-                                <AvatarFallback>{song.title.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col items-start">
-                                <span>{song.title}</span>
-                                <small className="text-xs text-muted-foreground">{song.artist}</small>
-                            </div>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                ))}
-            </SidebarMenu>
-        )}
-      </ScrollArea>
 
       <SidebarFooter>
         {user ? (
