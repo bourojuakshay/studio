@@ -38,13 +38,16 @@ const pathVariants = {
   hidden: {
     pathLength: 0,
     pathOffset: 1,
+    opacity: 0,
   },
   visible: (i: number) => ({
     pathLength: 1,
     pathOffset: 0,
+    opacity: 1,
     transition: {
       pathLength: { delay: i * 0.1, duration: 1, ease: "easeOut" },
       pathOffset: { delay: i * 0.1, duration: 1, ease: "easeOut" },
+      opacity: { delay: i * 0.1, duration: 0.01 }
     }
   }),
   exit: (i: number) => ({
@@ -65,12 +68,12 @@ const letterPaths = [
   "M83.45,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C75.15,5.5,83.45,14.2,83.45,25.2z",
   // O
   "M134.85,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C126.55,5.5,134.85,14.2,134.85,25.2z",
-  // R
-  "M210.85,48.2V2.3h8.6c11.2,0,18.5,6.8,18.5,17.4c0,7.2-3.8,12.7-9.9,15.5l11.9,13H229.2l-11-12.2h-3.4v12.2H210.85z M218.95,30.3h6.6c6.6,0,10.6-3.8,10.6-9.5c0-5.8-4-9.4-10.4-9.4h-6.8V30.3z",
+  // D
+  "M154.25,48.2V2.3h15.2c13.2,0,21.5,8.1,21.5,19.6c0,11.5-8.3,19.7-21.5,19.7h-7.1v6.6H154.25z M162.35,37.3h12.1c8.1,0,13.8-5,13.8-12.7c0-7.7-5.7-12.8-13.8-12.8h-12.1V37.3z",
   // Y
-  "M284.15,48.2V2.3h8.1l11.5,29.3L315.25,2.3h8.1v45.9h-7.7V17.1l-11.6,29.8h-7.1L291.85,17.1v31.1H284.15z",
+  "M218.45,2.3l11.4,29.2l11.4-29.2h8.1v45.9h-7.7V17.1l-11.6,29.8h-7.1L218.05,17.1v31.1h-7.7V2.3H218.45z",
   // O
-  "M370.95,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C362.65,5.5,370.95,14.2,370.95,25.2z"
+  "M296.95,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C288.65,5.5,296.95,14.2,296.95,25.2z",
 ];
 
 
@@ -85,7 +88,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
 
   const containerVariants = {
     enter: { },
-    exit: { },
+    exit: { opacity: 0, transition: { duration: 0.4, ease: 'easeOut' } },
   };
   
   const taglineVariants = {
@@ -112,7 +115,7 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
       <div className="intro-logo-container">
         <motion.svg 
           className="intro-svg-logo" 
-          viewBox="0 0 375 51"
+          viewBox="0 0 301 51"
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -545,7 +548,7 @@ export default function Home() {
         <header>
           <div className="header-inner">
               <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">
-                Moodyo
+                MoodyO
               </a>
               <nav className="hidden md:flex">
                 <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="nav-btn">
@@ -573,7 +576,7 @@ export default function Home() {
                   <SheetContent side="left" className="main-menu-sheet sheet-content">
                     <SheetHeader>
                        <SheetTitle className="sr-only">Main Menu</SheetTitle>
-                      <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">Moodyo</a>
+                      <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">MoodyO</a>
                     </SheetHeader>
                     <div className="flex flex-col py-4">
                        <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }}>Home</a>
@@ -797,5 +800,3 @@ export default function Home() {
     </>
   );
 }
-
-    
