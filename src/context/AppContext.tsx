@@ -24,8 +24,14 @@ export const useAppContext = create<AppState>((set) => ({
     setPlaylist: (playlist) => set({ playlist }),
     audioRef: React.createRef<HTMLAudioElement>(),
     volume: 0.75,
-    setVolume: (volume) => set({ volume }),
-    setIsPlaying: (playing) => set(state => usePlaybackState.setState({ isPlaying: playing })),
+    setVolume: (volume) => {
+        set({ volume });
+        const audio = useAppContext.getState().audioRef.current;
+        if (audio) {
+            audio.volume = volume;
+        }
+    },
+    setIsPlaying: (playing) => usePlaybackState.setState({ isPlaying: playing }),
 }));
 
 
@@ -62,7 +68,14 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
     handlePlayPause: () => {
         const { isPlaying, currentTrack } = get();
         if (currentTrack) {
-            useAppContext.getState().setIsPlaying(!isPlaying);
+            const audio = useAppContext.getState().audioRef.current;
+            if (!audio) return;
+            
+            if (!isPlaying) {
+                audio.play().catch(e => console.error("Audio play error:", e));
+            } else {
+                audio.pause();
+            }
             set({ isPlaying: !isPlaying });
         }
     },
@@ -74,7 +87,6 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
         if (currentIndex === -1) return;
         const nextIndex = (currentIndex + 1) % playlist.length;
         get().setNowPlayingId(playlist[nextIndex].id!);
-        useAppContext.getState().setIsPlaying(true);
         set({ isPlaying: true });
     },
     handlePrev: () => {
@@ -85,7 +97,6 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
         if (currentIndex === -1) return;
         const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
         get().setNowPlayingId(playlist[prevIndex].id!);
-        useAppContext.getState().setIsPlaying(true);
         set({ isPlaying: true });
     },
     handleSeek: (time: number) => {
@@ -105,9 +116,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const unsubPlayback = usePlaybackState.subscribe(
             (state, prevState) => {
-                if (state.isPlaying !== prevState.isPlaying || state.currentTrack?.id !== prevState.currentTrack?.id) {
+                if (state.isPlaying !== prevState.isPlaying && state.currentTrack) {
                     const audio = audioRef.current;
-                    if (!audio || !state.currentTrack) return;
+                    if (!audio) return;
                     
                     if (state.isPlaying) {
                         audio.play().catch(e => console.error("Audio play error:", e));
@@ -117,19 +128,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 }
             }
         );
-
-        const unsubVolume = useAppContext.subscribe(
-            (state) => {
-                 const audio = audioRef.current;
-                if (audio && state.volume !== undefined) {
-                    audio.volume = state.volume;
-                }
-            }
-        );
-
+        
         return () => {
             unsubPlayback();
-            unsubVolume();
         }
     }, [audioRef]);
     
