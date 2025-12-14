@@ -121,11 +121,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const unsubVolume = useAppContext.subscribe(
             (state) => {
                  const audio = audioRef.current;
-                if (audio) {
+                if (audio && state.volume !== undefined) {
                     audio.volume = state.volume;
                 }
-            },
-            (state) => state.volume
+            }
         );
 
         return () => {
