@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { Menu, Wand2, Loader, Home as HomeIcon, Github, User, LogOut, Plus } from 'lucide-react';
+import { Menu, Wand2, Loader, Home as HomeIcon, Github, User, LogOut, Plus, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -38,165 +38,120 @@ const pathVariants = {
   hidden: {
     pathLength: 0,
     pathOffset: 1,
-    opacity: 0,
   },
   visible: (i: number) => ({
     pathLength: 1,
     pathOffset: 0,
-    opacity: 1,
     transition: {
-      pathLength: { delay: i * 0.2, type: 'spring', duration: 1.5, bounce: 0 },
-      pathOffset: { delay: i * 0.2, type: 'spring', duration: 1.5, bounce: 0 },
-      opacity: { delay: i * 0.2, duration: 0.01 }
+      pathLength: { delay: i * 0.1, duration: 1, ease: "easeOut" },
+      pathOffset: { delay: i * 0.1, duration: 1, ease: "easeOut" },
     }
   }),
   exit: (i: number) => ({
-    pathLength: 0,
-    pathOffset: 1,
+    pathLength: 1,
+    pathOffset: 0,
     opacity: 0,
     transition: {
-      duration: 0.5,
-      ease: 'easeOut',
-      delay: (6 - i) * 0.1
+      duration: 0.3,
+      delay: (6 - i) * 0.05
     }
   })
 };
 
 const letterPaths = [
   // M
-  "M2.7,48.2V2.3h10.3l7,19.3l7-19.3h10.3v45.9h-8.1V12.6L22.1,32L15,12.6v35.6H2.7z",
-  // o
-  "M81.2,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C72.9,5.5,81.2,14.2,81.2,25.2z",
-  // o
-  "M132.6,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C124.3,5.5,132.6,14.2,132.6,25.2z",
-  // d
-  "M180.2,48.2V2.3h7.9c11.2,0,18.5,7.5,18.5,18.1c0,8.7-4.9,14.5-12.2,16.8l13.2,11H197l-12.3-10.7h-4.5v10.7H180.2z M188.3,30.4h7.1c7,0,11.2-4.1,11.2-10c0-6-4.2-9.9-11-9.9h-7.3V30.4z",
-  // y
-  "M237.4,31.5l-12-30.2h9l7.5,19.3l7.5-19.3h9l-12,30.2v16.7h-8.1V31.5z",
-  // o
-  "M284.5,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C276.2,5.5,284.5,14.2,284.5,25.2z"
+  "M4.25,48.2V2.3h10.3l7,19.3l7-19.3h10.3v45.9h-8.1V12.6L22.65,32L15.55,12.6v35.6H4.25z",
+  // O
+  "M83.45,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C75.15,5.5,83.45,14.2,83.45,25.2z",
+  // O
+  "M134.85,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C126.55,5.5,134.85,14.2,134.85,25.2z",
+  // R
+  "M210.85,48.2V2.3h8.6c11.2,0,18.5,6.8,18.5,17.4c0,7.2-3.8,12.7-9.9,15.5l11.9,13H229.2l-11-12.2h-3.4v12.2H210.85z M218.95,30.3h6.6c6.6,0,10.6-3.8,10.6-9.5c0-5.8-4-9.4-10.4-9.4h-6.8V30.3z",
+  // Y
+  "M284.15,48.2V2.3h8.1l11.5,29.3L315.25,2.3h8.1v45.9h-7.7V17.1l-11.6,29.8h-7.1L291.85,17.1v31.1H284.15z",
+  // O
+  "M370.95,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C362.65,5.5,370.95,14.2,370.95,25.2z"
 ];
 
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   const [exitState, setExitState] = useState<'enter' | 'exit'>('enter');
-  const [showHint, setShowHint] = useState(false);
 
   const handleExit = () => {
     if (exitState === 'exit') return;
     setExitState('exit');
-    setTimeout(onExit, 1000); // Wait for exit animation
+    setTimeout(onExit, 600); // Wait for exit animation
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => setShowHint(true), 1500); // Show hint after intro animates
-    return () => clearTimeout(timer);
-  }, []);
-
   const containerVariants = {
-    enter: {
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-    exit: {
-      transition: {
-        staggerChildren: 0.1,
-        staggerDirection: -1,
-      },
-    },
+    enter: { },
+    exit: { },
   };
   
   const taglineVariants = {
-    initial: { opacity: 0, y: 10 },
-    enter: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut', delay: 1.2 } },
-    exit: { opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeIn' } },
-  };
-
-  const hintVariants = {
     initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { duration: 0.8 } },
-    exit: { opacity: 0, transition: { duration: 0.3 } },
+    enter: { opacity: 1, transition: { duration: 0.5, ease: 'easeOut', delay: 1 } },
+    exit: { opacity: 0, transition: { duration: 0.3, ease: 'easeIn' } },
   };
 
-  const taglineText = "MOOD-DRIVEN AUDIO EXPERIENCE".split(' ');
+  const bottomItemsVariants = {
+    initial: { opacity: 0 },
+    enter: { opacity: 1, transition: { duration: 0.5, ease: 'easeOut', delay: 1.2 } },
+    exit: { opacity: 0, transition: { duration: 0.3, ease: 'easeIn' } },
+  };
 
   return (
     <motion.div
       className="intro-screen-v2"
-      data-state={exitState}
       onClick={handleExit}
       initial="initial"
       animate="enter"
       exit="exit"
       variants={containerVariants}
     >
-      <div className="animated-hero-background">
-          <div className="wave-layer-1"></div>
-          <div className="wave-layer-2"></div>
-          <div className="wave-layer-3"></div>
-          <div className="wave-layer-4"></div>
-          <div className="wave-layer-5"></div>
-          <div className="wave-layer-6"></div>
-          <div className="wave-layer-7"></div>
-          <div className="wave-layer-8"></div>
-          <div className="wave-layer-9"></div>
+      <div className="intro-logo-container">
+        <motion.svg 
+          className="intro-svg-logo" 
+          viewBox="0 0 375 51"
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
+          <defs>
+              <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#4f46e5" />
+                  <stop offset="20%" stopColor="#c026d3" />
+                  <stop offset="40%" stopColor="#db2777" />
+                  <stop offset="60%" stopColor="#f97316" />
+                  <stop offset="80%" stopColor="#84cc16" />
+                  <stop offset="100%" stopColor="#22d3ee" />
+              </linearGradient>
+          </defs>
+          {letterPaths.map((path, i) => (
+              <motion.path
+                  key={i}
+                  d={path}
+                  variants={pathVariants}
+                  custom={i}
+              />
+          ))}
+        </motion.svg>
+        <div className="intro-tagline-container">
+          <motion.div className="intro-tagline" variants={taglineVariants}>MOOD-DRIVEN</motion.div>
+          <motion.div className="intro-tagline" style={{textAlign: 'right'}} variants={taglineVariants}>AUDIO EXPERIENCE</motion.div>
+        </div>
       </div>
-      <motion.svg 
-        className="intro-svg-logo" 
-        viewBox="0 0 308 50"
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        variants={containerVariants}
-      >
-        <defs>
-            <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#4f46e5" />
-                <stop offset="20%" stopColor="#c026d3" />
-                <stop offset="40%" stopColor="#db2777" />
-                <stop offset="60%" stopColor="#f97316" />
-                <stop offset="80%" stopColor="#84cc16" />
-                <stop offset="100%" stopColor="#22d3ee" />
-            </linearGradient>
-        </defs>
-        {letterPaths.map((path, i) => (
-            <motion.path
-                key={i}
-                d={path}
-                fill="none"
-                stroke="url(#logo-gradient)"
-                strokeWidth="2.5"
-                variants={pathVariants}
-                custom={i}
-            />
-        ))}
-    </motion.svg>
-
-      <motion.div
-        className="intro-tagline"
-        variants={containerVariants}
-      >
-        {taglineText.map((word, index) => (
-            <motion.span key={index} variants={taglineVariants}>
-              {word}
-            </motion.span>
-        ))}
+      <motion.div className="intro-bottom-container" variants={bottomItemsVariants}>
+        <div className="intro-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+            </svg>
+        </div>
+        <div className="intro-hint">
+          Tap anywhere to continue
+        </div>
+        <div style={{width: '24px'}}></div>
       </motion.div>
-      <AnimatePresence>
-        {showHint && (
-          <motion.div
-            className="absolute bottom-10 text-xs text-white/30"
-            variants={hintVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            Tap anywhere to continue
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };
@@ -842,3 +797,5 @@ export default function Home() {
     </>
   );
 }
+
+    
