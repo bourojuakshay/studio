@@ -21,7 +21,7 @@ const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "3.5rem"
+const SIDEBAR_WIDTH_ICON = "5rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContext = {
@@ -167,16 +167,16 @@ const Sidebar = React.forwardRef<
 
     if (collapsible === "none") {
       return (
-        <div
+        <aside
           className={cn(
-            "flex h-full w-[--sidebar-width] flex-col bg-card",
+            "flex h-full w-[--sidebar-width] flex-col bg-background",
             className
           )}
           ref={ref}
           {...props}
         >
           {children}
-        </div>
+        </aside>
       )
     }
 
@@ -186,7 +186,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-card p-0 text-card-foreground [&>button]:hidden"
+            className="w-[--sidebar-width] bg-background p-0 text-card-foreground [&>button]:hidden"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -194,17 +194,18 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
-            <div className="flex h-full w-full flex-col">{children}</div>
+            <div className="flex h-full w-full flex-col gap-2 p-2">{children}</div>
           </SheetContent>
         </Sheet>
       )
     }
 
     return (
-      <div
+      <aside
         ref={ref}
         className={cn("group peer hidden md:block text-card-foreground",
-          variant === 'sidebar' && "w-[var(--sidebar-width-icon)] group-data-[state=expanded]:w-[var(--sidebar-width)] transition-[width] duration-300 ease-in-out"
+          "w-[var(--sidebar-width-icon)] group-data-[state=expanded]:w-[var(--sidebar-width)] transition-[width] duration-300 ease-in-out",
+           className
         )}
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
@@ -212,15 +213,15 @@ const Sidebar = React.forwardRef<
         data-side={side}
         {...props}
       >
-        <div className="h-full w-full">
+        <div className="h-full w-full p-2">
             <div
                 data-sidebar="sidebar"
-                className="flex h-full w-full flex-col bg-card"
+                className="flex h-full w-full flex-col gap-2"
             >
                 {children}
             </div>
         </div>
-      </div>
+      </aside>
     )
   }
 )
@@ -261,7 +262,7 @@ const SidebarInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        "relative flex min-h-svh flex-1 flex-col bg-background",
+        "relative flex h-screen flex-1 flex-col overflow-y-auto bg-background",
         className
       )}
       {...props}
@@ -279,7 +280,7 @@ const SidebarHeader = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="header"
-      className={cn("flex flex-col gap-2 p-4 group-data-[state=collapsed]:p-2", className)}
+      className={cn("flex flex-col gap-2 rounded-lg bg-card p-4 group-data-[state=collapsed]:p-2", className)}
       {...props}
     />
   )
@@ -294,7 +295,7 @@ const SidebarFooter = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-4 mt-auto group-data-[state=collapsed]:p-2", className)}
+      className={cn("flex flex-col gap-2 p-2 mt-auto", className)}
       {...props}
     />
   )
@@ -327,7 +328,7 @@ const SidebarGroup = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col p-4 bg-card group-data-[state=collapsed]:p-2", className)}
+      className={cn("relative flex w-full min-w-0 flex-col rounded-lg bg-card", className)}
       {...props}
     />
   )
@@ -342,7 +343,7 @@ const SidebarMenu = React.forwardRef<
     <ul
       ref={ref}
       data-sidebar="menu"
-      className={cn("flex w-full min-w-0 flex-col gap-1", className)}
+      className={cn("flex w-full min-w-0 flex-col gap-1 p-2", className)}
       {...props}
     />
   )

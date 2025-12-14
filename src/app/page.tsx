@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { AnimatePresence } from 'framer-motion';
-import { Bell, Play, Search } from 'lucide-react';
+import { Bell, Play, Search, Heart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -23,16 +23,11 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
+  SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-  SidebarGroup,
-  SidebarInset,
-  SidebarFooter
 } from '@/components/ui/sidebar';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppContext } from '@/context/AppContext';
 import AuthButtons from '@/components/AuthButtons';
@@ -348,16 +343,13 @@ export default function Home() {
       
       <Sidebar side="left">
           <SidebarHeader>
-              <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">
+              <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo hidden group-data-[state=expanded]:block">
                 MoodyO
               </a>
           </SidebarHeader>
           <SidebarContent>
             <AuthButtons />
           </SidebarContent>
-          <SidebarFooter>
-            <Button variant="outline" className="w-full" onClick={() => router.push('/admin')}>Admin</Button>
-          </SidebarFooter>
       </Sidebar>
       
       <SidebarInset>
@@ -392,8 +384,6 @@ export default function Home() {
                       nowPlaying={nowPlaying}
                       isPlaying={isPlaying}
                       currentTrack={currentTrack}
-                      volume={volume}
-                      setVolume={setVolume}
                       handlePlayPause={handlePlayPause}
                       handleNext={handleNext}
                       handlePrev={handlePrev}

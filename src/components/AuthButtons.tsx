@@ -29,7 +29,7 @@ export default function AuthButtons() {
   const likedSongs = songs.filter(song => likedSongIds.includes(song.id!));
 
   const handleNavigation = (path: string) => {
-    setActivePage('home');
+    // setActivePage('home'); // This might be causing unintended page switches
     router.push(path);
   };
   
@@ -84,8 +84,8 @@ export default function AuthButtons() {
                                     <AvatarFallback>{song.title.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col items-start">
-                                    <span>{song.title}</span>
-                                    <small className="text-xs text-muted-foreground">{song.artist}</small>
+                                    <span className="group-data-[state=collapsed]:hidden">{song.title}</span>
+                                    <small className="text-xs text-muted-foreground group-data-[state=collapsed]:hidden">{song.artist}</small>
                                 </div>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -101,12 +101,12 @@ export default function AuthButtons() {
         {user ? (
           <SidebarMenuButton onClick={() => auth.signOut()}>
             <LogOut />
-            <span>Sign Out</span>
+            <span className="group-data-[state=collapsed]:hidden">Sign Out</span>
           </SidebarMenuButton>
         ) : (
           <SidebarMenuButton onClick={() => router.push('/login')}>
             <LogIn />
-            <span>Sign In</span>
+            <span className="group-data-[state=collapsed]:hidden">Sign In</span>
           </SidebarMenuButton>
         )}
       </SidebarFooter>

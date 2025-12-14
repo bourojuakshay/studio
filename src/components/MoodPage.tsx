@@ -9,13 +9,11 @@ import { PlaylistView } from './PlaylistView';
 
 type MoodPageProps = {
   mood: string;
-  definition: MoodDefinition;
+  definition?: MoodDefinition;
   tracks: Track[];
   nowPlaying: { mood: string; index: number } | null;
   isPlaying: boolean;
   currentTrack: Track | null;
-  volume: number;
-  setVolume: (volume: number) => void;
   handlePlayPause: () => void;
   handleNext: () => void;
   handlePrev: () => void;

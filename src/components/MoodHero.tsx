@@ -8,6 +8,7 @@ import { SkipBack, SkipForward, Play, Pause, Heart, Volume1, Volume2 } from 'luc
 import { cn } from '@/lib/utils';
 import { MoodDefinition, Track } from '@/app/lib/mood-definitions';
 import { useAppContext } from '@/context/AppContext';
+import { Slider } from './ui/slider';
 
 type MoodHeroProps = {
     definition: MoodDefinition;
@@ -57,18 +58,10 @@ export function MoodHero({
       visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: 'easeOut' } }
     };
 
-    const onProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        const { clientX, currentTarget } = e;
-        const { left, width } = currentTarget.getBoundingClientRect();
-        const clickPosition = clientX - left;
-        const seekRatio = clickPosition / width;
-        const seekTime = progress.duration * seekRatio;
-        handleSeek(seekTime);
+    const onProgressBarChange = (value: number[]) => {
+      if (!progress.duration) return;
+      handleSeek(value[0]);
     };
-
-    const progressPercentage = progress.duration > 0 ? (progress.currentTime / progress.duration) * 100 : 0;
-    
-    if (!definition) return null;
 
     return (
         <motion.div className="mood-hero" variants={heroVariants}>
@@ -90,9 +83,11 @@ export function MoodHero({
                             <p className="card__description">{displayTrack.artist}</p>
                         </div>
                         <div className="card__footer">
-                            <div className="progress-bar-container" onClick={onProgressBarClick}>
-                                <div className="progress-bar" style={{ width: `${progressPercentage}%` }}></div>
-                            </div>
+                            <Slider 
+                                value={[progress.currentTime]} 
+                                max={progress.duration || 100}
+                                onValueChange={onProgressBarChange}
+                            />
                             <div className="time-display">
                                 <span>{formatTime(progress.currentTime)}</span>
                                 <span>{formatTime(progress.duration)}</span>
@@ -114,7 +109,13 @@ export function MoodHero({
                                             {volume > 0.5 ? <Volume2 size={20} /> : <Volume1 size={20} />}
                                         </button>
                                         {isVolumeOpen && (
-                                            <input type="range" min="0" max="1" step="0.01" value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} className="volume-slider" />
+                                            <Slider 
+                                                defaultValue={[volume]} 
+                                                max={1} 
+                                                step={0.01} 
+                                                onValueChange={(value) => setVolume(value[0])}
+                                                className="volume-slider" 
+                                            />
                                         )}
                                     </div>
                                 </div>
@@ -126,5 +127,3 @@ export function MoodHero({
         </motion.div>
     );
 }
-
-    
