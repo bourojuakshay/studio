@@ -14,7 +14,6 @@ interface AppState {
     audioRef: React.RefObject<HTMLAudioElement>;
     volume: number;
     setVolume: (volume: number) => void;
-    setIsPlaying: (playing: boolean) => void; // Keep for audio element callbacks
 }
 
 export const useAppContext = create<AppState>((set, get) => ({
@@ -31,7 +30,6 @@ export const useAppContext = create<AppState>((set, get) => ({
             audio.volume = volume;
         }
     },
-    setIsPlaying: (playing) => usePlaybackState.setState({ isPlaying: playing }),
 }));
 
 
@@ -120,6 +118,31 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
         }
     },
 }));
+
+export const AudioPlayer = () => {
+    const audioRef = useAppContext((state) => state.audioRef);
+    const setProgress = usePlaybackState((state) => state.setProgress);
+    const handleNext = usePlaybackState((state) => state.handleNext);
+    const setIsPlaying = usePlaybackState((state) => (playing: boolean) => usePlaybackState.setState({ isPlaying: playing }));
+
+    return (
+        <audio 
+            ref={audioRef} 
+            onEnded={handleNext}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onTimeUpdate={() => {
+                const audio = audioRef.current;
+                if(audio) setProgress({ currentTime: audio.currentTime, duration: audio.duration });
+            }}
+            onLoadedData={() => {
+                const audio = audioRef.current;
+                if(audio) setProgress({ currentTime: audio.currentTime, duration: audio.duration });
+            }}
+            crossOrigin="anonymous"
+        />
+    )
+}
 
 
 // --- Provider Component ---

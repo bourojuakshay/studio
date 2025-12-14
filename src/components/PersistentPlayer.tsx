@@ -3,12 +3,57 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, SkipBack, Play, Pause, SkipForward, Volume1, Volume2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppContext, usePlaybackState } from '@/context/AppContext';
 import { Slider } from './ui/slider';
 import type { Song } from '@/firebase/firestore';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
+import { useUser, useFirestore } from '@/firebase';
+import { setUserSongPreference } from '@/firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+
+export function PersistentPlayerWrapper() {
+    const { currentTrack } = usePlaybackState();
+    const { user } = useUser();
+    const firestore = useFirestore();
+    const router = useRouter();
+    const { toast } = useToast();
+    const { likedSongIds } = useUserPreferences(user?.uid);
+
+    const isLiked = (songId: string) => {
+        if (!songId) return false;
+        return likedSongIds.includes(songId);
+    };
+
+    const handleLike = (e: React.MouseEvent, songId: string) => {
+        e.stopPropagation();
+        if (!user) {
+            router.push('/login');
+            toast({
+                title: 'Please sign in',
+                description: 'You need to be signed in to like songs.',
+            });
+            return;
+        }
+        if (!songId) return;
+
+        const currentlyLiked = isLiked(songId);
+        setUserSongPreference(firestore, user.uid, songId, !currentlyLiked);
+    };
+
+    if (!currentTrack) return null;
+
+    return (
+        <PersistentPlayer
+            track={currentTrack}
+            handleLike={handleLike}
+            isLiked={isLiked}
+        />
+    );
+}
 
 type PersistentPlayerProps = {
     track: Song;

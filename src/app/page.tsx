@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ThemeProvider } from '@/components/theme-provider';
-import { PersistentPlayer } from '@/components/PersistentPlayer';
 import { MoodPage } from '@/components/MoodPage';
 import { useSongs } from '@/hooks/use-songs';
 import { useUserPreferences } from '@/hooks/use-user-preferences';
@@ -338,49 +337,8 @@ export default function Home() {
           <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
         </footer>
       </SidebarInset>
-        
-      {isMounted && (
-        <AnimatePresence>
-            {currentTrack && (
-                <PersistentPlayer
-                    track={currentTrack}
-                    handleLike={handleLike}
-                    isLiked={isLiked}
-                />
-            )}
-        </AnimatePresence>
-      )}
-
-      <AudioPlayer />
     </SidebarProvider>
   );
-}
-
-const AudioPlayer = () => {
-    const { audioRef, setIsPlaying } = useAppContext();
-    const { setProgress } = usePlaybackState();
-
-    const handleNext = () => {
-        // Implement next song logic here if needed, or handle in component
-    };
-
-    return (
-        <audio 
-            ref={audioRef} 
-            onEnded={handleNext}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onTimeUpdate={() => {
-                const audio = audioRef.current;
-                if(audio) setProgress({ currentTime: audio.currentTime, duration: audio.duration });
-            }}
-            onLoadedData={() => {
-                const audio = audioRef.current;
-                if(audio) setProgress({ currentTime: audio.currentTime, duration: audio.duration });
-            }}
-            crossOrigin="anonymous"
-        />
-    )
 }
 
     

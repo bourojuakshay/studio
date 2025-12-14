@@ -3,7 +3,9 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
-import { AppProvider } from '@/context/AppContext';
+import { AppProvider, AudioPlayer } from '@/context/AppContext';
+import { PersistentPlayerWrapper } from '@/components/PersistentPlayer';
+import { AnimatePresence } from 'framer-motion';
 
 export const metadata: Metadata = {
   title: 'MoodyO',
@@ -26,6 +28,10 @@ export default function RootLayout({
         <FirebaseClientProvider>
           <AppProvider>
             {children}
+            <AnimatePresence>
+              <PersistentPlayerWrapper />
+            </AnimatePresence>
+             <AudioPlayer />
           </AppProvider>
         </FirebaseClientProvider>
         <Toaster />
