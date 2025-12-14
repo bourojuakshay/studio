@@ -34,100 +34,89 @@ import { useToast } from '@/hooks/use-toast';
 
 export const dynamic = 'force-dynamic';
 
-const pathVariants = {
-  hidden: {
-    pathLength: 0,
-    opacity: 0,
-  },
-  visible: (i: number) => ({
-    pathLength: 1,
-    opacity: 1,
-    transition: {
-      pathLength: { delay: i * 0.1, duration: 1.2, ease: "easeOut" },
-      opacity: { delay: i * 0.1, duration: 0.01 }
-    }
-  }),
-};
-
-const letterPaths = [
-    // M
-    "M4.25,48.2V2.3h10.3l7,19.3l7-19.3h10.3v45.9h-8.1V12.6L22.65,32L15.55,12.6v35.6H4.25z",
-    // o
-    "M83.45,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C75.15,5.5,83.45,14.2,83.45,25.2z M75.55,25.2c0-6.6-5-12.7-12.2-12.7c-7.2,0-12.2,6-12.2,12.7c0,6.6,5,12.7,12.2,12.7C70.55,37.9,75.55,31.8,75.55,25.2z",
-    // o
-    "M134.85,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C126.55,5.5,134.85,14.2,134.85,25.2z M126.95,25.2c0-6.6-5-12.7-12.2-12.7c-7.2,0-12.2,6-12.2,12.7c0,6.6,5,12.7,12.2,12.7C121.95,37.9,126.95,31.8,126.95,25.2z",
-    // d
-    "M182.2,25.3c0-11,8.3-19.7,20.1-19.7s20.1,8.7,20.1,19.7v22.9h-8.1V25.3c0-6.6-5-12.7-12.1-12.7s-12.1,6-12.1,12.7v22.9h-8.1V25.3z",
-    // y
-    "M255.95,2.3h8.1v17.5l14.4-17.5h10.4l-12.8,15.7l14,30h-9.5l-9.6-21.4l-5.5,6.5v14.9h-8.1V2.3z",
-    // O
-    "M336.85,25.2c0,11-8.3,19.7-20.1,19.7c-11.8,0-20.1-8.7-20.1-19.7c0-11,8.3-19.7,20.1-19.7C328.55,5.5,336.85,14.2,336.85,25.2z M328.95,25.2c0-6.6-5-12.7-12.2-12.7c-7.2,0-12.2,6-12.2,12.7c0,6.6,5,12.7,12.2,12.7C323.95,37.9,328.95,31.8,328.95,25.2z"
-];
-
-
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   const [exitState, setExitState] = useState<'enter' | 'exit'>('enter');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const letters = gsap.utils.toArray('.intro-logo-gsap span');
+      const tagline = gsap.utils.toArray('.intro-tagline-container');
+      const bottomItems = gsap.utils.toArray('.intro-bottom-container');
+
+      gsap.set(letters, {
+        opacity: 0,
+        y: 18,
+        scale: 0.95,
+        filter: 'blur(2px)',
+      });
+      gsap.set([tagline, bottomItems], { opacity: 0 });
+
+      const tl = gsap.timeline({
+        onComplete: () => {
+          if (containerRef.current) {
+            containerRef.current.style.cursor = 'pointer';
+          }
+        },
+      });
+
+      tl.to(letters, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        filter: 'blur(0px)',
+        duration: 0.35,
+        ease: 'power3.out',
+        stagger: 0.06,
+      })
+      .to([tagline, bottomItems], {
+        opacity: 1,
+        duration: 0.8,
+        ease: 'power2.out',
+      }, '-=0.2');
+
+      timelineRef.current = tl;
+
+    }, containerRef);
+    
+    return () => ctx.revert();
+  }, []);
 
   const handleExit = () => {
-    if (exitState === 'exit') return;
+    if (exitState === 'exit' || !timelineRef.current) return;
     setExitState('exit');
-    setTimeout(onExit, 600); // Wait for exit animation
+    
+    gsap.to(containerRef.current, {
+      opacity: 0,
+      duration: 0.5,
+      ease: 'power2.inOut',
+      onComplete: onExit,
+    });
+    timelineRef.current.reverse();
   };
 
-  const containerVariants = {
-    enter: { opacity: 1 },
-    exit: { opacity: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-  };
-  
-  const taglineVariants = {
-    initial: { opacity: 0 },
-    enter: { opacity: 1, transition: { duration: 0.8, ease: 'easeOut', delay: 1.2 } },
-    exit: { opacity: 0, transition: { duration: 0.3, ease: 'easeIn' } },
-  };
-
-  const bottomItemsVariants = {
-    initial: { opacity: 0, y: 20 },
-    enter: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut', delay: 1.4 } },
-    exit: { opacity: 0, y: 10, transition: { duration: 0.3, ease: 'easeIn' } },
-  };
 
   return (
     <motion.div
       className="intro-screen-v2"
       onClick={handleExit}
-      initial="exit"
-      animate="enter"
-      exit="exit"
-      variants={containerVariants}
+      ref={containerRef}
+      initial={{ opacity: 1 }}
     >
-      <div className="intro-logo-container">
-        <motion.svg 
-          className="intro-svg-logo" 
-          viewBox="0 0 341 51"
-          initial="hidden"
-          animate="visible"
-        >
-          <defs>
-              <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#818cf8" />
-                  <stop offset="100%" stopColor="#3b82f6" />
-              </linearGradient>
-          </defs>
-          {letterPaths.map((path, i) => (
-              <motion.path
-                  key={i}
-                  d={path}
-                  variants={pathVariants}
-                  custom={i}
-              />
-          ))}
-        </motion.svg>
-        <div className="intro-tagline-container">
-          <motion.div className="intro-tagline" variants={taglineVariants}>MOOD-DRIVEN</motion.div>
-          <motion.div className="intro-tagline" style={{textAlign: 'right'}} variants={taglineVariants}>AUDIO EXPERIENCE</motion.div>
+        <div className="intro-content-wrapper">
+             <h1 className="intro-logo-gsap">
+                {'MoodyO'.split('').map((char, index) => (
+                    <span key={index}>{char}</span>
+                ))}
+            </h1>
+            <div className="intro-tagline-container">
+                <div className="intro-tagline">MOOD-DRIVEN</div>
+                <div className="intro-tagline" style={{textAlign: 'right'}}>AUDIO EXPERIENCE</div>
+            </div>
         </div>
-      </div>
-      <motion.div className="intro-bottom-container" variants={bottomItemsVariants}>
+
+      <div className="intro-bottom-container">
         <div className="intro-icon">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -137,10 +126,11 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
           Tap anywhere to continue
         </div>
         <div style={{width: '24px'}}></div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 };
+
 
 
 const InteractiveCard = ({ moodKey, emoji, title, onClick }: { moodKey: string, emoji: React.ReactNode, title: string, onClick: () => void }) => {
