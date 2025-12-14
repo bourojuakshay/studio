@@ -13,8 +13,8 @@
   --popover: 240 5% 15%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 100 82% 51%; /* Vibrant Lime Green */
-  --primary-foreground: 240 5% 10%;
+  --primary: 274 60% 60%; 
+  --primary-foreground: 210 40% 98%;
 
   --secondary: 258 60% 70%; /* Vibrant Purple */
   --secondary-foreground: 210 40% 98%;
@@ -30,7 +30,7 @@
 
   --border: 240 5% 25%;
   --input: 240 5% 20%;
-  --ring: 100 82% 51%; /* Vibrant Lime Green */
+  --ring: 274 60% 60%; 
 
   --radius: 0.8rem;
   --font-sans: 'Poppins', sans-serif;
@@ -56,8 +56,8 @@
   --popover: 240 5% 15%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 100 82% 51%;
-  --primary-foreground: 240 5% 10%;
+  --primary: 274 60% 60%;
+  --primary-foreground: 210 40% 98%;
 
   --secondary: 258 60% 70%;
   --secondary-foreground: 210 40% 98%;
@@ -73,7 +73,7 @@
 
   --border: 240 5% 25%;
   --input: 240 5% 20%;
-  --ring: 100 82% 51%;
+  --ring: 274 60% 60%;
 }
 
 *{box-sizing:border-box}
@@ -993,6 +993,7 @@ body.custom-theme-active body {
   cursor: pointer;
   color: var(--text);
   overflow: hidden; /* Prevent pseudo-elements from spilling out */
+  border: 1px solid var(--glass-border);
 }
 
 .interactive-card::before,
