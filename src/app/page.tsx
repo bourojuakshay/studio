@@ -588,7 +588,7 @@ export default function Home() {
               <MainContent />
           ) : (
              <AnimatePresence>
-                {activePage !== 'home' && (
+                {activePage !== 'home' && allMoods[activePage] && (
                    <MoodPage
                       mood={activePage}
                       definition={allMoods[activePage]}
@@ -753,5 +753,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    

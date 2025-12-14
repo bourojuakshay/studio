@@ -45,6 +45,11 @@ export function MoodPage({
   handleSeek,
 }: MoodPageProps) {
 
+  // Guard against rendering if the mood definition is missing.
+  if (!definition) {
+    return null;
+  }
+
   const pageVariants = {
     hidden: { opacity: 0 },
     visible: { 
@@ -97,5 +102,3 @@ export function MoodPage({
     </motion.section>
   );
 }
-
-    
