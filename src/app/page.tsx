@@ -105,8 +105,8 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
     exit: { opacity: 0, y: 10, transition: { duration: 0.3, ease: 'easeIn' } },
   };
 
-  const logoText = "MoodyO";
-  const taglineText = "MOOD-DRIVEN AUDIO EXPERIENCE".split(' ');
+  const logoText = "MooayO";
+  const taglineText = "MOOD BASED AUDIO".split(' ');
 
   return (
     <motion.div 
@@ -531,7 +531,7 @@ export default function Home() {
         <header>
           <div className="header-inner">
               <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">
-                MoodyO
+                MooayO
               </a>
               <nav className="hidden md:flex">
                 <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="nav-btn">
@@ -559,7 +559,7 @@ export default function Home() {
                   <SheetContent side="left" className="main-menu-sheet sheet-content">
                     <SheetHeader>
                        <SheetTitle className="sr-only">Main Menu</SheetTitle>
-                      <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">MoodyO</a>
+                      <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }} className="logo">MooayO</a>
                     </SheetHeader>
                     <div className="flex flex-col py-4">
                        <a href="#" onClick={(e) => { e.preventDefault(); openPage('home'); }}>Home</a>
@@ -641,7 +641,7 @@ export default function Home() {
         </main>
         
         <footer>
-          <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • MoodyO Demo</small>
+          <small>Made with ❤️ by Bouroju Akshay • <a href="mailto:23eg106b12@anurag.edu.in">23eg106b12@anurag.edu.in</a> • MooayO Demo</small>
         </footer>
         
         {isMounted && (
