@@ -2,40 +2,54 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
-import { getUserSongPreferences, type UserSongPreference } from '@/firebase/firestore';
+import { UserProfile, UserSongPreference } from '@/firebase/firestore';
 
+// A simplified hook to get just the liked song IDs
 export function useUserPreferences(userId?: string) {
-  const [preferences, setPreferences] = useState<UserSongPreference[]>([]);
+  const [likedSongIds, setLikedSongIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const firestore = useFirestore();
 
   useEffect(() => {
     if (!firestore || !userId) {
-      setPreferences([]);
-      // We don't set loading to false here to avoid UI flicker if userId is just temporarily unavailable.
-      // If no userId is ever provided, loading will remain true, which is acceptable.
+      setLikedSongIds([]);
       return;
     }
 
     setLoading(true);
-    const unsubscribe = getUserSongPreferences(
-      firestore,
-      userId,
-      (newPreferences) => {
-        setPreferences(newPreferences);
+    const userDocRef = doc(firestore, 'users', userId);
+
+    const unsubscribe = onSnapshot(
+      userDocRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const userData = docSnap.data() as UserProfile;
+          setLikedSongIds(userData.likedSongs || []);
+        } else {
+          // User document might not exist yet
+          setLikedSongIds([]);
+        }
         setLoading(false);
-        setError(null);
       },
       (err) => {
         setError(err);
         setLoading(false);
+        console.error("Error fetching user preferences:", err);
       }
     );
 
     return () => unsubscribe();
   }, [firestore, userId]);
+  
+  // To maintain compatibility with original hook shape if needed elsewhere
+  const preferences: UserSongPreference[] = likedSongIds.map(songId => ({
+      songId,
+      liked: true,
+      userId: userId!,
+  }));
 
-  return { preferences, loading, error };
+  return { preferences, likedSongIds, loading, error };
 }

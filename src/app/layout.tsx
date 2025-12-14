@@ -3,6 +3,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
+import { AppProvider } from '@/context/AppContext';
 
 export const metadata: Metadata = {
   title: 'MoodyO',
@@ -23,7 +24,9 @@ export default function RootLayout({
       </head>
       <body>
         <FirebaseClientProvider>
-          {children}
+          <AppProvider>
+            {children}
+          </AppProvider>
         </FirebaseClientProvider>
         <Toaster />
       </body>

@@ -4,9 +4,10 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ListMusic, Heart, SkipBack, Play, Pause, SkipForward, Volume1, Volume2, X } from 'lucide-react';
+import { Heart, SkipBack, Play, Pause, SkipForward, Volume1, Volume2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Track } from '@/app/lib/mood-definitions';
+import { useAppContext } from '@/context/AppContext';
 
 type PersistentPlayerProps = {
     track: Track;
@@ -19,8 +20,6 @@ type PersistentPlayerProps = {
     setNowPlaying: (nowPlaying: { mood: string, index: number } | null) => void;
     progress: { currentTime: number; duration: number };
     handleSeek: (time: number) => void;
-    volume: number;
-    setVolume: (volume: number) => void;
 };
 
 const formatTime = (seconds: number) => {
@@ -41,9 +40,8 @@ export function PersistentPlayer({
     setNowPlaying,
     progress,
     handleSeek,
-    volume,
-    setVolume
 }: PersistentPlayerProps) {
+    const { volume, setVolume } = useAppContext();
     
     if (!track) return null;
 

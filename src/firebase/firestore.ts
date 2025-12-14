@@ -1,5 +1,5 @@
 
-'use a client';
+'use client';
 
 import { collection, addDoc, updateDoc, deleteDoc, doc, type Firestore, query, onSnapshot, where, getDocs, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from './error-emitter';
@@ -16,6 +16,17 @@ export interface Song {
     popularity?: number;
     createdAt?: any;
 }
+
+export interface UserProfile {
+    id?: string;
+    name: string;
+    email: string;
+    createdAt: any;
+    likedSongs: string[];
+    playlists: { id: string; name: string; songIds: string[] }[];
+    recentPlays: string[];
+}
+
 
 export interface UserSongPreference {
     id?: string;
@@ -101,33 +112,34 @@ export function getSongs(
 export async function setUserSongPreference(firestore: Firestore, userId: string, songId: string, liked: boolean) {
     if (!userId || !songId) return;
 
-    const preferenceCollection = collection(firestore, `users/${userId}/song_preferences`);
-    const q = query(preferenceCollection, where("songId", "==", songId));
-
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-        const newPrefRef = doc(preferenceCollection);
-        const preferenceData: UserSongPreference = { id: newPrefRef.id, userId, songId, liked };
-        
-        setDoc(newPrefRef, preferenceData).catch((serverError) => {
-            const permissionError = new FirestorePermissionError({
-                path: newPrefRef.path,
-                operation: 'create',
-                requestResourceData: preferenceData,
-            } satisfies SecurityRuleContext);
-            errorEmitter.emit('permission-error', permissionError);
-        });
-    } else {
-        const docToUpdate = querySnapshot.docs[0];
-        updateDoc(docToUpdate.ref, { liked }).catch((serverError) => {
-            const permissionError = new FirestorePermissionError({
-                path: docToUpdate.ref.path,
-                operation: 'update',
-                requestResourceData: { liked },
-            } satisfies SecurityRuleContext);
-            errorEmitter.emit('permission-error', permissionError);
-        });
+    const userDocRef = doc(firestore, 'users', userId);
+    
+    try {
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+            const userData = userDoc.data() as UserProfile;
+            let likedSongs = userData.likedSongs || [];
+            if (liked) {
+                if (!likedSongs.includes(songId)) {
+                    likedSongs.push(songId);
+                }
+            } else {
+                likedSongs = likedSongs.filter(id => id !== songId);
+            }
+            updateDoc(userDocRef, { likedSongs }).catch((serverError) => {
+                 errorEmitter.emit('permission-error', new FirestorePermissionError({
+                    path: userDocRef.path,
+                    operation: 'update',
+                    requestResourceData: { likedSongs },
+                }));
+            });
+        }
+    } catch (error) {
+        // This could be a permission error on getDoc
+         errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: userDocRef.path,
+            operation: 'get',
+        }));
     }
 }
 
@@ -157,4 +169,38 @@ export function getUserSongPreferences(
     });
 
     return unsubscribe;
+}
+
+export async function searchSongs(firestore: Firestore, searchTerm: string): Promise<Song[]> {
+    if (!searchTerm) return [];
+    
+    const songsCollection = collection(firestore, 'songs');
+    const titleQuery = query(songsCollection, where('title', '>=', searchTerm), where('title', '<=', searchTerm + '\uf8ff'));
+    const artistQuery = query(songsCollection, where('artist', '>=', searchTerm), where('artist', '<=', searchTerm + '\uf8ff'));
+
+    try {
+        const [titleSnapshot, artistSnapshot] = await Promise.all([
+            getDocs(titleQuery),
+            getDocs(artistQuery)
+        ]);
+
+        const results: { [key: string]: Song } = {};
+        titleSnapshot.forEach(doc => {
+            results[doc.id] = { id: doc.id, ...doc.data() } as Song;
+        });
+        artistSnapshot.forEach(doc => {
+            results[doc.id] = { id: doc.id, ...doc.data() } as Song;
+        });
+
+        return Object.values(results);
+    } catch (error) {
+        console.error("Error searching songs: ", error);
+        if (error instanceof Error && error.message.includes('permission-denied')) {
+            errorEmitter.emit('permission-error', new FirestorePermissionError({
+                path: songsCollection.path,
+                operation: 'list'
+            }));
+        }
+        return [];
+    }
 }

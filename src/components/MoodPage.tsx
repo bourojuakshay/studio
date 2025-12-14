@@ -33,8 +33,6 @@ export function MoodPage({
   nowPlaying,
   isPlaying,
   currentTrack,
-  volume,
-  setVolume,
   handlePlayPause,
   handleNext,
   handlePrev,
@@ -80,8 +78,6 @@ export function MoodPage({
           currentTrack={currentTrack}
           tracks={tracks}
           mood={mood}
-          volume={volume}
-          setVolume={setVolume}
           handlePlayPause={handlePlayPause}
           handleNext={handleNext}
           handlePrev={handlePrev}

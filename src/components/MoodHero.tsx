@@ -1,12 +1,13 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { SkipBack, SkipForward, Play, Pause, Heart, Volume1, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MoodDefinition, Track } from '@/app/lib/mood-definitions';
+import { useAppContext } from '@/context/AppContext';
 
 type MoodHeroProps = {
     definition: MoodDefinition;
@@ -15,8 +16,6 @@ type MoodHeroProps = {
     currentTrack: Track | null;
     tracks: Track[];
     mood: string;
-    volume: number;
-    setVolume: (volume: number) => void;
     handlePlayPause: () => void;
     handleNext: () => void;
     handlePrev: () => void;
@@ -40,8 +39,6 @@ export function MoodHero({
     currentTrack,
     tracks,
     mood,
-    volume,
-    setVolume,
     handlePlayPause,
     handleNext,
     handlePrev,
@@ -50,7 +47,8 @@ export function MoodHero({
     progress,
     handleSeek,
 }: MoodHeroProps) {
-    const [isVolumeOpen, setIsVolumeOpen] = useState(false);
+    const { volume, setVolume } = useAppContext();
+    const [isVolumeOpen, setIsVolumeOpen] = React.useState(false);
     const trackPlaying = nowPlaying?.mood === mood ? currentTrack : null;
     const displayTrack = trackPlaying || tracks?.[0];
 
@@ -70,6 +68,8 @@ export function MoodHero({
 
     const progressPercentage = progress.duration > 0 ? (progress.currentTime / progress.duration) * 100 : 0;
     
+    if (!definition) return null;
+
     return (
         <motion.div className="mood-hero" variants={heroVariants}>
             <div>

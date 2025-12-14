@@ -1,12 +1,13 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { addSong, updateSong, deleteSong, type Song } from '@/firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
 import { useSongs } from '@/hooks/use-songs';
 import { Loader, Trash2, Pencil, ArrowLeft } from 'lucide-react';
 import { MOOD_DEFS } from '../lib/mood-definitions';
@@ -39,6 +40,15 @@ import {
 import Image from 'next/image';
 
 export default function AdminPage() {
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isUserLoading, router]);
+
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
   const [src, setSrc] = useState('');
@@ -71,7 +81,7 @@ export default function AdminPage() {
     }
     setIsSubmitting(true);
 
-    const songData: Omit<Song, 'id'> = { title, artist, src, cover, mood: mood.toLowerCase() };
+    const songData: Omit<Song, 'id'> = { title, artist, src, cover, mood: mood.toLowerCase(), emotions: [mood.toLowerCase()] };
 
     try {
       if (editMode) {
@@ -128,16 +138,22 @@ export default function AdminPage() {
     }
   };
 
+  if (isUserLoading || !user) {
+    return (
+      <div className="w-screen h-screen flex items-center justify-center">
+        <Loader className="animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="app">
-      <header className="flex justify-between items-center">
+    <div className="container mx-auto py-8">
+      <header className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Admin Panel</h1>
-        <Link href="/" passHref>
-           <Button variant="outline">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-           </Button>
-        </Link>
+        <Button variant="outline" onClick={() => router.push('/')}>
+           <ArrowLeft className="mr-2 h-4 w-4" />
+           Back to Home
+        </Button>
       </header>
       <main className="flex flex-col gap-8">
         <div className="max-w-2xl mx-auto w-full">
