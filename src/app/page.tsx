@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { AnimatePresence } from 'framer-motion';
-import { Bell, Play, Search, Heart, Library, Plus, LogIn, LogOut } from 'lucide-react';
+import { Bell, Search, Library, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,7 @@ import { MoodPage } from '@/components/MoodPage';
 import { useSongs } from '@/hooks/use-songs';
 import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { setUserSongPreference, type Song } from '@/firebase/firestore';
-import { useAuth, useFirestore, useUser } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
 import { MOOD_DEFS, type MoodDefinition } from '@/app/lib/mood-definitions';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -26,16 +26,11 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-  SidebarGroup,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton
 } from '@/components/ui/sidebar';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext, usePlaybackState } from '@/context/AppContext';
 import AuthButtons from '@/components/AuthButtons';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,7 +116,6 @@ const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => 
     <div className="album-card" onClick={onClick}>
         <div className="album-card-image">
             <Image src={track.cover} alt={track.title} width={150} height={150} />
-            <Button size="icon" className="play-button"><Play /></Button>
         </div>
         <div className="album-card-info">
             <p className="album-card-title">{track.title}</p>
@@ -133,25 +127,12 @@ const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => 
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
-  const { 
-    activePage, 
-    setActivePage,
-    nowPlayingId,
-    setNowPlayingId,
-    isPlaying,
-    setIsPlaying,
-    volume,
-    setVolume,
-    progress,
-    audioRef,
-    setPlaylist,
-    currentTrack,
-    playlist,
-  } = useAppContext();
   
+  const { activePage, setActivePage, setPlaylist, playlist } = useAppContext();
+  const { setNowPlayingId, setIsPlaying, currentTrack } = usePlaybackState();
+
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const auth = useAuth();
   const { toast } = useToast();
   
   const { likedSongIds } = useUserPreferences(user?.uid);
@@ -199,67 +180,14 @@ export default function Home() {
     setIsMounted(true);
   }, []);
 
-  const handlePlayPause = () => {
-    if (nowPlayingId) {
-      setIsPlaying(!isPlaying);
-    } else {
-      // If nothing is playing, play the first song from the current view
-      const currentPlaylist = activePage === 'home' 
-        ? tracksByMood['all'] 
-        : tracksByMood[activePage];
-      
-      if (currentPlaylist?.length > 0) {
-        setNowPlayingId(currentPlaylist[0].id!);
-        setIsPlaying(true);
-      }
-    }
-  };
-
- const handleNext = () => {
-    if (!nowPlayingId) return;
-    const currentPlaylist = tracksByMood[activePage === 'home' ? 'all' : activePage] || playlist;
-    const currentIndex = currentPlaylist.findIndex(t => t.id === nowPlayingId);
-    if (currentIndex === -1 || currentPlaylist.length === 0) return;
-    
-    const nextIndex = (currentIndex + 1) % currentPlaylist.length;
-    setNowPlayingId(currentPlaylist[nextIndex].id!);
-    setIsPlaying(true);
-  };
-
-  const handlePrev = () => {
-    if (!nowPlayingId) return;
-    const currentPlaylist = tracksByMood[activePage === 'home' ? 'all' : activePage] || playlist;
-    const currentIndex = currentPlaylist.findIndex(t => t.id === nowPlayingId);
-    if (currentIndex === -1 || currentPlaylist.length === 0) return;
-
-    const prevIndex = (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
-    setNowPlayingId(currentPlaylist[prevIndex].id!);
-    setIsPlaying(true);
-  };
-  
-  const handleSeek = (newTime: number) => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.currentTime = newTime;
-    }
-  };
-
-  /**
-   * Plays a song without navigating away from the current page.
-   * Used for home page cards.
-   */
   const playSong = (songId: string) => {
     setNowPlayingId(songId);
     setIsPlaying(true);
   };
   
-  /**
-   * Navigates to a mood page and starts playing a song.
-   * Used for mood-specific contexts.
-   */
   const openPlayer = (songId: string, contextMood: string) => {
-    setNowPlayingId(songId);
     setActivePage(contextMood);
+    setNowPlayingId(songId);
     setIsPlaying(true);
   };
 
@@ -351,14 +279,12 @@ export default function Home() {
         activePage={activePage} 
         customMoods={{}}
         tracks={tracksByMood}
-        nowPlayingId={nowPlayingId}
+        nowPlayingId={currentTrack?.id || null}
         allMoods={allMoods}
       />
       
       <Sidebar side="left">
-          <div className="flex h-full w-full flex-col gap-2 p-2">
-            <AuthButtons onNavigate={openPage} />
-          </div>
+        <AuthButtons onNavigate={openPage} />
       </Sidebar>
       
       <SidebarInset>
@@ -390,17 +316,9 @@ export default function Home() {
                       mood={activePage}
                       definition={allMoods[activePage]}
                       tracks={tracksByMood[activePage]}
-                      nowPlayingId={nowPlayingId}
-                      isPlaying={isPlaying}
-                      currentTrack={currentTrack}
-                      handlePlayPause={handlePlayPause}
-                      handleNext={handleNext}
-                      handlePrev={handlePrev}
                       handleLike={handleLike}
                       isLiked={isLiked}
                       openPlayer={openPlayer}
-                      progress={progress}
-                      handleSeek={handleSeek}
                    />
                 )}
               </AnimatePresence>
@@ -414,40 +332,60 @@ export default function Home() {
         
       {isMounted && (
         <AnimatePresence>
-            {nowPlayingId && currentTrack && (
+            {currentTrack && (
                 <PersistentPlayer
                     track={currentTrack}
-                    isPlaying={isPlaying}
-                    handlePlayPause={handlePlayPause}
-                    handleNext={handleNext}
-                    handlePrev={handlePrev}
                     handleLike={handleLike}
                     isLiked={isLiked}
-                    setNowPlayingId={setNowPlayingId}
-                    progress={progress}
-                    handleSeek={handleSeek}
-                    volume={volume}
-                    setVolume={setVolume}
                 />
             )}
         </AnimatePresence>
       )}
 
-      <audio 
-        ref={audioRef} 
-        onEnded={handleNext}
-        onTimeUpdate={() => {
-            const audio = audioRef.current;
-            if(audio) useAppContext.getState().setProgress({ currentTime: audio.currentTime, duration: audio.duration });
-        }}
-        onLoadedMetadata={() => {
-            const audio = audioRef.current;
-            if(audio) useAppContext.getState().setProgress({ currentTime: audio.currentTime, duration: audio.duration });
-        }}
-        crossOrigin="anonymous"
-      />
+      <AudioPlayer />
     </SidebarProvider>
   );
 }
 
-    
+const AudioPlayer = () => {
+    const { audioRef, setIsPlaying } = useAppContext();
+    const { currentTrack, setProgress } = usePlaybackState();
+
+    const handleNext = () => {
+        // Implement next song logic here if needed, or handle in component
+    };
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        if (currentTrack?.src) {
+            if (audio.src !== currentTrack.src) {
+                audio.src = currentTrack.src;
+                audio.load();
+            }
+            // `isPlaying` is managed in a separate effect in AppProvider
+        } else if (!currentTrack) {
+             audio.pause();
+             audio.src = '';
+        }
+    }, [currentTrack, audioRef]);
+
+    return (
+        <audio 
+            ref={audioRef} 
+            onEnded={handleNext}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onTimeUpdate={() => {
+                const audio = audioRef.current;
+                if(audio) setProgress({ currentTime: audio.currentTime, duration: audio.duration });
+            }}
+            onLoadedData={() => {
+                const audio = audioRef.current;
+                if(audio) setProgress({ currentTime: audio.currentTime, duration: audio.duration });
+            }}
+            crossOrigin="anonymous"
+        />
+    )
+}

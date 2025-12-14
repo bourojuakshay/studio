@@ -7,24 +7,16 @@ import { motion } from 'framer-motion';
 import { SkipBack, SkipForward, Play, Pause, Heart, Volume1, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { MoodDefinition } from '@/app/lib/mood-definitions';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext, usePlaybackState } from '@/context/AppContext';
 import { Slider } from './ui/slider';
 import type { Song } from '@/firebase/firestore';
 
 type MoodHeroProps = {
     definition: MoodDefinition;
-    nowPlayingId: string | null;
-    isPlaying: boolean;
-    currentTrack: Song | null;
     tracks: Song[];
     mood: string;
-    handlePlayPause: () => void;
-    handleNext: () => void;
-    handlePrev: () => void;
     handleLike: (e: React.MouseEvent, songId: string) => void;
     isLiked: (songId: string) => boolean;
-    progress: { currentTime: number; duration: number; };
-    handleSeek: (time: number) => void;
 };
 
 const formatTime = (seconds: number) => {
@@ -36,19 +28,22 @@ const formatTime = (seconds: number) => {
 
 export function MoodHero({
     definition,
-    isPlaying,
-    currentTrack,
     tracks,
     mood,
-    handlePlayPause,
-    handleNext,
-    handlePrev,
     handleLike,
     isLiked,
-    progress,
-    handleSeek,
 }: MoodHeroProps) {
-    const { volume, setVolume } = useAppContext();
+    const { setVolume, volume } = useAppContext();
+    const { 
+      isPlaying,
+      currentTrack, 
+      progress, 
+      handlePlayPause, 
+      handleNext, 
+      handlePrev, 
+      handleSeek
+    } = usePlaybackState();
+    
     const [isVolumeOpen, setIsVolumeOpen] = React.useState(false);
     
     const isPlayingThisMood = currentTrack && tracks.some(t => t.id === currentTrack.id);

@@ -1,28 +1,19 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Heart, SkipBack, Play, Pause, SkipForward, Volume1, Volume2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext, usePlaybackState } from '@/context/AppContext';
 import { Slider } from './ui/slider';
 import type { Song } from '@/firebase/firestore';
 
 type PersistentPlayerProps = {
     track: Song;
-    isPlaying: boolean;
-    handlePlayPause: () => void;
-    handleNext: () => void;
-    handlePrev: () => void;
     handleLike: (e: React.MouseEvent, songId: string) => void;
     isLiked: (songId: string) => boolean;
-    setNowPlayingId: (songId: string | null) => void;
-    progress: { currentTime: number; duration: number };
-    handleSeek: (time: number) => void;
-    volume: number;
-    setVolume: (volume: number) => void;
 };
 
 const formatTime = (seconds: number) => {
@@ -34,18 +25,19 @@ const formatTime = (seconds: number) => {
 
 export function PersistentPlayer({ 
     track, 
-    isPlaying, 
-    handlePlayPause, 
-    handleNext, 
-    handlePrev, 
     handleLike, 
     isLiked, 
-    setNowPlayingId,
-    progress,
-    handleSeek,
-    volume,
-    setVolume
 }: PersistentPlayerProps) {
+    const { volume, setVolume } = useAppContext();
+    const { 
+        isPlaying, 
+        progress, 
+        handlePlayPause, 
+        handleNext, 
+        handlePrev,
+        handleSeek,
+        setNowPlayingId
+    } = usePlaybackState();
     
     if (!track) return null;
 

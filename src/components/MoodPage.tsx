@@ -7,40 +7,27 @@ import type { MoodDefinition } from '@/app/lib/mood-definitions';
 import { MoodHero } from './MoodHero';
 import { PlaylistView } from './PlaylistView';
 import type { Song } from '@/firebase/firestore';
+import { usePlaybackState } from '@/context/AppContext';
 
 type MoodPageProps = {
   mood: string;
   definition?: MoodDefinition;
   tracks: Song[];
-  nowPlayingId: string | null;
-  isPlaying: boolean;
-  currentTrack: Song | null;
-  handlePlayPause: () => void;
-  handleNext: () => void;
-  handlePrev: () => void;
   handleLike: (e: React.MouseEvent, songId: string) => void;
   isLiked: (songId: string) => boolean;
   openPlayer: (songId: string, contextMood: string) => void;
-  progress: { currentTime: number; duration: number; };
-  handleSeek: (time: number) => void;
 };
 
 export function MoodPage({
   mood,
   definition,
   tracks,
-  nowPlayingId,
-  isPlaying,
-  currentTrack,
-  handlePlayPause,
-  handleNext,
-  handlePrev,
   handleLike,
   isLiked,
   openPlayer,
-  progress,
-  handleSeek,
 }: MoodPageProps) {
+
+  const { currentTrack } = usePlaybackState();
 
   // Guard against rendering if the mood definition is missing.
   if (!definition) {
@@ -72,18 +59,10 @@ export function MoodPage({
       <div className="mood-page-layout">
         <MoodHero
           definition={definition}
-          nowPlayingId={nowPlayingId}
-          isPlaying={isPlaying}
-          currentTrack={currentTrack}
           tracks={tracks}
           mood={mood}
-          handlePlayPause={handlePlayPause}
-          handleNext={handleNext}
-          handlePrev={handlePrev}
           handleLike={handleLike}
           isLiked={isLiked}
-          progress={progress}
-          handleSeek={handleSeek}
         />
         <PlaylistView
           tracks={tracks}
