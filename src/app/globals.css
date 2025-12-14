@@ -946,7 +946,7 @@ body.custom-theme-active .sheet-content {
   color: inherit;
   transition: background .2s ease;
 }
-.main-menu-sheet .py-4 a:hover {
+.main-menu-sheet .py_4 a:hover {
   background: var(--glass-bg);
 }
 .main-menu-sheet .sheet-header {

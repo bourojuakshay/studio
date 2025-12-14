@@ -36,109 +36,39 @@ export const dynamic = 'force-dynamic';
 
 const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
   const [isExiting, setIsExiting] = useState(false);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isExiting) {
+        handleExit();
+      }
+    }, 2500); // Auto-exit after 2.5s
+    return () => clearTimeout(timer);
+  }, [isExiting]);
 
   const handleExit = () => {
     setIsExiting(true);
-    // Wait for exit animation to complete before calling parent onExit
-    setTimeout(onExit, 1000); 
+    setTimeout(onExit, 1000); // Duration of the exit animation
   };
-  
-  const containerVariants = {
-    enter: {
-      transition: {
-        staggerChildren: 0.06, // 60ms delay
-      },
-    },
-    exit: {
-      transition: {
-        staggerChildren: 0.06,
-        staggerDirection: -1,
-      },
-    },
-  };
-
-  const letterVariants = {
-    initial: {
-      opacity: 0,
-      y: 20,
-      rotate: -5,
-      scale: 0.95,
-    },
-    enter: {
-      opacity: 1,
-      y: 0,
-      rotate: 0,
-      scale: 1,
-      transition: {
-        duration: 0.35, // 350ms
-        ease: [0.22, 1, 0.36, 1], // cubic-bezier(0.22, 1, 0.36, 1)
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: 20,
-      rotate: 5,
-      scale: 0.95,
-      transition: {
-        duration: 0.35,
-        ease: [0.76, 0, 0.24, 1], // ease-in-out-quart
-      },
-    },
-  };
-  
-  const taglineContainerVariants = {
-    enter: {
-      transition: {
-        delayChildren: 0.3, // Delay start of tagline animation
-        staggerChildren: 0.08,
-      }
-    },
-    exit: {
-      transition: {
-        staggerChildren: 0.08,
-        staggerDirection: -1,
-      }
-    }
-  };
-
-  const taglineWordVariants = {
-    initial: { opacity: 0, y: 10 },
-    enter: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
-    exit: { opacity: 0, y: 10, transition: { duration: 0.3, ease: 'easeIn' } },
-  }
-
-  const logoText = "MoodyO".split("");
-  const taglineText = "MOOD-DRIVEN AUDIO EXPERIENCE".split(" ");
-
 
   return (
-    <motion.div
-      className="intro-screen-v2"
-      onClick={handleExit}
-      initial="initial"
-      animate="enter"
-      exit="exit"
-      variants={{ 
-        enter: { transition: { staggerChildren: 0.1 } }, 
-        exit: { transition: { staggerChildren: 0.1 } } 
-      }}
-      data-state={isExiting ? "exit" : "enter"}
-    >
-      <motion.div className="intro-logo-text" variants={containerVariants}>
-        {logoText.map((letter, index) => (
-          <motion.span key={index} variants={letterVariants}>
-            {letter}
-          </motion.span>
-        ))}
-      </motion.div>
-      <motion.div className="intro-tagline" variants={taglineContainerVariants}>
-        {taglineText.map((word, index) => (
-           <motion.span key={index} variants={taglineWordVariants} style={{ display: 'inline-block', marginRight: '0.5em' }}>
-            {word}
-          </motion.span>
-        ))}
-      </motion.div>
-    </motion.div>
+    <div className={cn("intro-screen", isExiting && "exit-animation")} onClick={handleExit}>
+      <h1 className="sr-only">MoodyO</h1>
+      <svg className="w-48 h-48" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style={{stopColor: 'hsl(var(--primary))', stopOpacity: 1}} />
+            <stop offset="100%" style={{stopColor: 'hsl(var(--secondary))', stopOpacity: 1}} />
+          </linearGradient>
+        </defs>
+        {/* M */}
+        <polyline className="draw" points="10,90 10,10 25,50 40,10 40,90" stroke="url(#grad)" strokeWidth="4" fill="none" />
+        {/* O */}
+        <circle className="draw" cx="55" cy="50" r="15" stroke="url(#grad)" strokeWidth="4" fill="none" />
+        {/* O */}
+        <circle className="draw" cx="55" cy="50" r="15" stroke="url(#grad)" strokeWidth="4" fill="none" transform="rotate(90 55 50)" />
+      </svg>
+    </div>
   );
 };
 
