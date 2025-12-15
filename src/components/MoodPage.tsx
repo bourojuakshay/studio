@@ -64,6 +64,7 @@ export function MoodPage({
           mood={mood}
           handleLike={handleLike}
           isLiked={isLiked}
+          openPlayer={openPlayer}
         />
         <PlaylistView
           tracks={tracks}
