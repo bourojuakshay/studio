@@ -26,6 +26,7 @@ import { setUserSongPreference } from '@/firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
 
 const formatTime = (seconds: number) => {
     if (isNaN(seconds) || seconds < 0) return '0:00';
@@ -139,7 +140,6 @@ export function FloatingPlayer({
                 initial={{ opacity: 0, y: 50, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 50, scale: 0.9 }}
-                whileHover={{ scale: 1.05 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 className={cn('player-card', { 'is-expanded-mode': isExpanded })}
             >
