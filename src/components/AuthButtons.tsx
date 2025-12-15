@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Home, Search, Library, LogOut, LogIn, Plus, Heart } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
 import {
@@ -50,16 +49,16 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
   return (
     <>
       <SidebarHeader>
-        <Link href="/" className="logo hidden group-data-[state=expanded]:block">
+        <div onClick={() => router.push('/')} className="logo hidden group-data-[state=expanded]:block cursor-pointer">
             MoodyO
-        </Link>
+        </div>
         <SidebarTrigger />
       </SidebarHeader>
 
       <SidebarGroup>
         <SidebarMenu>
           <SidebarMenuItem>
-            <MotionSidebarMenuButton
+             <MotionSidebarMenuButton
               isActive={pathname === '/'}
               onClick={() => router.push('/')}
               {...motionProps}
