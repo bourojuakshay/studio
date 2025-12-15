@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { gsap } from 'gsap';
 import { AnimatePresence } from 'framer-motion';
 import { Bell, Search, Library, Plus, Heart, Music } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -171,6 +171,7 @@ export default function Home() {
   
   const [showIntro, setShowIntro] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleExitIntro = () => {
     setShowIntro(false);
@@ -237,6 +238,7 @@ export default function Home() {
     } else {
         setActivePage(id);
         if (id === 'home') {
+          // This ensures that navigating to home always dismisses the intro.
           setShowIntro(false);
         }
     }
@@ -245,6 +247,9 @@ export default function Home() {
   const allMoods = { ...MOOD_DEFS };
   
   const appIsLoading = isUserLoading || songsLoading;
+
+  // Determine current page for main content area
+  const isHomePage = pathname === '/';
 
   const MainContent = () => (
     <>
@@ -296,7 +301,7 @@ export default function Home() {
   return (
     <SidebarProvider>
       <AnimatePresence>
-        {showIntro && <MoodyOLoader onExit={handleExitIntro} showLoaderAnimation={appIsLoading} />}
+        {showIntro && isHomePage && <MoodyOLoader onExit={handleExitIntro} showLoaderAnimation={appIsLoading} />}
       </AnimatePresence>
       
       <ThemeProvider 
@@ -332,11 +337,11 @@ export default function Home() {
         </header>
 
         <main className="app-main">
-          {appIsLoading && activePage === 'home' ? (
+          {appIsLoading && isHomePage ? (
               <div className="flex justify-center items-center h-full">
                 <Loader />
               </div>
-          ) : activePage === 'home' ? (
+          ) : isHomePage ? (
               <MainContent />
           ) : (
              <AnimatePresence>

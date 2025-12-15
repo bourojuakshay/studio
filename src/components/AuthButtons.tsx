@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Home, Search, Library, Heart, LogOut, LogIn, Plus } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
 import {
@@ -24,7 +24,7 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
-  const { activePage } = useAppContext();
+  const pathname = usePathname();
   const { likedSongIds } = useUserPreferences(user?.uid);
   const { songs } = useSongs();
 
@@ -54,13 +54,13 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
       <SidebarGroup>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => handleLocalNavigation('home')} isActive={activePage === 'home'}>
+            <SidebarMenuButton onClick={() => handleLocalNavigation('home')} isActive={pathname === '/'}>
               <Home />
               <span>Home</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => handleLocalNavigation('/search')} isActive={router.pathname === '/search'}>
+            <SidebarMenuButton onClick={() => handleLocalNavigation('/search')} isActive={pathname === '/search'}>
               <Search />
               <span>Search</span>
             </SidebarMenuButton>
@@ -125,5 +125,3 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
     </>
   );
 }
-
-    
