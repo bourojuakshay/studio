@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
@@ -235,6 +236,9 @@ export default function Home() {
         router.push(id);
     } else {
         setActivePage(id);
+        if (id === 'home') {
+          setShowIntro(false);
+        }
     }
   };
   
