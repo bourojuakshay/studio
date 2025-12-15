@@ -40,7 +40,11 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
     return <div className="p-4">Loading...</div>;
   }
 
-  const MotionSidebarMenuItem = motion(SidebarMenuItem);
+  const motionProps = {
+    whileHover: { scale: 1.05 },
+    whileTap: { scale: 0.95 },
+    transition: { type: 'spring', stiffness: 400, damping: 17 }
+  };
 
   return (
     <>
@@ -53,22 +57,26 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
 
       <SidebarGroup>
         <SidebarMenu>
-          <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <SidebarMenuItem>
             <Link href="/" asChild>
-                <SidebarMenuButton isActive={pathname === '/'}>
-                    <Home />
-                    <span className="group-data-[state=collapsed]:hidden">Home</span>
-                </SidebarMenuButton>
+              <SidebarMenuButton isActive={pathname === '/'}>
+                <motion.div {...motionProps} className="flex items-center gap-3">
+                  <Home />
+                  <span className="group-data-[state=collapsed]:hidden">Home</span>
+                </motion.div>
+              </SidebarMenuButton>
             </Link>
-          </MotionSidebarMenuItem>
-          <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <Link href="/search" asChild>
-                <SidebarMenuButton isActive={pathname === '/search'}>
-                    <Search />
-                    <span className="group-data-[state=collapsed]:hidden">Search</span>
-                </SidebarMenuButton>
+              <SidebarMenuButton isActive={pathname === '/search'}>
+                <motion.div {...motionProps} className="flex items-center gap-3">
+                  <Search />
+                  <span className="group-data-[state=collapsed]:hidden">Search</span>
+                </motion.div>
+              </SidebarMenuButton>
             </Link>
-          </MotionSidebarMenuItem>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
 
