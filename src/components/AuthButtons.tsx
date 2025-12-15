@@ -21,6 +21,8 @@ import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { useSongs } from '@/hooks/use-songs';
 import { motion } from 'framer-motion';
 
+const MotionSidebarMenuButton = motion(SidebarMenuButton);
+
 export default function AuthButtons({ onNavigate }: { onNavigate: (page: string) => void }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
@@ -59,18 +61,18 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
         <SidebarMenu>
           <SidebarMenuItem>
             <Link href="/" asChild>
-                <SidebarMenuButton isActive={pathname === '/'} {...motionProps}>
+                <MotionSidebarMenuButton isActive={pathname === '/'} {...motionProps}>
                     <Home />
                     <span className="group-data-[state=collapsed]:hidden">Home</span>
-                </SidebarMenuButton>
+                </MotionSidebarMenuButton>
             </Link>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <Link href="/search" asChild>
-              <SidebarMenuButton isActive={pathname === '/search'} {...motionProps}>
+              <MotionSidebarMenuButton isActive={pathname === '/search'} {...motionProps}>
                   <Search />
                   <span className="group-data-[state=collapsed]:hidden">Search</span>
-              </SidebarMenuButton>
+              </MotionSidebarMenuButton>
             </Link>
           </SidebarMenuItem>
         </SidebarMenu>
