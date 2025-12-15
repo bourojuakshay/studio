@@ -47,7 +47,7 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
   return (
     <>
       <SidebarHeader>
-        <a href="#" onClick={(e) => { e.preventDefault(); handleLocalNavigation('/'); }} className="logo hidden group-data-[state=expanded]:block">
+        <a href="#" onClick={(e) => { e.preventDefault(); handleLocalNavigation('home'); }} className="logo hidden group-data-[state=expanded]:block">
             MoodyO
         </a>
         <SidebarTrigger />
@@ -56,7 +56,7 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
       <SidebarGroup>
         <SidebarMenu>
           <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <SidebarMenuButton onClick={() => handleLocalNavigation('/')} isActive={pathname === '/'}>
+            <SidebarMenuButton onClick={() => handleLocalNavigation('home')} isActive={pathname === '/'}>
               <Home />
               <span>Home</span>
             </SidebarMenuButton>
