@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -53,7 +54,7 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
       <SidebarGroup>
         <SidebarMenu>
           <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-             <Link href="/" legacyBehavior passHref>
+            <Link href="/" passHref>
                 <SidebarMenuButton asChild isActive={pathname === '/'}>
                   <a>
                     <Home />
@@ -63,7 +64,7 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
             </Link>
           </MotionSidebarMenuItem>
           <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link href="/search" legacyBehavior passHref>
+            <Link href="/search" passHref>
               <SidebarMenuButton asChild isActive={pathname === '/search'}>
                 <a>
                   <Search />
