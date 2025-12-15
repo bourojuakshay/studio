@@ -45,7 +45,7 @@ const MoodyOLoader = ({ onExit, showLoaderAnimation }: { onExit: () => void, sho
 
   useEffect(() => {
     // Only run animation if it hasn't run before
-    if (!animationRef.current) {
+    if (!animationRef.current && !showLoaderAnimation) {
         const ctx = gsap.context(() => {
             const letters = gsap.utils.toArray('.intro-logo-gsap span');
             const tagline = gsap.utils.toArray('.intro-tagline');
