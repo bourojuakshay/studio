@@ -39,56 +39,68 @@ import Loader from '@/components/Loader';
 
 export const dynamic = 'force-dynamic';
 
-const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
+const MoodyOLoader = ({ onExit, showLoaderAnimation }: { onExit: () => void, showLoaderAnimation: boolean }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const letters = gsap.utils.toArray('.intro-logo-gsap span');
-      const tagline = gsap.utils.toArray('.intro-tagline');
-      
-      gsap.set(letters, {
-        opacity: 0,
-        y: 18,
-        scale: 0.95,
-        filter: 'blur(2px)',
-      });
-      gsap.set(tagline, { opacity: 0 });
+    // Only run animation if it hasn't run before
+    if (!animationRef.current) {
+        const ctx = gsap.context(() => {
+            const letters = gsap.utils.toArray('.intro-logo-gsap span');
+            const tagline = gsap.utils.toArray('.intro-tagline');
+            
+            gsap.set(letters, {
+                opacity: 0,
+                y: 18,
+                scale: 0.95,
+                filter: 'blur(2px)',
+            });
+            gsap.set(tagline, { opacity: 0 });
 
-      const tl = gsap.timeline({
-        onComplete: () => {
-          if (containerRef.current) {
-            containerRef.current.style.cursor = 'pointer';
-          }
-        },
-      });
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    if (containerRef.current) {
+                        // Don't add click handler if we are just showing the loader
+                        if (!showLoaderAnimation) {
+                             containerRef.current.style.cursor = 'pointer';
+                        }
+                    }
+                },
+            });
 
-      tl.to(letters, {
-          opacity: 1,
-          y: -5,
-          scale: 1,
-          filter: 'blur(0px)',
-          duration: 0.35,
-          ease: 'power3.out',
-          stagger: 0.06,
-      })
-      .to(letters, {
-          y: 0,
-          duration: 0.15,
-          ease: 'power2.in',
-      }, "-=0.2")
-      .to(tagline, {
-        opacity: 1,
-        duration: 0.8,
-        ease: 'power2.out',
-      }, '-=0.2');
+            tl.to(letters, {
+                opacity: 1,
+                y: -5,
+                scale: 1,
+                filter: 'blur(0px)',
+                duration: 0.35,
+                ease: 'power3.out',
+                stagger: 0.06,
+            })
+            .to(letters, {
+                y: 0,
+                duration: 0.15,
+                ease: 'power2.in',
+            }, "-=0.2")
+            .to(tagline, {
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power2.out',
+            }, '-=0.2');
 
-    }, containerRef);
-    
-    return () => ctx.revert();
-  }, []);
+            animationRef.current = tl;
+
+        }, containerRef);
+        
+        return () => ctx.revert();
+    }
+  }, [showLoaderAnimation]);
 
   const handleExit = () => {
+    // If it's just the loader, don't allow exit by click
+    if (showLoaderAnimation) return;
+
     gsap.to(containerRef.current, {
       opacity: 0,
       duration: 0.5,
@@ -104,14 +116,22 @@ const MoodyOLoader = ({ onExit }: { onExit: () => void }) => {
       ref={containerRef}
     >
         <div className="intro-content-wrapper">
-             <h1 className="intro-logo-gsap">
-                {'MoodyO'.split('').map((char, index) => (
-                    <span key={index}>{char}</span>
-                ))}
-            </h1>
-            <div className="intro-tagline-container">
-                <div className="intro-tagline">mood based audio</div>
-            </div>
+             <AnimatePresence>
+                {showLoaderAnimation ? (
+                    <Loader />
+                ) : (
+                    <>
+                        <h1 className="intro-logo-gsap">
+                            {'MoodyO'.split('').map((char, index) => (
+                                <span key={index}>{char}</span>
+                            ))}
+                        </h1>
+                        <div className="intro-tagline-container">
+                            <div className="intro-tagline">mood based audio</div>
+                        </div>
+                    </>
+                )}
+             </AnimatePresence>
         </div>
     </div>
   );
@@ -225,14 +245,6 @@ export default function Home() {
   
   const appIsLoading = isUserLoading || songsLoading;
 
-  if (appIsLoading && !showIntro) {
-    return (
-      <div className="loader-fullscreen">
-        <Loader />
-      </div>
-    );
-  }
-
   const MainContent = () => (
     <>
         <div className="home-section-grid">
@@ -283,7 +295,7 @@ export default function Home() {
   return (
     <SidebarProvider>
       <AnimatePresence>
-        {showIntro && <MoodyOLoader onExit={handleExitIntro} />}
+        {showIntro && <MoodyOLoader onExit={handleExitIntro} showLoaderAnimation={appIsLoading} />}
       </AnimatePresence>
       
       <ThemeProvider 
@@ -325,7 +337,7 @@ export default function Home() {
                 {activePage !== 'home' && allMoods[activePage] && (
                    <MoodPage
                       mood={activePage}
-                      definition={allMoods[activeage]}
+                      definition={allMoods[activePage]}
                       tracks={tracksByMood[activePage]}
                       handleLike={handleLike}
                       isLiked={isLiked}

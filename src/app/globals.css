@@ -102,10 +102,10 @@ body{
 }
 
 .wave {
-  width: 6px;
-  height: 50px;
-  background: linear-gradient(45deg, cyan, #fff);
-  margin: 10px;
+  width: 4px;
+  height: 30px;
+  background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--primary-foreground)));
+  margin: 8px;
   animation: wave 1s linear infinite;
   border-radius: 20px;
 }
