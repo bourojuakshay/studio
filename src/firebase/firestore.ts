@@ -171,38 +171,60 @@ export function getUserSongPreferences(
 }
 
 export async function searchSongs(firestore: Firestore, searchTerm: string): Promise<Song[]> {
-    const searchLower = searchTerm.toLowerCase();
-    if (!searchLower) return [];
+    const term = searchTerm.trim();
+    if (!term) return [];
     
     const songsCollection = collection(firestore, 'songs');
-    // Firestore does not support case-insensitive querying directly.
-    // A common workaround is to store a lowercased version of the fields.
-    // Since we don't have that, we'll do a prefix match which is case-sensitive.
-    // This will match 'SearchTerm' but not 'searchterm'.
-    // For a real-world app, you'd use a dedicated search service like Algolia/Elasticsearch
-    // or store lowercase fields.
-    const titleQuery = query(songsCollection, where('title', '>=', searchTerm), where('title', '<=', searchTerm + '\uf8ff'));
-    const artistQuery = query(songsCollection, where('artist', '>=', searchTerm), where('artist', '<=', searchTerm + '\uf8ff'));
+    
+    // Firestore doesn't support native case-insensitive search.
+    // This approach queries for different capitalizations. It's not exhaustive but works for many cases.
+    const capitalizedTerm = term.charAt(0).toUpperCase() + term.slice(1);
+
+    const titleQuery = query(songsCollection, where('title', '>=', term), where('title', '<=', term + '\uf8ff'));
+    const artistQuery = query(songsCollection, where('artist', '>=', term), where('artist', '<=', term + '\uf8ff'));
+    
+    const capitalizedTitleQuery = query(songsCollection, where('title', '>=', capitalizedTerm), where('title', '<=', capitalizedTerm + '\uf8ff'));
+    const capitalizedArtistQuery = query(songsCollection, where('artist', '>=', capitalizedTerm), where('artist', '<=', capitalizedTerm + '\uf8ff'));
 
     try {
-        const [titleSnapshot, artistSnapshot] = await Promise.all([
+        const [
+            titleSnapshot, 
+            artistSnapshot, 
+            capTitleSnapshot, 
+            capArtistSnapshot
+        ] = await Promise.all([
             getDocs(titleQuery),
-            getDocs(artistQuery)
+            getDocs(artistQuery),
+            getDocs(capitalizedTitleQuery),
+            getDocs(capitalizedArtistQuery)
         ]);
 
-        const results: { [key: string]: Song } = {};
-        titleSnapshot.forEach(doc => {
-            results[doc.id] = { id: doc.id, ...doc.data() } as Song;
-        });
-        artistSnapshot.forEach(doc => {
-            // This might overwrite a title match if the same song matches both artist and title, which is fine.
-            results[doc.id] = { id: doc.id, ...doc.data() } as Song;
-        });
+        const results: Map<string, Song> = new Map();
+        
+        const processSnapshot = (snapshot: any) => {
+            snapshot.forEach((doc: any) => {
+                if (!results.has(doc.id)) {
+                    results.set(doc.id, { id: doc.id, ...doc.data() } as Song);
+                }
+            });
+        };
 
-        return Object.values(results);
+        processSnapshot(titleSnapshot);
+        processSnapshot(artistSnapshot);
+        processSnapshot(capTitleSnapshot);
+        processSnapshot(capArtistSnapshot);
+        
+        // Final client-side filter for more accuracy, since Firestore prefix queries can be broad.
+        const finalResults = Array.from(results.values()).filter(song => 
+            song.title.toLowerCase().includes(term.toLowerCase()) ||
+            song.artist.toLowerCase().includes(term.toLowerCase())
+        );
+
+        return finalResults;
+
     } catch (error) {
         console.error("Error searching songs: ", error);
-        if (error instanceof Error && error.message.includes('permission-denied')) {
+        if (error instanceof Error && (error as any).code === 'permission-denied') {
             errorEmitter.emit('permission-error', new FirestorePermissionError({
                 path: songsCollection.path,
                 operation: 'list'

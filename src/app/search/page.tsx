@@ -10,7 +10,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useAppContext } from '@/context/AppContext';
 import { useDebounce } from '@/hooks/use-debounce';
-import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { Sidebar, SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import AuthButtons from '@/components/AuthButtons';
 import Loader from '@/components/Loader';
 
@@ -48,6 +48,7 @@ export default function SearchPage() {
     const playSong = (song: Song) => {
         if (!song.id) return;
         setNowPlayingId(song.id); 
+        // Set active page to the song's primary mood to load the correct theme
         setActivePage(song.mood);
         router.push('/');
     };
@@ -73,10 +74,11 @@ export default function SearchPage() {
                     <div className="relative w-full max-w-lg">
                         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                            placeholder="Search for songs or artists..."
+                            placeholder="What do you want to play?"
                             className="pl-10"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            autoFocus
                         />
                     </div>
                 </header>
@@ -87,10 +89,8 @@ export default function SearchPage() {
                             <Loader />
                         </div>
                     )}
-                    {!isLoading && debouncedSearchTerm.length === 0 && (
-                        <div className="flex justify-center items-center h-64">
-                            <p className="text-muted-foreground">Search for your favorite songs and artists...</p>
-                        </div>
+                    {!isLoading && debouncedSearchTerm.length > 0 && results.length === 0 && (
+                         <p className="text-center text-muted-foreground mt-8">No results found for &quot;{debouncedSearchTerm}&quot;.</p>
                     )}
                     {!isLoading && results.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
@@ -110,7 +110,11 @@ export default function SearchPage() {
                             ))}
                         </div>
                     ) : (
-                       !isLoading && debouncedSearchTerm && <p className="text-center text-muted-foreground mt-8">No results found for &quot;{debouncedSearchTerm}&quot;.</p>
+                       !isLoading && !debouncedSearchTerm && (
+                        <div className="flex justify-center items-center h-64">
+                            <p className="text-muted-foreground">Find your favorite songs by title or artist.</p>
+                        </div>
+                       )
                     )}
                 </main>
             </SidebarInset>
