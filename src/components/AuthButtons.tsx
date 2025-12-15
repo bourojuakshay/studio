@@ -59,8 +59,8 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
         <SidebarMenu>
           <SidebarMenuItem>
             <Link href="/" asChild>
-              <SidebarMenuButton isActive={pathname === '/'}>
-                <motion.div {...motionProps} className="flex items-center gap-3">
+              <SidebarMenuButton isActive={pathname === '/'} asChild>
+                <motion.div {...motionProps}>
                   <Home />
                   <span className="group-data-[state=collapsed]:hidden">Home</span>
                 </motion.div>
@@ -69,8 +69,8 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
           </SidebarMenuItem>
           <SidebarMenuItem>
             <Link href="/search" asChild>
-              <SidebarMenuButton isActive={pathname === '/search'}>
-                <motion.div {...motionProps} className="flex items-center gap-3">
+              <SidebarMenuButton isActive={pathname === '/search'} asChild>
+                <motion.div {...motionProps}>
                   <Search />
                   <span className="group-data-[state=collapsed]:hidden">Search</span>
                 </motion.div>
