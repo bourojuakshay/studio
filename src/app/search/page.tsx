@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -50,16 +49,14 @@ export default function SearchPage() {
         if (!song.id) return;
         setNowPlayingId(song.id); 
         setActivePage(song.mood);
+        router.push('/');
     };
-
+    
     const handleNavigate = (page: string) => {
         if (page.startsWith('/')) {
             router.push(page);
         } else {
             setActivePage(page);
-             // If navigating to a mood, we might want to go to the home page
-            // to show the context, but for now we'll just switch the active page.
-            // A redirect to home might be better ux.
             router.push('/');
         }
     };
@@ -101,6 +98,9 @@ export default function SearchPage() {
                                 <div key={song.id} className="album-card" onClick={() => playSong(song)}>
                                     <div className="album-card-image">
                                         <Image src={song.cover} alt={song.title} width={150} height={150} className="rounded-md mb-2 aspect-square object-cover" />
+                                        <Button variant="default" size="icon" className="play-button">
+                                          <Music size={20} />
+                                        </Button>
                                     </div>
                                     <div className="album-card-info">
                                         <p className="album-card-title">{song.title}</p>
@@ -117,5 +117,3 @@ export default function SearchPage() {
         </SidebarProvider>
     );
 }
-
-    

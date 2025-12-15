@@ -1,4 +1,3 @@
-
 'use client';
 
 import { collection, addDoc, updateDoc, deleteDoc, doc, type Firestore, query, onSnapshot, where, getDocs, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
@@ -172,9 +171,16 @@ export function getUserSongPreferences(
 }
 
 export async function searchSongs(firestore: Firestore, searchTerm: string): Promise<Song[]> {
-    if (!searchTerm) return [];
+    const searchLower = searchTerm.toLowerCase();
+    if (!searchLower) return [];
     
     const songsCollection = collection(firestore, 'songs');
+    // Firestore does not support case-insensitive querying directly.
+    // A common workaround is to store a lowercased version of the fields.
+    // Since we don't have that, we'll do a prefix match which is case-sensitive.
+    // This will match 'SearchTerm' but not 'searchterm'.
+    // For a real-world app, you'd use a dedicated search service like Algolia/Elasticsearch
+    // or store lowercase fields.
     const titleQuery = query(songsCollection, where('title', '>=', searchTerm), where('title', '<=', searchTerm + '\uf8ff'));
     const artistQuery = query(songsCollection, where('artist', '>=', searchTerm), where('artist', '<=', searchTerm + '\uf8ff'));
 
@@ -189,6 +195,7 @@ export async function searchSongs(firestore: Firestore, searchTerm: string): Pro
             results[doc.id] = { id: doc.id, ...doc.data() } as Song;
         });
         artistSnapshot.forEach(doc => {
+            // This might overwrite a title match if the same song matches both artist and title, which is fine.
             results[doc.id] = { id: doc.id, ...doc.data() } as Song;
         });
 

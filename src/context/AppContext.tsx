@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { ReactNode, useEffect, useRef } from 'react';
@@ -15,6 +14,7 @@ interface AppState {
     volume: number;
     setVolume: (volume: number) => void;
     nowPlayingId: string | null;
+    setNowPlayingId: (songId: string | null) => void; // Moved from PlaybackState
     currentTrack: Song | null;
 }
 
@@ -34,6 +34,29 @@ export const useAppContext = create<AppState>((set, get) => ({
     },
     nowPlayingId: null,
     currentTrack: null,
+    setNowPlayingId: (songId) => {
+        const { playlist, audioRef } = get();
+        const track = playlist.find(t => t.id === songId) || null;
+        
+        set({ nowPlayingId: songId, currentTrack: track });
+        usePlaybackState.getState().setTrack(track); // Inform playback state
+
+        const audio = audioRef.current;
+        if (audio) {
+            if (track) {
+                if (audio.src !== track.src) {
+                    audio.src = track.src;
+                    audio.load();
+                }
+                audio.play().catch(e => console.error("Audio play error:", e));
+                usePlaybackState.setState({ isPlaying: true });
+            } else {
+                audio.pause();
+                usePlaybackState.setState({ isPlaying: false });
+                audio.src = '';
+            }
+        }
+    },
 }));
 
 
@@ -41,9 +64,10 @@ export const useAppContext = create<AppState>((set, get) => ({
 interface PlaybackState {
     isPlaying: boolean;
     progress: { currentTime: number; duration: number };
+    currentTrack: Song | null; // Keep a reference here for playback logic
     
-    // Actions - These can be called directly without subscribing to the component
-    setNowPlayingId: (songId: string | null) => void;
+    // Actions
+    setTrack: (track: Song | null) => void;
     setProgress: (progress: { currentTime: number; duration: number }) => void;
     handlePlayPause: () => void;
     handleNext: () => void;
@@ -54,34 +78,13 @@ interface PlaybackState {
 export const usePlaybackState = create<PlaybackState>((set, get) => ({
     isPlaying: false,
     progress: { currentTime: 0, duration: 0 },
+    currentTrack: null,
 
-    setNowPlayingId: (songId) => {
-        const { playlist, audioRef } = useAppContext.getState();
-        const track = playlist.find(t => t.id === songId) || null;
-        
-        useAppContext.setState({ nowPlayingId: songId, currentTrack: track });
-
-        const audio = audioRef.current;
-        if (audio) {
-            if (track) {
-                if (audio.src !== track.src) {
-                    audio.src = track.src;
-                    audio.load();
-                }
-                // Always play the new track
-                audio.play().catch(e => console.error("Audio play error:", e));
-                set({ isPlaying: true });
-            } else {
-                audio.pause();
-                set({ isPlaying: false });
-                audio.src = '';
-            }
-        }
-    },
+    setTrack: (track) => set({ currentTrack: track }),
     setProgress: (progress) => set({ progress }),
     
     handlePlayPause: () => {
-        const { currentTrack } = useAppContext.getState();
+        const { currentTrack } = get();
         if (currentTrack) {
             const audio = useAppContext.getState().audioRef.current;
             if (!audio) return;
@@ -96,20 +99,20 @@ export const usePlaybackState = create<PlaybackState>((set, get) => ({
         }
     },
     handleNext: () => {
-        const { playlist, nowPlayingId } = useAppContext.getState();
+        const { playlist, nowPlayingId, setNowPlayingId } = useAppContext.getState();
         if (!nowPlayingId || playlist.length === 0) return;
         const currentIndex = playlist.findIndex(t => t.id === nowPlayingId);
         if (currentIndex === -1) return;
         const nextIndex = (currentIndex + 1) % playlist.length;
-        get().setNowPlayingId(playlist[nextIndex].id!);
+        setNowPlayingId(playlist[nextIndex].id!);
     },
     handlePrev: () => {
-        const { playlist, nowPlayingId } = useAppContext.getState();
+        const { playlist, nowPlayingId, setNowPlayingId } = useAppContext.getState();
         if (!nowPlayingId || playlist.length === 0) return;
         const currentIndex = playlist.findIndex(t => t.id === nowPlayingId);
         if (currentIndex === -1) return;
         const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-        get().setNowPlayingId(playlist[prevIndex].id!);
+        setNowPlayingId(playlist[prevIndex].id!);
     },
     handleSeek: (time: number) => {
         const { audioRef } = useAppContext.getState();
@@ -132,11 +135,11 @@ export const AudioPlayer = () => {
             onPause={() => setIsPlaying(false)}
             onTimeUpdate={() => {
                 const audio = audioRef.current;
-                if(audio) setProgress({ currentTime: audio.currentTime, duration: audio.duration });
+                if(audio) setProgress({ currentTime: audio.currentTime, duration: audio.duration || 0 });
             }}
             onLoadedData={() => {
                 const audio = audioRef.current;
-                if(audio) setProgress({ currentTime: audio.currentTime, duration: audio.duration });
+                if(audio) setProgress({ currentTime: audio.currentTime, duration: audio.duration || 0 });
             }}
             crossOrigin="anonymous"
         />

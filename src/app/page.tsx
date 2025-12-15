@@ -1,11 +1,10 @@
-
 'use client';
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { AnimatePresence } from 'framer-motion';
-import { Bell, Search, Library, Plus, Heart } from 'lucide-react';
+import { Bell, Search, Library, Plus, Heart, Music } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -33,7 +32,7 @@ import {
 } from '@/components/ui/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAppContext, usePlaybackState } from '@/context/AppContext';
+import { useAppContext } from '@/context/AppContext';
 import AuthButtons from '@/components/AuthButtons';
 import Loader from '@/components/Loader';
 
@@ -44,8 +43,13 @@ const MoodyOLoader = ({ onExit, showLoaderAnimation }: { onExit: () => void, sho
   const animationRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
+    if (showLoaderAnimation) {
+        // Just show the loader, no animation needed
+        return;
+    }
+
     // Only run animation if it hasn't run before
-    if (!animationRef.current && !showLoaderAnimation) {
+    if (!animationRef.current) {
         const ctx = gsap.context(() => {
             const letters = gsap.utils.toArray('.intro-logo-gsap span');
             const tagline = gsap.utils.toArray('.intro-tagline');
@@ -61,10 +65,7 @@ const MoodyOLoader = ({ onExit, showLoaderAnimation }: { onExit: () => void, sho
             const tl = gsap.timeline({
                 onComplete: () => {
                     if (containerRef.current) {
-                        // Don't add click handler if we are just showing the loader
-                        if (!showLoaderAnimation) {
-                             containerRef.current.style.cursor = 'pointer';
-                        }
+                        containerRef.current.style.cursor = 'pointer';
                     }
                 },
             });
@@ -141,6 +142,9 @@ const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => 
     <div className="album-card" onClick={onClick}>
         <div className="album-card-image">
             <Image src={track.cover} alt={track.title} width={150} height={150} />
+            <Button variant="default" size="icon" className="play-button">
+              <Music size={20} />
+            </Button>
         </div>
         <div className="album-card-info">
             <p className="album-card-title">{track.title}</p>
@@ -151,13 +155,8 @@ const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => 
 
 
 export default function Home() {
-  const { activePage, setActivePage, setPlaylist } = useAppContext();
-  const { nowPlayingId } = useAppContext(); // Get nowPlayingId from low-frequency store
+  const { activePage, setActivePage, setPlaylist, nowPlayingId, setNowPlayingId, currentTrack } = useAppContext();
   
-  // Directly call actions from the store without subscribing the whole component
-  const { setNowPlayingId } = usePlaybackState.getState();
-
-
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -203,13 +202,11 @@ export default function Home() {
   }, [selectedEmotion, tracksByMood]);
 
   const openPlayer = (songId: string, contextMood: string) => {
-    if (contextMood === 'home') {
-      setActivePage('home');
-      setNowPlayingId(songId);
-    } else {
-      setActivePage(contextMood);
-      setNowPlayingId(songId);
+    // Navigating to a mood page is handled by setActivePage
+    if(contextMood !== 'home') {
+        setActivePage(contextMood);
     }
+    setNowPlayingId(songId);
   };
 
   const isLiked = (songId: string) => {
@@ -304,6 +301,7 @@ export default function Home() {
         tracks={tracksByMood}
         nowPlayingId={nowPlayingId}
         allMoods={allMoods}
+        currentTrack={currentTrack}
       />
       
       <Sidebar side="left">
@@ -316,7 +314,7 @@ export default function Home() {
             <SidebarTrigger className="md:hidden" />
             <div className="relative w-full max-w-md hidden md:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="What do you want to play?" className="pl-10" />
+              <Input placeholder="What do you want to play?" className="pl-10" onFocus={() => router.push('/search')} />
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -330,7 +328,11 @@ export default function Home() {
         </header>
 
         <main className="app-main">
-          {activePage === 'home' ? (
+          {appIsLoading && activePage === 'home' ? (
+              <div className="flex justify-center items-center h-full">
+                <Loader />
+              </div>
+          ) : activePage === 'home' ? (
               <MainContent />
           ) : (
              <AnimatePresence>
