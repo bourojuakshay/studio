@@ -54,20 +54,20 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
       <SidebarGroup>
         <SidebarMenu>
           <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <SidebarMenuButton asChild isActive={pathname === '/'}>
-                <Link href="/">
+            <Link href="/" asChild>
+                <SidebarMenuButton isActive={pathname === '/'}>
                     <Home />
                     <span className="group-data-[state=collapsed]:hidden">Home</span>
-                </Link>
-            </SidebarMenuButton>
+                </SidebarMenuButton>
+            </Link>
           </MotionSidebarMenuItem>
           <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <SidebarMenuButton asChild isActive={pathname === '/search'}>
-                <Link href="/search">
+            <Link href="/search" asChild>
+                <SidebarMenuButton isActive={pathname === '/search'}>
                     <Search />
                     <span className="group-data-[state=collapsed]:hidden">Search</span>
-                </Link>
-            </SidebarMenuButton>
+                </SidebarMenuButton>
+            </Link>
           </MotionSidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
