@@ -59,21 +59,17 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
         <SidebarMenu>
           <SidebarMenuItem>
             <Link href="/" asChild>
-              <SidebarMenuButton isActive={pathname === '/'} asChild>
-                <motion.div {...motionProps}>
-                  <Home />
-                  <span className="group-data-[state=collapsed]:hidden">Home</span>
-                </motion.div>
-              </SidebarMenuButton>
+                <SidebarMenuButton isActive={pathname === '/'} {...motionProps}>
+                    <Home />
+                    <span className="group-data-[state=collapsed]:hidden">Home</span>
+                </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <Link href="/search" asChild>
-              <SidebarMenuButton isActive={pathname === '/search'} asChild>
-                <motion.div {...motionProps}>
+              <SidebarMenuButton isActive={pathname === '/search'} {...motionProps}>
                   <Search />
                   <span className="group-data-[state=collapsed]:hidden">Search</span>
-                </motion.div>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
