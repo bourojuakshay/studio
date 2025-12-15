@@ -17,6 +17,7 @@ type MoodHeroProps = {
     mood: string;
     handleLike: (e: React.MouseEvent, songId: string) => void;
     isLiked: (songId: string) => boolean;
+    openPlayer: (songId: string, mood: string) => void;
 };
 
 const formatTime = (seconds: number) => {
@@ -32,6 +33,7 @@ export function MoodHero({
     mood,
     handleLike,
     isLiked,
+    openPlayer
 }: MoodHeroProps) {
     const { setVolume, volume } = useAppContext();
     const { 
@@ -57,6 +59,14 @@ export function MoodHero({
     const onProgressBarChange = (value: number[]) => {
       if (!progress.duration) return;
       handleSeek(value[0]);
+    };
+    
+    const handleHeroPlayPause = () => {
+        if (isPlayingThisMood) {
+            handlePlayPause();
+        } else if (displayTrack) {
+            openPlayer(displayTrack.id!, mood);
+        }
     };
 
     return (
@@ -91,7 +101,7 @@ export function MoodHero({
                             <div className="player-controls">
                                 <div className="main-controls">
                                     <button onClick={handlePrev} className="control-btn"><SkipBack size={20} /></button>
-                                    <button onClick={handlePlayPause} className="play-main-btn">
+                                    <button onClick={handleHeroPlayPause} className="play-main-btn">
                                         {(isPlaying && isPlayingThisMood) ? <Pause size={24} /> : <Play size={24} />}
                                     </button>
                                     <button onClick={handleNext} className="control-btn"><SkipForward size={20}/></button>
