@@ -4,7 +4,7 @@
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Search, Library, Heart, LogOut, LogIn, Plus } from 'lucide-react';
+import { Home, Search, Library, LogOut, LogIn, Plus } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
 import {
   SidebarMenu,
