@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
@@ -45,11 +44,9 @@ const MoodyOLoader = ({ onExit, showLoaderAnimation }: { onExit: () => void, sho
 
   useEffect(() => {
     if (showLoaderAnimation) {
-        // Just show the loader, no animation needed
         return;
     }
 
-    // Only run animation if it hasn't run before
     if (!animationRef.current) {
         const ctx = gsap.context(() => {
             const letters = gsap.utils.toArray('.intro-logo-gsap span');
@@ -100,7 +97,6 @@ const MoodyOLoader = ({ onExit, showLoaderAnimation }: { onExit: () => void, sho
   }, [showLoaderAnimation]);
 
   const handleExit = () => {
-    // If it's just the loader, don't allow exit by click
     if (showLoaderAnimation) return;
 
     gsap.to(containerRef.current, {
@@ -156,7 +152,7 @@ const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => 
 
 
 export default function Home() {
-  const { activePage, setActivePage, setPlaylist, nowPlayingId, setNowPlayingId, currentTrack } = useAppContext();
+  const { setPlaylist, setNowPlayingId, currentTrack, setActivePage, activePage } = useAppContext();
   
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -173,9 +169,9 @@ export default function Home() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleExitIntro = () => {
+  const handleExitIntro = useCallback(() => {
     setShowIntro(false);
-  };
+  }, []);
 
   useEffect(() => {
     if (firestoreSongs) {
@@ -203,13 +199,13 @@ export default function Home() {
     }
   }, [selectedEmotion, tracksByMood]);
 
-  const openPlayer = (songId: string, contextMood: string) => {
-    // Navigating to a mood page is handled by setActivePage
-    if(contextMood !== 'home') {
-        setActivePage(contextMood);
-    }
+  const openPlayer = (songId: string) => {
     setNowPlayingId(songId);
   };
+  
+  const handleMoodCardClick = (moodKey: string) => {
+      router.push(`/${moodKey}`);
+  }
 
   const isLiked = (songId: string) => {
     if (!songId) return false;
@@ -236,10 +232,12 @@ export default function Home() {
     if (id.startsWith('/')) {
         router.push(id);
     } else {
-        setActivePage(id);
+        // This is for legacy navigation from other components, can be phased out.
         if (id === 'home') {
-          // This ensures that navigating to home always dismisses the intro.
-          setShowIntro(false);
+            setShowIntro(false);
+            router.push('/');
+        } else {
+            router.push(`/${id}`);
         }
     }
   };
@@ -250,6 +248,20 @@ export default function Home() {
 
   // Determine current page for main content area
   const isHomePage = pathname === '/';
+  const currentMood = Object.keys(allMoods).find(m => `/${m}` === pathname);
+  
+  useEffect(() => {
+      // Logic to set active page in context for theme provider
+      if(isHomePage) {
+        setActivePage('home');
+      } else if (currentMood) {
+        setActivePage(currentMood);
+      }
+      // If we navigate away from home, we shouldn't see the intro again on this session.
+      if (!isHomePage) {
+        setShowIntro(false);
+      }
+  }, [pathname, isHomePage, currentMood, setActivePage]);
 
   const MainContent = () => (
     <>
@@ -257,7 +269,7 @@ export default function Home() {
             <h2 className="section-title">Recently Played</h2>
             <div className="album-grid">
                 {(tracksByMood.all || []).slice(0, 6).map((track, i) => (
-                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, 'home')} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!)} />
                 ))}
             </div>
         </div>
@@ -265,7 +277,7 @@ export default function Home() {
             <h2 className="section-title">Recommended Stations</h2>
              <div className="album-grid">
                 {(tracksByMood.all || []).slice(6, 12).map((track, i) => (
-                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, 'home')} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!)} />
                 ))}
             </div>
         </div>
@@ -279,7 +291,7 @@ export default function Home() {
                 <div 
                   key={key} 
                   className={cn("emotion-card", { active: selectedEmotion === key })}
-                  onClick={() => setActivePage(key)}
+                  onClick={() => handleMoodCardClick(key)}
                 >
                   <span>{emoji}</span>
                   <p>{title}</p>
@@ -291,7 +303,7 @@ export default function Home() {
             <h2 className="section-title">{selectedEmotion === 'all' ? 'Popular Playlists' : `For Your ${selectedEmotion.charAt(0).toUpperCase() + selectedEmotion.slice(1)}`}</h2>
             <div className="album-grid">
                 {filteredTracks.slice(0, 12).map((track, i) => (
-                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, 'home')} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!)} />
                 ))}
             </div>
         </div>
@@ -308,7 +320,7 @@ export default function Home() {
         activePage={activePage} 
         customMoods={{}}
         tracks={tracksByMood}
-        nowPlayingId={nowPlayingId}
+        nowPlayingId={null} // nowPlayingId from context is sufficient
         allMoods={allMoods}
         currentTrack={currentTrack}
       />
@@ -337,26 +349,24 @@ export default function Home() {
         </header>
 
         <main className="app-main">
-          {appIsLoading && isHomePage ? (
+          {appIsLoading && isHomePage && !showIntro ? (
               <div className="flex justify-center items-center h-full">
                 <Loader />
               </div>
           ) : isHomePage ? (
               <MainContent />
-          ) : (
+          ) : currentMood ? (
              <AnimatePresence>
-                {activePage !== 'home' && allMoods[activePage] && (
-                   <MoodPage
-                      mood={activePage}
-                      definition={allMoods[activePage]}
-                      tracks={tracksByMood[activePage]}
-                      handleLike={handleLike}
-                      isLiked={isLiked}
-                      openPlayer={openPlayer}
-                   />
-                )}
+               <MoodPage
+                  mood={currentMood}
+                  definition={allMoods[currentMood]}
+                  tracks={tracksByMood[currentMood]}
+                  handleLike={handleLike}
+                  isLiked={isLiked}
+                  openPlayer={openPlayer}
+               />
               </AnimatePresence>
-          )}
+          ) : null}
         </main>
         
         <footer className="app-footer">

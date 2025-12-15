@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -19,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { useSongs } from '@/hooks/use-songs';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function AuthButtons({ onNavigate }: { onNavigate: (page: string) => void }) {
   const { user, isUserLoading } = useUser();
@@ -30,12 +30,9 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
 
   const likedSongs = songs.filter(song => likedSongIds.includes(song.id!));
 
-  const handleLocalNavigation = (path: string) => {
-    if (path.startsWith('/')) {
-        router.push(path);
-    } else {
-        onNavigate(path);
-    }
+  const handleSignOut = async () => {
+    await auth.signOut();
+    router.push('/login');
   };
   
   if (isUserLoading) {
@@ -47,25 +44,33 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
   return (
     <>
       <SidebarHeader>
-        <a href="#" onClick={(e) => { e.preventDefault(); handleLocalNavigation('home'); }} className="logo hidden group-data-[state=expanded]:block">
+        <Link href="/" className="logo hidden group-data-[state=expanded]:block">
             MoodyO
-        </a>
+        </Link>
         <SidebarTrigger />
       </SidebarHeader>
 
       <SidebarGroup>
         <SidebarMenu>
           <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <SidebarMenuButton onClick={() => handleLocalNavigation('home')} isActive={pathname === '/'}>
-              <Home />
-              <span>Home</span>
-            </SidebarMenuButton>
+             <Link href="/" legacyBehavior passHref>
+                <SidebarMenuButton asChild isActive={pathname === '/'}>
+                  <a>
+                    <Home />
+                    <span>Home</span>
+                  </a>
+                </SidebarMenuButton>
+            </Link>
           </MotionSidebarMenuItem>
           <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <SidebarMenuButton onClick={() => handleLocalNavigation('/search')} isActive={pathname === '/search'}>
-              <Search />
-              <span>Search</span>
-            </SidebarMenuButton>
+            <Link href="/search" legacyBehavior passHref>
+              <SidebarMenuButton asChild isActive={pathname === '/search'}>
+                <a>
+                  <Search />
+                  <span>Search</span>
+                </a>
+              </SidebarMenuButton>
+            </Link>
           </MotionSidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
@@ -113,7 +118,7 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
 
       <SidebarFooter>
         {user ? (
-          <SidebarMenuButton onClick={() => auth.signOut()}>
+          <SidebarMenuButton onClick={handleSignOut}>
             <LogOut />
             <span className="group-data-[state=collapsed]:hidden">Sign Out</span>
           </SidebarMenuButton>
