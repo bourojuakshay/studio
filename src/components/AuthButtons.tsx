@@ -2,7 +2,8 @@
 'use client';
 
 import React from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Home, Search, Library, Heart, LogOut, LogIn, Plus } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
 import {
@@ -19,7 +20,6 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { useSongs } from '@/hooks/use-songs';
 import { motion } from 'framer-motion';
-import Link from 'next/link';
 
 export default function AuthButtons({ onNavigate }: { onNavigate: (page: string) => void }) {
   const { user, isUserLoading } = useUser();
@@ -53,22 +53,22 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
 
       <SidebarGroup>
         <SidebarMenu>
-            <Link href="/" passHref legacyBehavior>
-                <SidebarMenuButton asChild isActive={pathname === '/'}>
-                    <a>
-                        <Home />
-                        <span>Home</span>
-                    </a>
+          <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link href="/" asChild>
+                <SidebarMenuButton isActive={pathname === '/'}>
+                    <Home />
+                    <span>Home</span>
                 </SidebarMenuButton>
             </Link>
-            <Link href="/search" passHref legacyBehavior>
-                <SidebarMenuButton asChild isActive={pathname === '/search'}>
-                    <a>
-                        <Search />
-                        <span>Search</span>
-                    </a>
+          </MotionSidebarMenuItem>
+          <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link href="/search" asChild>
+                <SidebarMenuButton isActive={pathname === '/search'}>
+                    <Search />
+                    <span>Search</span>
                 </SidebarMenuButton>
             </Link>
+          </MotionSidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
 
