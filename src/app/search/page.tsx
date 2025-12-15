@@ -21,7 +21,7 @@ export default function SearchPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [results, setResults] = useState<Song[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const { setNowPlayingId, setIsPlaying } = useAppContext();
+    const { setNowPlayingId, setActivePage } = useAppContext();
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     useEffect(() => {
@@ -48,18 +48,25 @@ export default function SearchPage() {
     const playSong = (song: Song) => {
         if (!song.id) return;
         setNowPlayingId(song.id); 
-        setIsPlaying(true);
+        setActivePage(song.mood);
+    };
+
+    const handleNavigate = (page: string) => {
+        if (page.startsWith('/')) {
+            router.push(page);
+        } else {
+            setActivePage(page);
+             // If navigating to a mood, we might want to go to the home page
+            // to show the context, but for now we'll just switch the active page.
+            // A redirect to home might be better ux.
+            router.push('/');
+        }
     };
 
     return (
         <SidebarProvider>
             <Sidebar side="left">
-                <SidebarHeader>
-                    <a href="/" className="logo">MoodyO</a>
-                </SidebarHeader>
-                <SidebarContent>
-                    <AuthButtons />
-                </SidebarContent>
+                 <AuthButtons onNavigate={handleNavigate} />
             </Sidebar>
 
             <SidebarInset>
@@ -76,18 +83,26 @@ export default function SearchPage() {
                     </div>
                 </header>
                 <main className="app-main">
-                    <h1 className="text-2xl font-bold mb-6">Search</h1>
-                    {isLoading ? (
+                    <h1 className="text-2xl font-bold mb-6">Search Results</h1>
+                    {isLoading && !debouncedSearchTerm ? (
+                        <div className="flex justify-center items-center h-64">
+                            <p className="text-muted-foreground">Search for your favorite songs and artists...</p>
+                        </div>
+                    ) : isLoading ? (
                         <div className="flex justify-center mt-8">
                             <Loader className="animate-spin" />
                         </div>
                     ) : results.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                             {results.map((song) => (
-                                <div key={song.id} className="bg-card p-4 rounded-lg flex flex-col items-center text-center cursor-pointer" onClick={() => playSong(song)}>
-                                    <Image src={song.cover} alt={song.title} width={150} height={150} className="rounded-md mb-2 aspect-square object-cover" />
-                                    <p className="font-semibold truncate w-full">{song.title}</p>
-                                    <p className="text-sm text-muted-foreground truncate w-full">{song.artist}</p>
+                                <div key={song.id} className="album-card" onClick={() => playSong(song)}>
+                                    <div className="album-card-image">
+                                        <Image src={song.cover} alt={song.title} width={150} height={150} className="rounded-md mb-2 aspect-square object-cover" />
+                                    </div>
+                                    <div className="album-card-info">
+                                        <p className="album-card-title">{song.title}</p>
+                                        <p className="album-card-artist">{song.artist}</p>
+                                    </div>
                                 </div>
                             ))}
                         </div>
