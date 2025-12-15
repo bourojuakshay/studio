@@ -131,8 +131,6 @@ const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => 
 
 
 export default function Home() {
-  const [isMounted, setIsMounted] = useState(false);
-  
   const { activePage, setActivePage, setPlaylist } = useAppContext();
   const { nowPlayingId } = useAppContext(); // Get nowPlayingId from low-frequency store
   
@@ -184,11 +182,6 @@ export default function Home() {
     }
   }, [selectedEmotion, tracksByMood]);
 
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-  
   const openPlayer = (songId: string, contextMood: string) => {
     if (contextMood === 'home') {
       setActivePage('home');
@@ -232,16 +225,12 @@ export default function Home() {
   
   const appIsLoading = isUserLoading || songsLoading;
 
-  if (appIsLoading && isMounted) {
+  if (appIsLoading && !showIntro) {
     return (
       <div className="loader-fullscreen">
         <Loader />
       </div>
     );
-  }
-
-  if (!isMounted) {
-    return <AnimatePresence>{showIntro && <MoodyOLoader onExit={handleExitIntro} />}</AnimatePresence>;
   }
 
   const MainContent = () => (
@@ -294,7 +283,7 @@ export default function Home() {
   return (
     <SidebarProvider>
       <AnimatePresence>
-        {showIntro && !appIsLoading && <MoodyOLoader onExit={handleExitIntro} />}
+        {showIntro && <MoodyOLoader onExit={handleExitIntro} />}
       </AnimatePresence>
       
       <ThemeProvider 
@@ -336,7 +325,7 @@ export default function Home() {
                 {activePage !== 'home' && allMoods[activePage] && (
                    <MoodPage
                       mood={activePage}
-                      definition={allMoods[activePage]}
+                      definition={allMoods[activeage]}
                       tracks={tracksByMood[activePage]}
                       handleLike={handleLike}
                       isLiked={isLiked}
@@ -354,5 +343,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
