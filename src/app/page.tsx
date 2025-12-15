@@ -193,8 +193,12 @@ export default function Home() {
   };
   
   const openPlayer = (songId: string, contextMood: string) => {
-    setActivePage(contextMood);
-    setNowPlayingId(songId);
+    if (contextMood === 'all' || !contextMood) {
+      setNowPlayingId(songId);
+    } else {
+      setActivePage(contextMood);
+      setNowPlayingId(songId);
+    }
   };
 
   const isLiked = (songId: string) => {
@@ -260,7 +264,7 @@ export default function Home() {
                 <div 
                   key={key} 
                   className={cn("emotion-card", { active: selectedEmotion === key })}
-                  onClick={() => setSelectedEmotion(key)}
+                  onClick={() => setActivePage(key)}
                 >
                   <span>{emoji}</span>
                   <p>{title}</p>

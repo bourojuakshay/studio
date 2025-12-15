@@ -58,59 +58,19 @@ export function FloatingPlayerWrapper() {
         setUserSongPreference(firestore, user.uid, songId, !currentlyLiked);
     };
     
-    if (!currentTrack && !isVisible) { // Only render if there is a track or it's visibly open
+    if (!isVisible) { 
         return null;
     }
 
     return (
-        <div className="floating-player-wrapper">
-            <FloatingPlayer
-                track={currentTrack}
-                handleLike={handleLike}
-                isLiked={isLiked}
-                onClose={() => setIsVisible(false)}
-            />
-        </div>
+        <FloatingPlayer
+            track={currentTrack}
+            handleLike={handleLike}
+            isLiked={isLiked}
+            onClose={() => setIsVisible(false)}
+        />
     );
 }
-
-// Memoized component for high-frequency updates
-const MemoizedProgress = React.memo(function MemoizedProgress() {
-    const { progress, handleSeek } = usePlaybackState();
-
-    const formatTime = (seconds: number) => {
-        if (isNaN(seconds) || seconds < 0) return '0:00';
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = Math.floor(seconds % 60);
-        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    };
-
-    const onProgressBarChange = (value: number[]) => {
-        if (!progress.duration) return;
-        handleSeek(value[0]);
-    };
-
-    return (
-        <motion.div 
-            className="progress-container w-full"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto', transition: { delay: 0.2 } }}
-            exit={{ opacity: 0, height: 0 }}
-        >
-            <Slider 
-                value={[progress.currentTime]} 
-                max={progress.duration || 100}
-                onValueChange={onProgressBarChange}
-                id="player-progress-bar"
-            />
-            <div className="time-display">
-                <span>{formatTime(progress.currentTime)}</span>
-                <span>{formatTime(progress.duration)}</span>
-            </div>
-        </motion.div>
-    );
-});
-
 
 type FloatingPlayerProps = {
     track: Song | null;
@@ -126,96 +86,49 @@ export function FloatingPlayer({
     isLiked,
     onClose
 }: FloatingPlayerProps) {
-    // Only subscribe to low-frequency updates here
-    const { isPlaying, handlePlayPause, handleNext, handlePrev } = usePlaybackState(
-      (state) => ({
-        isPlaying: state.isPlaying,
-        handlePlayPause: state.handlePlayPause,
-        handleNext: state.handleNext,
-        handlePrev: state.handlePrev,
-      })
-    );
+    const { isPlaying, handlePlayPause, handleNext, handlePrev } = usePlaybackState();
 
     const [isExpanded, setIsExpanded] = useState(false);
     
     const hasTrack = !!track;
 
     return (
-        <motion.div
-            className="player-card"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            layout
-        >
-            <div className="player-card-background">
-                <div className="blob one"></div>
-                <div className="blob two"></div>
-            </div>
-            
-            <motion.div
-                className={cn('player-card-content', isExpanded ? 'expanded' : 'compact')}
-                layout
-            >
-                <div className="player-header">
-                    <span>{isExpanded ? "NOW PLAYING" : "MUSIC"}</span>
-                     <div className="flex items-center gap-2">
-                        <button onClick={() => setIsExpanded(!isExpanded)} className="player-control-button">
-                            {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-                        </button>
-                        <button onClick={onClose} className="player-control-button">
-                            <X size={18} />
-                        </button>
-                    </div>
-                </div>
-
-                <motion.div className="album-art" layout="position">
+        <div className="card">
+            <div className="one">
+                <span className="title">Music</span>
+                <div className="music">
                     {hasTrack && track.cover ? (
                         <Image src={track.cover} alt={track.title} layout="fill" objectFit="cover" unoptimized={track.cover.startsWith('data:')}/>
                     ) : (
-                        <div className="icon-placeholder">
-                            <Music />
-                        </div>
+                        <Music className="text-gray-500" />
                     )}
-                </motion.div>
-                
-                <motion.div className="track-info" layout="position">
-                    <div className="title">{track?.title || 'MoodyO Player'}</div>
-                    <div className="artist">{track?.artist || 'Select a song'}</div>
-                </motion.div>
-
-                <AnimatePresence>
-                    {isExpanded && hasTrack && <MemoizedProgress />}
-                </AnimatePresence>
-                
-                <motion.div className="main-controls" layout="position">
-                    <button onClick={handlePrev} disabled={!hasTrack} className="player-control-button">
-                        <SkipBack size={isExpanded ? 22 : 20} />
+                </div>
+                <span className="name">{track?.title || 'MoodyO Player'}</span>
+                <span className="name1">{track?.artist || 'Select a song'}</span>
+                <div className="bar">
+                     <button onClick={handlePrev} disabled={!hasTrack} className="player-control-button">
+                        <SkipBack size={18} className="color" />
                     </button>
-                    <button onClick={handlePlayPause} disabled={!hasTrack} className="player-control-button play-pause-btn">
-                        {isPlaying && hasTrack ? <Pause size={isExpanded ? 24: 22} /> : <Play size={isExpanded ? 24: 22} />}
+                    <button onClick={handlePlayPause} disabled={!hasTrack} className="player-control-button">
+                        {isPlaying && hasTrack ? <Pause size={20} className="color" /> : <Play size={20} className="color" />}
                     </button>
                     <button onClick={handleNext} disabled={!hasTrack} className="player-control-button">
-                        <SkipForward size={isExpanded ? 22 : 20} />
+                        <SkipForward size={18} className="color" />
                     </button>
-                </motion.div>
-                
-                <AnimatePresence>
-                {isExpanded && (
-                    <motion.div 
-                        className="secondary-controls"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, transition: { delay: 0.2 } }}
-                        exit={{ opacity: 0 }}
-                    >
-                        <button className="player-control-button"><Shuffle size={18} /></button>
-                        <button onClick={(e) => hasTrack && handleLike(e, track.id!)} disabled={!hasTrack} className={cn('player-control-button like-btn', { 'liked': hasTrack && isLiked(track.id!) })}>
-                           <Heart size={18} fill={hasTrack && isLiked(track.id!) ? 'currentColor' : 'none'}/>
-                        </button>
-                        <button className="player-control-button"><ListMusic size={18} /></button>
-                    </motion.div>
-                )}
-                </AnimatePresence>
-            </motion.div>
-        </motion.div>
+                </div>
+                <div className="bar">
+                    <button className="player-control-button"><Shuffle size={14} className="color1" /></button>
+                    <button className="player-control-button"><ListMusic size={14} className="color1" /></button>
+                    <button onClick={(e) => hasTrack && handleLike(e, track.id!)} disabled={!hasTrack} className={cn('player-control-button like-btn', { 'liked': hasTrack && isLiked(track.id!) })}>
+                       <Heart size={14} className="color1" fill={hasTrack && isLiked(track.id!) ? 'currentColor' : 'none'}/>
+                    </button>
+                     <button onClick={onClose} className="player-control-button">
+                        <X size={16} className="color1" />
+                    </button>
+                </div>
+            </div>
+            <div className="two"></div>
+            <div className="three"></div>
+        </div>
     );
 }
