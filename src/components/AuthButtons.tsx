@@ -86,14 +86,14 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
               <SidebarMenuItem>
                   <SidebarMenuButton>
                       <Library />
-                      <span>Your Library</span>
-                      <Plus size={18} className="ml-auto opacity-70 hover:opacity-100" />
+                      <span className="group-data-[state=collapsed]:hidden">Your Library</span>
+                      <Plus size={18} className="ml-auto opacity-70 hover:opacity-100 group-data-[state=collapsed]:hidden" />
                   </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                   <SidebarMenuButton>
                       <div className="liked-songs-icon"><Heart /></div>
-                      <span>Liked Songs</span>
+                      <span className="group-data-[state=collapsed]:hidden">Liked Songs</span>
                   </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -107,9 +107,9 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
                                     <AvatarImage src={song.cover} alt={song.title}/>
                                     <AvatarFallback>{song.title.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <div className="flex flex-col items-start">
-                                    <span className="group-data-[state=collapsed]:hidden">{song.title}</span>
-                                    <small className="text-xs text-muted-foreground group-data-[state=collapsed]:hidden">{song.artist}</small>
+                                <div className="flex flex-col items-start group-data-[state=collapsed]:hidden">
+                                    <span>{song.title}</span>
+                                    <small className="text-xs text-muted-foreground">{song.artist}</small>
                                 </div>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
