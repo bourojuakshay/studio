@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -60,20 +59,24 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
       <SidebarGroup>
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/" asChild>
-              <MotionSidebarMenuButton isActive={pathname === '/'} {...motionProps}>
-                  <Home />
-                  <span className="group-data-[state=collapsed]:hidden">Home</span>
-              </MotionSidebarMenuButton>
-            </Link>
+            <MotionSidebarMenuButton
+              isActive={pathname === '/'}
+              onClick={() => router.push('/')}
+              {...motionProps}
+            >
+              <Home />
+              <span className="group-data-[state=collapsed]:hidden">Home</span>
+            </MotionSidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <Link href="/search" asChild>
-              <MotionSidebarMenuButton isActive={pathname === '/search'} {...motionProps}>
-                  <Search />
-                  <span className="group-data-[state=collapsed]:hidden">Search</span>
-              </MotionSidebarMenuButton>
-            </Link>
+            <MotionSidebarMenuButton
+              isActive={pathname === '/search'}
+              onClick={() => router.push('/search')}
+              {...motionProps}
+            >
+              <Search />
+              <span className="group-data-[state=collapsed]:hidden">Search</span>
+            </MotionSidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
