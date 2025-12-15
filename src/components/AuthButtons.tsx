@@ -18,7 +18,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useUserPreferences } from '@/hooks/use-user-preferences';
 import { useSongs } from '@/hooks/use-songs';
-import { useAppContext } from '@/context/AppContext';
+import { motion } from 'framer-motion';
 
 export default function AuthButtons({ onNavigate }: { onNavigate: (page: string) => void }) {
   const { user, isUserLoading } = useUser();
@@ -42,10 +42,12 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
     return <div className="p-4">Loading...</div>;
   }
 
+  const MotionSidebarMenuItem = motion(SidebarMenuItem);
+
   return (
     <>
       <SidebarHeader>
-        <a href="#" onClick={(e) => { e.preventDefault(); handleLocalNavigation('home'); }} className="logo hidden group-data-[state=expanded]:block">
+        <a href="#" onClick={(e) => { e.preventDefault(); handleLocalNavigation('/'); }} className="logo hidden group-data-[state=expanded]:block">
             MoodyO
         </a>
         <SidebarTrigger />
@@ -53,18 +55,18 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
 
       <SidebarGroup>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => handleLocalNavigation('home')} isActive={pathname === '/'}>
+          <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <SidebarMenuButton onClick={() => handleLocalNavigation('/')} isActive={pathname === '/'}>
               <Home />
               <span>Home</span>
             </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
+          </MotionSidebarMenuItem>
+          <MotionSidebarMenuItem whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <SidebarMenuButton onClick={() => handleLocalNavigation('/search')} isActive={pathname === '/search'}>
               <Search />
               <span>Search</span>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </MotionSidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
 
