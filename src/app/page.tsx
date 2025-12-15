@@ -35,6 +35,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppContext, usePlaybackState } from '@/context/AppContext';
 import AuthButtons from '@/components/AuthButtons';
+import Loader from '@/components/Loader';
 
 export const dynamic = 'force-dynamic';
 
@@ -144,7 +145,7 @@ export default function Home() {
   const { toast } = useToast();
   
   const { likedSongIds } = useUserPreferences(user?.uid);
-  const { songs: firestoreSongs } = useSongs();
+  const { songs: firestoreSongs, loading: songsLoading } = useSongs();
   
   const [tracksByMood, setTracksByMood] = useState<Record<string, Song[]>>({});
   const [filteredTracks, setFilteredTracks] = useState<Song[]>([]);
@@ -189,7 +190,8 @@ export default function Home() {
   }, []);
   
   const openPlayer = (songId: string, contextMood: string) => {
-    if (contextMood === 'all' || !contextMood) {
+    if (contextMood === 'home') {
+      setActivePage('home');
       setNowPlayingId(songId);
     } else {
       setActivePage(contextMood);
@@ -227,6 +229,16 @@ export default function Home() {
   };
   
   const allMoods = { ...MOOD_DEFS };
+  
+  const appIsLoading = isUserLoading || songsLoading;
+
+  if (appIsLoading && isMounted) {
+    return (
+      <div className="loader-fullscreen">
+        <Loader />
+      </div>
+    );
+  }
 
   if (!isMounted) {
     return <AnimatePresence>{showIntro && <MoodyOLoader onExit={handleExitIntro} />}</AnimatePresence>;
@@ -238,7 +250,7 @@ export default function Home() {
             <h2 className="section-title">Recently Played</h2>
             <div className="album-grid">
                 {(tracksByMood.all || []).slice(0, 6).map((track, i) => (
-                    <AlbumCard key={track.id || i} track={track} onClick={() => setNowPlayingId(track.id!)} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, 'home')} />
                 ))}
             </div>
         </div>
@@ -246,7 +258,7 @@ export default function Home() {
             <h2 className="section-title">Recommended Stations</h2>
              <div className="album-grid">
                 {(tracksByMood.all || []).slice(6, 12).map((track, i) => (
-                    <AlbumCard key={track.id || i} track={track} onClick={() => setNowPlayingId(track.id!)} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, 'home')} />
                 ))}
             </div>
         </div>
@@ -269,10 +281,10 @@ export default function Home() {
             </div>
         </div>
         <div className="home-section-grid">
-            <h2 className="section-title">{selectedEmotion === 'all' ? 'Popular Playlists' : `For Your ${selectedEmotion.charAt(0).toUpperCase() + selectedEmotion.slice(1)} Mood`}</h2>
+            <h2 className="section-title">{selectedEmotion === 'all' ? 'Popular Playlists' : `For Your ${selectedEmotion.charAt(0).toUpperCase() + selectedEmotion.slice(1)}`}</h2>
             <div className="album-grid">
                 {filteredTracks.slice(0, 12).map((track, i) => (
-                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, selectedEmotion)} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => openPlayer(track.id!, 'home')} />
                 ))}
             </div>
         </div>
@@ -282,7 +294,7 @@ export default function Home() {
   return (
     <SidebarProvider>
       <AnimatePresence>
-        {showIntro && <MoodyOLoader onExit={handleExitIntro} />}
+        {showIntro && !appIsLoading && <MoodyOLoader onExit={handleExitIntro} />}
       </AnimatePresence>
       
       <ThemeProvider 
@@ -342,3 +354,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    

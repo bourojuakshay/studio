@@ -6,13 +6,14 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { useFirestore, useUser } from '@/firebase';
 import { searchSongs, Song } from '@/firebase/firestore';
-import { Loader, Music, Search as SearchIcon } from 'lucide-react';
+import { Music, Search as SearchIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useAppContext } from '@/context/AppContext';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import AuthButtons from '@/components/AuthButtons';
+import Loader from '@/components/Loader';
 
 export default function SearchPage() {
     const { user, isUserLoading } = useUser();
@@ -84,15 +85,17 @@ export default function SearchPage() {
                 </header>
                 <main className="app-main">
                     <h1 className="text-2xl font-bold mb-6">Search Results</h1>
-                    {isLoading && !debouncedSearchTerm ? (
+                    {isLoading && (
+                        <div className="flex justify-center mt-8">
+                            <Loader />
+                        </div>
+                    )}
+                    {!isLoading && debouncedSearchTerm.length === 0 && (
                         <div className="flex justify-center items-center h-64">
                             <p className="text-muted-foreground">Search for your favorite songs and artists...</p>
                         </div>
-                    ) : isLoading ? (
-                        <div className="flex justify-center mt-8">
-                            <Loader className="animate-spin" />
-                        </div>
-                    ) : results.length > 0 ? (
+                    )}
+                    {!isLoading && results.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                             {results.map((song) => (
                                 <div key={song.id} className="album-card" onClick={() => playSong(song)}>
@@ -107,10 +110,12 @@ export default function SearchPage() {
                             ))}
                         </div>
                     ) : (
-                        debouncedSearchTerm && <p className="text-center text-muted-foreground mt-8">No results found for &quot;{debouncedSearchTerm}&quot;.</p>
+                       !isLoading && debouncedSearchTerm && <p className="text-center text-muted-foreground mt-8">No results found for &quot;{debouncedSearchTerm}&quot;.</p>
                     )}
                 </main>
             </SidebarInset>
         </SidebarProvider>
     );
 }
+
+    
