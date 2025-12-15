@@ -15,7 +15,7 @@ type ThemeProviderProps = {
 };
 
 export function ThemeProvider({ activePage, customMoods, tracks, nowPlayingId, allMoods }: ThemeProviderProps) {
-  const { playlist } = useAppContext();
+  const { currentTrack } = useAppContext();
 
   useEffect(() => {
     const moodDef = allMoods[activePage as keyof typeof allMoods];
@@ -39,12 +39,11 @@ export function ThemeProvider({ activePage, customMoods, tracks, nowPlayingId, a
         document.documentElement.style.setProperty('--page-accent', moodDef.accent);
         
         const activePageElement = document.getElementById(activePage);
-        const activePlaylist = tracks[activePage as keyof typeof tracks];
-        if (activePageElement && activePlaylist && activePlaylist.length > 0) {
-            const currentTrack = nowPlayingId ? playlist.find(t => t.id === nowPlayingId) : activePlaylist[0];
-            if (currentTrack) {
-              activePageElement.style.setProperty('--bg-image', `url(${currentTrack.cover})`);
-            }
+        if (activePageElement && currentTrack && tracks[activePage]?.some(t => t.id === currentTrack.id)) {
+            activePageElement.style.setProperty('--bg-image', `url(${currentTrack.cover})`);
+        } else if (activePageElement && tracks[activePage]?.length > 0) {
+            // Fallback to the first track of the mood if no specific track is playing from this mood
+            activePageElement.style.setProperty('--bg-image', `url(${tracks[activePage][0].cover})`);
         }
 
         let classes = `${activePage}-active `;
@@ -53,7 +52,7 @@ export function ThemeProvider({ activePage, customMoods, tracks, nowPlayingId, a
         
         document.body.className = document.body.className + ' ' + classes.trim();
     }
-  }, [activePage, customMoods, tracks, nowPlayingId, allMoods, playlist]);
+  }, [activePage, customMoods, tracks, nowPlayingId, allMoods, currentTrack]);
 
   return null; // This component does not render anything
 }

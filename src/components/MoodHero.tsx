@@ -35,10 +35,9 @@ export function MoodHero({
     isLiked,
     openPlayer
 }: MoodHeroProps) {
-    const { setVolume, volume } = useAppContext();
+    const { setVolume, volume, currentTrack } = useAppContext(); // Get currentTrack from low-frequency state
     const { 
       isPlaying,
-      currentTrack, 
       progress, 
       handlePlayPause, 
       handleNext, 
@@ -48,7 +47,10 @@ export function MoodHero({
     
     const [isVolumeOpen, setIsVolumeOpen] = React.useState(false);
     
+    // Determine if the currently playing track belongs to the current mood's playlist
     const isPlayingThisMood = currentTrack && tracks.some(t => t.id === currentTrack.id);
+    
+    // The track to display: if a track from this mood is playing, show it. Otherwise, show the first track of the mood.
     const displayTrack = isPlayingThisMood ? currentTrack : tracks?.[0];
 
     const heroVariants = {
