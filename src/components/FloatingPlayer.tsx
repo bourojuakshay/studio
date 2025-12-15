@@ -89,9 +89,18 @@ export function FloatingPlayerWrapper() {
         setUserSongPreference(firestore, user.uid, songId, !currentlyLiked);
     };
     
-    if (!currentTrack || !isVisible) { 
+    if (!currentTrack) { 
         return null;
     }
+    
+    if(!isVisible) {
+      // A trick to allow the exit animation to complete
+      setTimeout(() => {
+        if(!currentTrack) setIsVisible(true)
+      }, 500)
+       return null;
+    }
+
 
     return (
         <FloatingPlayer
@@ -223,6 +232,10 @@ export function FloatingPlayer({
                         <div className="expanded-controls-wrapper">
                             <div className="expanded-progress">
                                 <PlayerProgress />
+                                <div className="time-display">
+                                    <span>{formatTime(usePlaybackState.getState().progress.currentTime)}</span>
+                                    <span>{formatTime(usePlaybackState.getState().progress.duration)}</span>
+                                </div>
                             </div>
                             <div className="expanded-main-controls">
                                 <button className="player-control-button"><Shuffle/></button>
