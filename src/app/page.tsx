@@ -136,7 +136,7 @@ export default function Home() {
   const { nowPlayingId } = useAppContext(); // Get nowPlayingId from low-frequency store
   
   // Directly call actions from the store without subscribing the whole component
-  const { setNowPlayingId, handlePlayPause } = usePlaybackState.getState();
+  const { setNowPlayingId } = usePlaybackState.getState();
 
 
   const { user, isUserLoading } = useUser();
@@ -187,10 +187,6 @@ export default function Home() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  const playSong = (songId: string) => {
-    setNowPlayingId(songId);
-  };
   
   const openPlayer = (songId: string, contextMood: string) => {
     if (contextMood === 'all' || !contextMood) {
@@ -242,7 +238,7 @@ export default function Home() {
             <h2 className="section-title">Recently Played</h2>
             <div className="album-grid">
                 {(tracksByMood.all || []).slice(0, 6).map((track, i) => (
-                    <AlbumCard key={track.id || i} track={track} onClick={() => playSong(track.id!)} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => setNowPlayingId(track.id!)} />
                 ))}
             </div>
         </div>
@@ -250,7 +246,7 @@ export default function Home() {
             <h2 className="section-title">Recommended Stations</h2>
              <div className="album-grid">
                 {(tracksByMood.all || []).slice(6, 12).map((track, i) => (
-                    <AlbumCard key={track.id || i} track={track} onClick={() => playSong(track.id!)} />
+                    <AlbumCard key={track.id || i} track={track} onClick={() => setNowPlayingId(track.id!)} />
                 ))}
             </div>
         </div>

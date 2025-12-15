@@ -796,203 +796,249 @@ audio { display: none; }
   transform: scale(1.3);
 }
 
-.card {
-  width: 190px;
-  height: 254px;
-  background: lightgrey;
-  border-radius: 10px;
-  position: fixed;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  z-index: 1000;
+.player-card {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    z-index: 1000;
+    width: 250px;
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid hsl(var(--border));
+    color: hsl(var(--foreground));
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
-.card .one {
-  width: 190px;
-  height: 254px;
-  z-index: 10;
-  position: absolute;
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  backdrop-filter: blur(8.5px);
-  -webkit-backdrop-filter: blur(8.5px);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: black;
+.player-card-content {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
 }
 
-.card .one .title {
-  width: 70px;
-  border: 1px solid rgba(180, 177, 177, 0.308);
-  display: block;
-  margin: 12px auto;
-  text-align: center;
-  font-size: 10px;
-  border-radius: 12px;
-  font-family: Roboto, sans-serif;
-  color: rgba(102, 100, 100, 0.911);
-}
-
-.card .one .music {
-  width: 80px;
-  height: 80px;
-  background: rgba(216, 212, 212, 0.726);
-  margin: 30px auto;
-  border-radius: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.card .one .music img {
+.player-card-background {
     position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.player-card-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(20px) brightness(0.5);
+    transform: scale(1.2);
+}
+
+.player-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.player-card-cover {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.player-card-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.player-card-cover .music-icon {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background-color: hsl(var(--muted));
+}
+
+.player-card-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.player-card-info h4 {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.player-card-info p {
+    font-size: 0.8rem;
+    color: hsl(var(--muted-foreground));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-card-close-btn {
+    flex-shrink: 0;
+}
+
+.player-card-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.player-control-button {
+    background: none;
+    border: none;
+    color: hsl(var(--muted-foreground));
+    cursor: pointer;
+    padding: 4px;
+    transition: all .2s ease;
+}
+.player-control-button:hover {
+    color: hsl(var(--foreground));
+}
+.player-control-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.like-btn.liked {
+    color: hsl(var(--primary));
+}
+.like-btn.liked svg {
+    fill: hsl(var(--primary));
+}
+
+.player-progress-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.player-progress-wrapper .time-label {
+    font-size: 0.7rem;
+    color: hsl(var(--muted-foreground));
+    width: 2.2rem;
+    text-align: center;
+}
+
+.player-progress-wrapper .slider {
+    flex-grow: 1;
+}
+
+.player-card-expanded {
+    position: fixed;
+    inset: 0;
+    background: hsl(var(--background));
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.player-card-expanded-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.player-card-expanded-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(50px) brightness(0.4);
+    transform: scale(1.1);
+}
+
+.expanded-cover {
+    width: 100%;
+    max-width: 350px;
+    aspect-ratio: 1/1;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+}
+.expanded-cover img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.card .one .name {
-  width: 150px;
-  height: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  font-family: Roboto, sans-serif;
-  padding: 0 5px;
-  margin: -22px auto;
-  display: block;
-  overflow: hidden;
-  text-align: center;
-  color: rgba(50, 49, 51, 0.637);
-  white-space: nowrap;
-}
-.card .one .name1 {
-  width: 120px;
-  height: 20px;
-  font-size: 9px;
-  font-weight: 500;
-  font-family: Roboto, sans-serif;
-  padding: 0 5px;
-  margin: 19px auto;
-  display: block;
-  overflow: hidden;
-  text-align: center;
-  color: rgba(50, 49, 51, 0.637);
-   white-space: nowrap;
-}
-.card .one .bar {
-  width: 100px;
-  margin: -15px auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 5px;
-  cursor: pointer;
+.expanded-info {
+    text-align: center;
+    margin-bottom: 2rem;
 }
 
-.card .one .bar:last-child {
-  margin: 35px auto;
-  width: 100%;
-  padding: 2px 23px;
+.expanded-info h2 {
+    font-size: 2rem;
+    font-weight: 700;
 }
-.card .one .bar .color {
-  fill: rgba(82, 79, 79, 0.829);
-}
-.card .one .bar .color1 {
-  fill: rgba(29, 28, 28, 0.829);
-  cursor: pointer;
+.expanded-info p {
+    font-size: 1.1rem;
+    color: hsl(var(--muted-foreground));
 }
 
-.card .one .bar .bi:first-child {
-  transform: rotate(180deg);
-}
-.card .one .bar:last-child .color1:first-child {
-  transform: rotate(0deg);
+.expanded-controls-wrapper {
+    width: 100%;
+    max-width: 400px;
 }
 
-.card .two {
-  width: 60px;
-  height: 60px;
-  background-color: rgb(131, 25, 163);
-  filter: drop-shadow(0 0 10px rgb(131, 25, 163));
-  border-radius: 50%;
-  position: relative;
-  top: 30px;
-  left: 20px;
-  animation: one 5s infinite;
+.expanded-progress .slider {
+    height: 8px;
+}
+.expanded-progress .time-display {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
 }
 
-.card .three {
-  width: 60px;
-  height: 60px;
-  background-color: rgb(29, 209, 149);
-  filter: drop-shadow(0 0 10px rgb(29, 209, 149));
-  border-radius: 50%;
-  position: relative;
-  top: 90px;
-  left: 90px;
-  animation: two 5s infinite;
+.expanded-main-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
-@keyframes one {
-  0% {
-    top: 30px;
-    left: 20px;
-  }
-  20% {
-    top: 50px;
-    left: 40px;
-  }
-  40% {
-    top: 80px;
-    left: 70px;
-  }
-  50% {
-    top: 60px;
-    left: 40px;
-  }
-  60% {
-    top: 35px;
-    left: 90px;
-  }
-  80% {
-    top: 70px;
-    left: 70px;
-  }
-  100% {
-    top: 30px;
-    left: 20px;
-  }
+.expanded-main-controls .player-control-button svg {
+    width: 24px;
+    height: 24px;
 }
 
-@keyframes two {
-  0% {
-    top: 90px;
-    left: 90px;
-  }
-  20% {
-    top: 50px;
-    left: 40px;
-  }
-  40% {
-    top: 60px;
-    left: 20px;
-  }
-  50% {
-    top: 80px;
-    left: 30px;
-  }
-  60% {
-    top: 35px;
-    left: 90px;
-  }
-  80% {
-    top: 70px;
-    left: 60px;
-  }
-  100% {
-    top: 90px;
-    left: 90px;
-  }
+.expanded-main-controls .play-pause-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    display: grid;
+    place-items: center;
+}
+.expanded-main-controls .play-pause-btn svg {
+    width: 32px;
+    height: 32px;
+}
+
+.expanded-secondary-controls {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+html.no-scroll {
+    overflow: hidden;
 }

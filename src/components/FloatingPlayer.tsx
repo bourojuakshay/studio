@@ -27,6 +27,36 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Slider } from '@/components/ui/slider';
 
+const formatTime = (seconds: number) => {
+    if (isNaN(seconds) || seconds < 0) return '0:00';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+const PlayerProgress = () => {
+    const { progress, handleSeek } = usePlaybackState(state => ({ progress: state.progress, handleSeek: state.handleSeek }));
+
+    const onSliderChange = (value: number[]) => {
+      if (progress.duration) {
+        handleSeek(value[0]);
+      }
+    };
+
+    return (
+        <div className="player-progress-wrapper">
+            <span className="time-label">{formatTime(progress.currentTime)}</span>
+            <Slider
+                className="slider"
+                value={[progress.currentTime]}
+                max={progress.duration || 100}
+                onValueChange={onSliderChange}
+            />
+            <span className="time-label">{formatTime(progress.duration)}</span>
+        </div>
+    );
+};
+
 
 export function FloatingPlayerWrapper() {
     const { currentTrack } = useAppContext();
@@ -58,7 +88,7 @@ export function FloatingPlayerWrapper() {
         setUserSongPreference(firestore, user.uid, songId, !currentlyLiked);
     };
     
-    if (!isVisible) { 
+    if (!currentTrack || !isVisible) { 
         return null;
     }
 
@@ -91,44 +121,124 @@ export function FloatingPlayer({
     const [isExpanded, setIsExpanded] = useState(false);
     
     const hasTrack = !!track;
+    
+    useEffect(() => {
+        if (isExpanded) {
+            document.documentElement.classList.add('no-scroll');
+        } else {
+            document.documentElement.classList.remove('no-scroll');
+        }
+        return () => document.documentElement.classList.remove('no-scroll');
+    }, [isExpanded]);
+
 
     return (
-        <div className="card">
-            <div className="one">
-                <span className="title">Music</span>
-                <div className="music">
-                    {hasTrack && track.cover ? (
-                        <Image src={track.cover} alt={track.title} layout="fill" objectFit="cover" unoptimized={track.cover.startsWith('data:')}/>
-                    ) : (
-                        <Music className="text-gray-500" />
-                    )}
+        <>
+            <motion.div
+                layout
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className={cn('player-card', { 'is-expanded-mode': isExpanded })}
+            >
+                {hasTrack && (
+                    <div className="player-card-background">
+                         <Image src={track.cover} alt="" layout="fill" />
+                    </div>
+                )}
+                <div className="player-card-content">
+                    <header className="player-card-header">
+                        <div className="player-card-cover">
+                            {hasTrack ? (
+                                <Image src={track.cover} alt={track.title} layout="fill" unoptimized={track.cover.startsWith('data:')} />
+                            ) : (
+                                <div className="music-icon"><Music /></div>
+                            )}
+                        </div>
+                        <div className="player-card-info">
+                            <h4>{track?.title || 'MoodyO Player'}</h4>
+                            <p>{track?.artist || 'Select a song'}</p>
+                        </div>
+                        <Button variant="ghost" size="icon" className="player-card-close-btn" onClick={() => setIsExpanded(true)}>
+                            <Maximize2 size={16}/>
+                        </Button>
+                         <Button variant="ghost" size="icon" className="player-card-close-btn" onClick={onClose}>
+                            <X size={16}/>
+                        </Button>
+                    </header>
+                    
+                    <main>
+                         <div className="player-card-controls">
+                            <button onClick={(e) => hasTrack && handleLike(e, track.id!)} disabled={!hasTrack} className={cn('player-control-button like-btn', { 'liked': hasTrack && isLiked(track.id!) })}>
+                                <Heart size={18} />
+                            </button>
+                            <div className="flex items-center gap-2">
+                                <button onClick={handlePrev} disabled={!hasTrack} className="player-control-button">
+                                    <SkipBack size={18} />
+                                </button>
+                                <button onClick={handlePlayPause} disabled={!hasTrack} className="player-control-button text-foreground">
+                                    {isPlaying ? <Pause size={22} /> : <Play size={22} />}
+                                </button>
+                                <button onClick={handleNext} disabled={!hasTrack} className="player-control-button">
+                                    <SkipForward size={18} />
+                                </button>
+                            </div>
+                            <button className="player-control-button"><ListMusic size={18} /></button>
+                        </div>
+                        <PlayerProgress />
+                    </main>
                 </div>
-                <span className="name">{track?.title || 'MoodyO Player'}</span>
-                <span className="name1">{track?.artist || 'Select a song'}</span>
-                <div className="bar">
-                     <button onClick={handlePrev} disabled={!hasTrack} className="player-control-button">
-                        <SkipBack size={18} className="color" />
-                    </button>
-                    <button onClick={handlePlayPause} disabled={!hasTrack} className="player-control-button">
-                        {isPlaying && hasTrack ? <Pause size={20} className="color" /> : <Play size={20} className="color" />}
-                    </button>
-                    <button onClick={handleNext} disabled={!hasTrack} className="player-control-button">
-                        <SkipForward size={18} className="color" />
-                    </button>
-                </div>
-                <div className="bar">
-                    <button className="player-control-button"><Shuffle size={14} className="color1" /></button>
-                    <button className="player-control-button"><ListMusic size={14} className="color1" /></button>
-                    <button onClick={(e) => hasTrack && handleLike(e, track.id!)} disabled={!hasTrack} className={cn('player-control-button like-btn', { 'liked': hasTrack && isLiked(track.id!) })}>
-                       <Heart size={14} className="color1" fill={hasTrack && isLiked(track.id!) ? 'currentColor' : 'none'}/>
-                    </button>
-                     <button onClick={onClose} className="player-control-button">
-                        <X size={16} className="color1" />
-                    </button>
-                </div>
-            </div>
-            <div className="two"></div>
-            <div className="three"></div>
-        </div>
+            </motion.div>
+
+            <AnimatePresence>
+                {isExpanded && hasTrack && (
+                    <motion.div 
+                        className="player-card-expanded"
+                        initial={{ opacity: 0, y: '100%' }}
+                        animate={{ opacity: 1, y: '0%' }}
+                        exit={{ opacity: 0, y: '100%' }}
+                        transition={{ duration: 0.5, ease: 'easeInOut' }}
+                    >
+                         <div className="player-card-expanded-bg">
+                            <Image src={track.cover} alt="" layout="fill" />
+                        </div>
+                        
+                        <div className="expanded-secondary-controls">
+                             <Button variant="ghost" size="icon" onClick={() => setIsExpanded(false)}>
+                                <Minimize2 />
+                            </Button>
+                        </div>
+
+                        <motion.div layoutId="player-cover" className="expanded-cover">
+                            <Image src={track.cover} alt={track.title} layout="fill" unoptimized={track.cover.startsWith('data:')}/>
+                        </motion.div>
+
+                        <div className="expanded-info">
+                            <h2>{track.title}</h2>
+                            <p>{track.artist}</p>
+                        </div>
+                        
+                        <div className="expanded-controls-wrapper">
+                            <div className="expanded-progress">
+                                <PlayerProgress />
+                            </div>
+                            <div className="expanded-main-controls">
+                                <button className="player-control-button"><Shuffle/></button>
+                                <button onClick={handlePrev} className="player-control-button"><SkipBack /></button>
+                                <button onClick={handlePlayPause} className="play-pause-btn">
+                                    {isPlaying ? <Pause /> : <Play />}
+                                </button>
+                                <button onClick={handleNext} className="player-control-button"><SkipForward /></button>
+                                <button onClick={(e) => handleLike(e, track.id!)} className={cn('player-control-button like-btn', { 'liked': isLiked(track.id!) })}>
+                                    <Heart />
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </>
     );
 }
