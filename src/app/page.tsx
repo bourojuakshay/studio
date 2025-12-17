@@ -38,103 +38,6 @@ import Loader from '@/components/Loader';
 
 export const dynamic = 'force-dynamic';
 
-const MoodyOLoader = ({ onExit, showLoaderAnimation }: { onExit: () => void, showLoaderAnimation: boolean }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<gsap.core.Timeline | null>(null);
-
-  useEffect(() => {
-    if (showLoaderAnimation) {
-        return;
-    }
-
-    if (!animationRef.current) {
-        const ctx = gsap.context(() => {
-            const letters = gsap.utils.toArray('.intro-logo-gsap span');
-            const tagline = gsap.utils.toArray('.intro-tagline');
-            
-            gsap.set(letters, {
-                opacity: 0,
-                y: 18,
-                scale: 0.95,
-                filter: 'blur(2px)',
-            });
-            gsap.set(tagline, { opacity: 0 });
-
-            const tl = gsap.timeline({
-                onComplete: () => {
-                    if (containerRef.current) {
-                        containerRef.current.style.cursor = 'pointer';
-                    }
-                },
-            });
-
-            tl.to(letters, {
-                opacity: 1,
-                y: -5,
-                scale: 1,
-                filter: 'blur(0px)',
-                duration: 0.35,
-                ease: 'power3.out',
-                stagger: 0.06,
-            })
-            .to(letters, {
-                y: 0,
-                duration: 0.15,
-                ease: 'power2.in',
-            }, "-=0.2")
-            .to(tagline, {
-                opacity: 1,
-                duration: 0.8,
-                ease: 'power2.out',
-            }, '-=0.2');
-
-            animationRef.current = tl;
-
-        }, containerRef);
-        
-        return () => ctx.revert();
-    }
-  }, [showLoaderAnimation]);
-
-  const handleExit = () => {
-    if (showLoaderAnimation) return;
-
-    gsap.to(containerRef.current, {
-      opacity: 0,
-      duration: 0.5,
-      ease: 'power2.inOut',
-      onComplete: onExit,
-    });
-  };
-
-  return (
-    <div
-      className="intro-screen-v2"
-      onClick={handleExit}
-      ref={containerRef}
-    >
-        <div className="intro-content-wrapper">
-             <AnimatePresence>
-                {showLoaderAnimation ? (
-                    <Loader />
-                ) : (
-                    <>
-                        <h1 className="intro-logo-gsap">
-                            {'MoodyO'.split('').map((char, index) => (
-                                <span key={index}>{char}</span>
-                            ))}
-                        </h1>
-                        <div className="intro-tagline-container">
-                            <div className="intro-tagline">mood based audio</div>
-                        </div>
-                    </>
-                )}
-             </AnimatePresence>
-        </div>
-    </div>
-  );
-};
-
 const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => (
     <div className="album-card" onClick={onClick}>
         <div className="album-card-image">
@@ -152,13 +55,13 @@ const AlbumCard = ({ track, onClick }: { track: Song; onClick: () => void }) => 
 
 
 export default function Home() {
-  const { setPlaylist, setNowPlayingId, currentTrack, setActivePage, activePage } = useAppContext();
+  const { setPlaylist, setNowPlayingId, currentTrack, setActivePage, activePage, globalLoading, setLoadingFlag } = useAppContext();
   
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
   
-  const { likedSongIds } = useUserPreferences(user?.uid);
+  const { likedSongIds, loading: prefsLoading } = useUserPreferences(user?.uid);
   const { songs: firestoreSongs, loading: songsLoading } = useSongs();
   
   const [tracksByMood, setTracksByMood] = useState<Record<string, Song[]>>({});
@@ -168,6 +71,12 @@ export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    setLoadingFlag('user', isUserLoading);
+    setLoadingFlag('songs', songsLoading);
+    setLoadingFlag('prefs', prefsLoading);
+  }, [isUserLoading, songsLoading, prefsLoading, setLoadingFlag]);
 
   const handleExitIntro = useCallback(() => {
     setShowIntro(false);
@@ -243,9 +152,7 @@ export default function Home() {
   };
   
   const allMoods = { ...MOOD_DEFS };
-  
-  const appIsLoading = isUserLoading || songsLoading;
-
+    
   // Determine current page for main content area
   const isHomePage = pathname === '/';
   const currentMood = Object.keys(allMoods).find(m => `/${m}` === pathname);
@@ -262,6 +169,13 @@ export default function Home() {
         setShowIntro(false);
       }
   }, [pathname, isHomePage, currentMood, setActivePage]);
+
+  // Hide intro if loading is finished
+  useEffect(() => {
+    if (!globalLoading) {
+      handleExitIntro();
+    }
+  }, [globalLoading, handleExitIntro]);
 
   const MainContent = () => (
     <>
@@ -312,10 +226,6 @@ export default function Home() {
 
   return (
     <SidebarProvider>
-      <AnimatePresence>
-        {showIntro && isHomePage && <MoodyOLoader onExit={handleExitIntro} showLoaderAnimation={appIsLoading} />}
-      </AnimatePresence>
-      
       <ThemeProvider 
         activePage={activePage} 
         customMoods={{}}
@@ -349,11 +259,7 @@ export default function Home() {
         </header>
 
         <main className="app-main">
-          {appIsLoading && isHomePage && !showIntro ? (
-              <div className="flex justify-center items-center h-full">
-                <Loader />
-              </div>
-          ) : isHomePage ? (
+          {isHomePage ? (
               <MainContent />
           ) : currentMood ? (
              <AnimatePresence>

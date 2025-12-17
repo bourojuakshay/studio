@@ -34,7 +34,13 @@ export default function LibraryPage() {
     const router = useRouter();
     const { likedSongIds, loading: prefsLoading } = useUserPreferences(user?.uid);
     const { songs, loading: songsLoading } = useSongs();
-    const { setNowPlayingId, setActivePage } = useAppContext();
+    const { setNowPlayingId, setActivePage, setLoadingFlag, globalLoading } = useAppContext();
+
+    React.useEffect(() => {
+        setLoadingFlag('user', isUserLoading);
+        setLoadingFlag('prefs', prefsLoading);
+        setLoadingFlag('songs', songsLoading);
+    }, [isUserLoading, prefsLoading, songsLoading, setLoadingFlag]);
 
     React.useEffect(() => {
         if (!isUserLoading && !user) {
@@ -56,8 +62,6 @@ export default function LibraryPage() {
         router.push(path);
     }
     
-    const isLoading = isUserLoading || prefsLoading || songsLoading;
-
     return (
         <SidebarProvider>
             <Sidebar side="left">
@@ -70,11 +74,7 @@ export default function LibraryPage() {
                     <h1 className="text-2xl font-bold">Your Library</h1>
                 </header>
                 <main className="app-main">
-                    {isLoading ? (
-                        <div className="flex justify-center items-center h-full">
-                            <Loader />
-                        </div>
-                    ) : (
+                    {!globalLoading && (
                         <>
                             <div className="mb-8">
                                 <Button size="lg">

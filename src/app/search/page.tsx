@@ -20,9 +20,13 @@ export default function SearchPage() {
     const firestore = useFirestore();
     const [searchTerm, setSearchTerm] = useState('');
     const [results, setResults] = useState<Song[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const { setNowPlayingId, setActivePage } = useAppContext();
+    const [isSearching, setIsSearching] = useState(false);
+    const { setNowPlayingId, setActivePage, setLoadingFlag } = useAppContext();
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+    useEffect(() => {
+        setLoadingFlag('user', isUserLoading);
+    }, [isUserLoading, setLoadingFlag]);
 
     useEffect(() => {
         if (!isUserLoading && !user) {
@@ -35,11 +39,13 @@ export default function SearchPage() {
             setResults([]);
             return;
         }
-        setIsLoading(true);
+        setIsSearching(true);
+        setLoadingFlag('search', true);
         const searchResults = await searchSongs(firestore, term);
         setResults(searchResults);
-        setIsLoading(false);
-    }, [firestore]);
+        setIsSearching(false);
+        setLoadingFlag('search', false);
+    }, [firestore, setLoadingFlag]);
 
     useEffect(() => {
         handleSearch(debouncedSearchTerm);
@@ -48,7 +54,6 @@ export default function SearchPage() {
     const playSong = (song: Song) => {
         if (!song.id) return;
         setNowPlayingId(song.id); 
-        // Set active page to the song's primary mood to load the correct theme
         setActivePage(song.mood);
         router.push('/');
     };
@@ -84,15 +89,11 @@ export default function SearchPage() {
                 </header>
                 <main className="app-main">
                     <h1 className="text-2xl font-bold mb-6">Search Results</h1>
-                    {isLoading && (
-                        <div className="flex justify-center mt-8">
-                            <Loader />
-                        </div>
-                    )}
-                    {!isLoading && debouncedSearchTerm.length > 0 && results.length === 0 && (
+                    
+                    {!isSearching && debouncedSearchTerm.length > 0 && results.length === 0 && (
                          <p className="text-center text-muted-foreground mt-8">No results found for &quot;{debouncedSearchTerm}&quot;.</p>
                     )}
-                    {!isLoading && results.length > 0 ? (
+                    {!isSearching && results.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                             {results.map((song) => (
                                 <div key={song.id} className="album-card" onClick={() => playSong(song)}>
@@ -110,7 +111,7 @@ export default function SearchPage() {
                             ))}
                         </div>
                     ) : (
-                       !isLoading && !debouncedSearchTerm && (
+                       !isSearching && !debouncedSearchTerm && (
                         <div className="flex justify-center items-center h-64">
                             <p className="text-muted-foreground">Find your favorite songs by title or artist.</p>
                         </div>

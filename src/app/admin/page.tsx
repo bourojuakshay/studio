@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,6 +10,7 @@ import { useFirestore, useUser } from '@/firebase';
 import { useSongs } from '@/hooks/use-songs';
 import { Loader, Trash2, Pencil, ArrowLeft } from 'lucide-react';
 import { MOOD_DEFS } from '../lib/mood-definitions';
+import { useAppContext } from '@/context/AppContext';
 import {
   Select,
   SelectContent,
@@ -42,6 +42,11 @@ import Image from 'next/image';
 export default function AdminPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const { setLoadingFlag, globalLoading } = useAppContext();
+
+  useEffect(() => {
+    setLoadingFlag('user', isUserLoading);
+  }, [isUserLoading, setLoadingFlag]);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -59,6 +64,10 @@ export default function AdminPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
   const { songs, loading: songsLoading } = useSongs();
+  
+  useEffect(() => {
+    setLoadingFlag('songs', songsLoading);
+  }, [songsLoading, setLoadingFlag]);
 
   const resetForm = () => {
     setTitle('');
@@ -138,12 +147,9 @@ export default function AdminPage() {
     }
   };
 
-  if (isUserLoading || !user) {
-    return (
-      <div className="w-screen h-screen flex items-center justify-center">
-        <Loader className="animate-spin" />
-      </div>
-    );
+  if (globalLoading) {
+    // Global loader will handle this
+    return null;
   }
 
   return (
@@ -229,13 +235,7 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {songsLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center">
-                      <Loader className="animate-spin mx-auto my-4" />
-                    </TableCell>
-                  </TableRow>
-                ) : songs.length > 0 ? (
+                {songs.length > 0 ? (
                   songs.map((song) => (
                     <TableRow key={song.id}>
                       <TableCell>

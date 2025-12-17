@@ -5,6 +5,7 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { AppProvider, AudioPlayer } from '@/context/AppContext';
 import { FloatingPlayerWrapper } from '@/components/FloatingPlayer';
 import { useAnonymousSignIn } from '@/hooks/use-anonymous-sign-in';
+import { GlobalLoader } from './GlobalLoader';
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
   // This hook will ensure an anonymous user is signed in if no one is.
@@ -18,6 +19,7 @@ export function RootProvider({ children }: { children: React.ReactNode }) {
     <FirebaseClientProvider>
       <AppProvider>
         <AppInitializer>
+          <GlobalLoader />
           {children}
           <FloatingPlayerWrapper />
           <AudioPlayer />

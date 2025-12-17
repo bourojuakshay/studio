@@ -24,10 +24,10 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <RootProvider>
-          {children}
-        </RootProvider>
-        <Toaster />
+          <RootProvider>
+            {children}
+          </RootProvider>
+          <Toaster />
       </body>
     </html>
   );

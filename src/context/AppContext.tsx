@@ -16,6 +16,11 @@ interface AppState {
     nowPlayingId: string | null;
     setNowPlayingId: (songId: string | null) => void; // Moved from PlaybackState
     currentTrack: Song | null;
+    
+    // New global loading state
+    loadingFlags: Record<string, boolean>;
+    setLoadingFlag: (key: string, value: boolean) => void;
+    globalLoading: boolean;
 }
 
 export const useAppContext = create<AppState>((set, get) => ({
@@ -56,6 +61,15 @@ export const useAppContext = create<AppState>((set, get) => ({
                 audio.src = '';
             }
         }
+    },
+
+    // Global loading implementation
+    loadingFlags: {},
+    globalLoading: false,
+    setLoadingFlag: (key: string, value: boolean) => {
+        const newFlags = { ...get().loadingFlags, [key]: value };
+        const anyLoading = Object.values(newFlags).some(flag => flag === true);
+        set({ loadingFlags: newFlags, globalLoading: anyLoading });
     },
 }));
 
