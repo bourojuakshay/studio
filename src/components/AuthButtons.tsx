@@ -58,7 +58,7 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
       <SidebarGroup>
         <SidebarMenu>
           <SidebarMenuItem>
-             <MotionSidebarMenuButton
+            <MotionSidebarMenuButton
               isActive={pathname === '/'}
               onClick={() => router.push('/')}
               {...motionProps}
