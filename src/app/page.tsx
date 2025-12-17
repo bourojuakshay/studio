@@ -335,7 +335,7 @@ export default function Home() {
             <SidebarTrigger className="md:hidden" />
             <div className="relative w-full max-w-md hidden md:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="What do you want to play?" className="pl-10" onFocus={() => router.push('/search')} />
+              <Input placeholder="What do you want to play?" className="pl-10" onFocus={() => router.push('/library')} />
             </div>
           </div>
           <div className="flex items-center gap-2">

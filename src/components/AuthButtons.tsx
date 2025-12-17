@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, Search, Library, LogOut, LogIn, Plus, Heart } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
@@ -57,7 +58,7 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
 
       <SidebarGroup>
         <SidebarMenu>
-          <SidebarMenuItem>
+         <SidebarMenuItem>
             <MotionSidebarMenuButton
               isActive={pathname === '/'}
               onClick={() => router.push('/')}
@@ -84,17 +85,24 @@ export default function AuthButtons({ onNavigate }: { onNavigate: (page: string)
         <SidebarGroup className="flex-grow flex flex-col min-h-0">
            <SidebarMenu>
               <SidebarMenuItem>
-                  <SidebarMenuButton>
+                  <MotionSidebarMenuButton 
+                    onClick={() => router.push('/library')}
+                    isActive={pathname === '/library'}
+                    {...motionProps}
+                  >
                       <Library />
                       <span className="group-data-[state=collapsed]:hidden">Your Library</span>
                       <Plus size={18} className="ml-auto opacity-70 hover:opacity-100 group-data-[state=collapsed]:hidden" />
-                  </SidebarMenuButton>
+                  </MotionSidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                  <SidebarMenuButton>
+                  <MotionSidebarMenuButton
+                     onClick={() => router.push('/library')}
+                     {...motionProps}
+                  >
                       <div className="liked-songs-icon"><Heart /></div>
                       <span className="group-data-[state=collapsed]:hidden">Liked Songs</span>
-                  </SidebarMenuButton>
+                  </MotionSidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           <ScrollArea className="flex-grow mt-4">
