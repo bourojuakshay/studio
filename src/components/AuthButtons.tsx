@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, Search, Library, LogOut, LogIn, Plus, Heart } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
